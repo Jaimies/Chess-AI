@@ -8,7 +8,7 @@
 class Board {
 public:
     std::array<int, 64> squares;
-    std::vector<Move> legalMoves;
+    std::vector<Move *> legalMoves;
 
     int colourToMove = Piece::White;
 
@@ -54,7 +54,7 @@ public:
         generateCheckSolvingMovePositions();
         generatePins();
 
-        for (auto potentialMove: pseudoLegalMoves)
+        for (Move *potentialMove: pseudoLegalMoves)
             addMoveIfLegal(potentialMove);
 
         hasLegalMoves = !legalMoves.empty();
@@ -77,20 +77,20 @@ public:
     }
 
 
-    void makeMove(Move move) {
+    void makeMove(Move *move) {
         updateCastlingPieceMovement(move);
         _MakeMove(move);
         generateMoves();
         updateGameState();
     }
 
-    void makeMoveWithoutGeneratingMoves(Move move) {
+    void makeMoveWithoutGeneratingMoves(Move *move) {
         updateCastlingPieceMovement(move);
         _MakeMove(move);
     }
 
-    void unmakeMove(Move move) {
-        move.undo(*this);
+    void unmakeMove(Move *move) {
+        move->undo(*this);
 
         changeColourToMove();
         moveHistory.pop();
@@ -101,7 +101,7 @@ public:
 private:
     int numSquaresToEdge[64][8];
 
-    std::queue<Move> moveHistory;
+    std::queue<Move *> moveHistory;
     std::queue<int> castlingPieceMovementHistory;
 
     std::unordered_map<int, std::unordered_set<int>> squaresAttackedByOpponent;
@@ -115,7 +115,7 @@ private:
         computeMoveData();
     }
 
-    Board(int colourToMove, std::queue<Move> moveHistory,
+    Board(int colourToMove, std::queue<Move *> moveHistory,
           std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares) {
         this->colourToMove = colourToMove;
         this->moveHistory = moveHistory;
@@ -124,9 +124,9 @@ private:
         computeMoveData();
     }
 
-    void _MakeMove(Move move) {
+    void _MakeMove(Move *move) {
         undoCastlingPieceMovementUpdate();
-        move.apply(*this);
+        move->apply(*this);
         changeColourToMove();
         moveHistory.push(move);
     }
@@ -157,16 +157,16 @@ private:
 //        }
     }
 
-    void updateCastlingPieceMovement(Move move) {
-        int piece = squares[move.startSquare];
-        int castlingPiece = getCastlingPiece(piece, move.startSquare);
+    void updateCastlingPieceMovement(Move *move) {
+        int piece = squares[move->startSquare];
+        int castlingPiece = getCastlingPiece(piece, move->startSquare);
 
         auto shouldUpdate = castlingPiece != Piece::None && !castlingPieceMoved[castlingPiece];
 
         if (shouldUpdate)
             castlingPieceMoved[castlingPiece] = true;
 
-        castlingPieceMovementHistory.push(shouldUpdate ? castlingPiece : Piece::None);
+        castlingPieceMovementHistory.push(shouldUpdate ? castlingPiece : 0);
     }
 
     static int getCastlingPiece(int piece, int square) {
@@ -188,13 +188,13 @@ private:
             int piece = squares[startSquare];
             if (Piece::getColour(piece) != colour) continue;
 
-            std::vector<Move> moves;
+            std::vector<Move *> moves;
 
             if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false);
             else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moves);
             else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false);
 
-            auto hasLegalMoves = std::find_if(moves.begin(), moves.end(), [this](const Move &move) {
+            auto hasLegalMoves = std::find_if(moves.begin(), moves.end(), [this](Move *move) {
                 return isMoveLegal(move);
             }) != moves.end();
 
@@ -204,52 +204,52 @@ private:
         return false;
     }
 
-    void addMoveIfLegal(Move potentialMove) {
+    void addMoveIfLegal(Move *potentialMove) {
         if (isMoveLegal(potentialMove))
             legalMoves.push_back(potentialMove);
     }
 
-    bool isMoveLegal(Move potentialMove) {
-        auto *enPassantMove = dynamic_cast<EnPassantMove *>(&potentialMove);
+    bool isMoveLegal(Move *potentialMove) {
+        auto *enPassantMove = dynamic_cast<EnPassantMove *>(potentialMove);
 
         if (enPassantMove != nullptr)
-            return isValidEnPassantMove(*enPassantMove);
+            return isValidEnPassantMove(enPassantMove);
 
-        if (dynamic_cast<CastlingMove *>(&potentialMove) != nullptr) return true;
+        if (dynamic_cast<CastlingMove *>(potentialMove) != nullptr) return true;
 
         return !violatesPin(potentialMove)
                && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove));
     }
 
-    bool violatesPin(Move move) {
-        if (!pins.contains(move.startSquare)) return false;
-        if (Piece::getType(squares[move.startSquare]) == Piece::Knight) return true;
+    bool violatesPin(Move *move) {
+        if (!pins.contains(move->startSquare)) return false;
+        if (Piece::getType(squares[move->startSquare]) == Piece::Knight) return true;
 
-        auto directionIndex = pins[move.startSquare];
+        auto directionIndex = pins[move->startSquare];
         auto directionOffset = directionOffsets[directionIndex];
 
-        auto squareDifference = move.targetSquare - move.startSquare;
+        auto squareDifference = move->targetSquare - move->startSquare;
 
         if (std::abs(directionOffset) == 1)
-            return move.startSquare / 8 != move.targetSquare / 8;
+            return move->startSquare / 8 != move->targetSquare / 8;
 
         return squareDifference % directionOffset != 0;
     }
 
-    bool coversCheck(Move potentialMove) const {
-        return potentialMove.startSquare != kingPosition &&
-               checkSolvingMovePositions.contains(potentialMove.targetSquare);
+    bool coversCheck(Move *potentialMove) const {
+        return potentialMove->startSquare != kingPosition &&
+               checkSolvingMovePositions.contains(potentialMove->targetSquare);
     }
 
-    bool isValidEnPassantMove(EnPassantMove move) {
+    bool isValidEnPassantMove(EnPassantMove *move) {
         auto kingFile = kingPosition / 8;
-        auto pawnFile = move.startSquare / 8;
+        auto pawnFile = move->startSquare / 8;
         if (kingFile != pawnFile) return true;
 
         auto opponentColour = Piece::getOpponentColour(colourToMove);
 
-        auto rightPawnPosition = std::max(move.startSquare, move.capturedPawnPosition);
-        auto leftPawnPosition = std::min(move.startSquare, move.capturedPawnPosition);
+        auto rightPawnPosition = std::max(move->startSquare, move->capturedPawnPosition);
+        auto leftPawnPosition = std::min(move->startSquare, move->capturedPawnPosition);
         auto isKingOnTheLeft = kingPosition < leftPawnPosition;
         auto directionIndex = isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
 
@@ -327,7 +327,7 @@ private:
     void generatePins() {
         pins.clear();
 
-        for (auto entry: squaresAttackedByOpponent) {
+        for (const auto& entry: squaresAttackedByOpponent) {
             auto piecePosition = entry.first;
             auto pieceType = Piece::getType(squares[piecePosition]);
 
@@ -375,7 +375,7 @@ private:
         checkSolvingMovePositions.clear();
         if (!isKingUnderAttack) return;
 
-        for (auto entry: squaresAttackedByOpponent) {
+        for (const auto& entry: squaresAttackedByOpponent) {
             auto piecePosition = entry.first;
             auto attackedPositions = entry.second;
 
@@ -433,13 +433,13 @@ private:
         return squaresAttackedByOpponentSet.contains(kingPosition);
     }
 
-    bool IsKingUnderAttack(Move potentialMove) {
-        if (potentialMove.startSquare != kingPosition) return isKingUnderAttack;
-        return squaresAttackedByOpponentSet.contains(potentialMove.targetSquare);
+    bool IsKingUnderAttack(Move *potentialMove) {
+        if (potentialMove->startSquare != kingPosition) return isKingUnderAttack;
+        return squaresAttackedByOpponentSet.contains(potentialMove->targetSquare);
     }
 
     void generateSquaresAttackedByOpponent(int colour) {
-        std::vector<Move> moves;
+        std::vector<Move *> moves;
 
         for (int startSquare = 0; startSquare < 64; startSquare++) {
             int piece = squares[startSquare];
@@ -455,17 +455,17 @@ private:
         squaresAttackedByOpponentSet.clear();
 
         for (auto move: moves) {
-            if (!squaresAttackedByOpponent.contains(move.startSquare)) {
-                squaresAttackedByOpponent[move.startSquare] = std::unordered_set{move.targetSquare};
+            if (!squaresAttackedByOpponent.contains(move->startSquare)) {
+                squaresAttackedByOpponent[move->startSquare] = std::unordered_set{move->targetSquare};
             }
 
-            squaresAttackedByOpponent[move.startSquare].insert(move.targetSquare);
-            squaresAttackedByOpponentSet.insert(move.targetSquare);
+            squaresAttackedByOpponent[move->startSquare].insert(move->targetSquare);
+            squaresAttackedByOpponentSet.insert(move->targetSquare);
         }
     }
 
-    std::vector<Move> generatePseudoLegalMoves(int colour) {
-        auto moves = std::vector<Move>();
+    std::vector<Move *> generatePseudoLegalMoves(int colour) {
+        auto moves = std::vector<Move *>();
 
         for (int startSquare = 0; startSquare < 64; startSquare++) {
             int piece = squares[startSquare];
@@ -481,14 +481,14 @@ private:
         return moves;
     }
 
-    void generateCastlingMoves(std::vector<Move> &moves) {
+    void generateCastlingMoves(std::vector<Move *> &moves) {
         if (colourToMove == Piece::White)
             addCastlingMovesIfAvailable(4, Piece::White, moves);
         else
             addCastlingMovesIfAvailable(60, Piece::Black, moves);
     }
 
-    void addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move> &moves) {
+    void addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move *> &moves) {
         int king = squares[kingSquare];
 
         if (king != (Piece::King | colour)) return;
@@ -499,9 +499,9 @@ private:
         }
     }
 
-    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move> &moves) {
+    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves) {
         if (IsCastlingPossible(kingSquare, rookSquare)) {
-            moves.push_back(CastlingMove(kingSquare, rookSquare));
+            moves.push_back(new CastlingMove(kingSquare, rookSquare));
         }
     }
 
@@ -549,7 +549,7 @@ private:
         return true;
     }
 
-    void generateSlidingMoves(int startSquare, int piece, std::vector<Move> &moves, bool canCaptureFriendly) {
+    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly) {
         int pieceType = Piece::getType(piece);
         int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
         int endDirIndex = pieceType == Piece::Rook ? 4 : 8;
@@ -566,14 +566,14 @@ private:
 
                 if (targetPieceColour == colour) {
                     if (canCaptureFriendly)
-                        moves.push_back(NormalMove(startSquare, targetSquare));
+                        moves.push_back(new NormalMove(startSquare, targetSquare));
 
                     break;
                 }
 
                 auto targetPieceType = Piece::getType(targetPiece);
 
-                moves.push_back(NormalMove(startSquare, targetSquare, targetPiece));
+                moves.push_back(new NormalMove(startSquare, targetSquare, targetPiece));
 
                 if (targetPiece != Piece::None
                     && (!canCaptureFriendly || targetPieceType != Piece::King))
@@ -582,7 +582,7 @@ private:
         }
     }
 
-    void generatePawnMoves(int startSquare, int piece, std::vector<Move> &moves) {
+    void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves) {
         auto isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
 
         generateForwardPawnMoves(startSquare, piece, moves, isAboutToPromote);
@@ -599,7 +599,7 @@ private:
     }
 
     void generateForwardPawnMoves(
-            int startSquare, int piece, std::vector<Move> &moves, bool isPawnAboutToPromote
+            int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
     ) {
         int possibleOffsets[]{8, 16};
 
@@ -643,7 +643,7 @@ private:
         return squares[positionOfPieceInFront] == Piece::None;
     }
 
-    void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move> &moves, bool isPawnAboutToPromote,
+    void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly) {
         int file = startSquare % 8;
 
@@ -668,17 +668,17 @@ private:
     }
 
     static void generatePawnMove(int startSquare, int targetSquare, bool isPawnAboutToPromote, int pieceToCapture,
-                                 std::vector<Move> &moves) {
+                                 std::vector<Move *> &moves) {
         if (!isPawnAboutToPromote) {
-            moves.push_back(NormalMove(startSquare, targetSquare, pieceToCapture));
+            moves.push_back(new NormalMove(startSquare, targetSquare, pieceToCapture));
             return;
         }
 
         for (auto piece: Piece::piecesToPromoteTo)
-            moves.push_back(PromotionMove(startSquare, targetSquare, piece, pieceToCapture));
+            moves.push_back(new PromotionMove(startSquare, targetSquare, piece, pieceToCapture));
     }
 
-    void generateKnightMoves(int startSquare, int piece, std::vector<Move> &moves, bool canCaptureFriendly) {
+    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly) {
         int file = startSquare % 8;
 
         for (auto offset: knightMoveOffsets) {
@@ -694,11 +694,11 @@ private:
             int pieceInTargetSquare = squares[targetSquarePosition];
 
             if (canCaptureFriendly || Piece::getColour(pieceInTargetSquare) != Piece::getColour(piece))
-                moves.push_back(NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
+                moves.push_back(new NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
         }
     }
 
-    void generateEnPassantMoves(int square, int piece, std::vector<Move> &moves) {
+    void generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves) {
         auto file = square % 8;
         auto rank = square / 8;
 
@@ -721,14 +721,14 @@ private:
             auto lastMove = moveHistory.back();
 
             if (neighbourPiece != enemyPawn
-                || getRank(lastMove.startSquare) != GetPawnRank(neighbourPiece)
-                || lastMove.targetSquare != neighbourPosition)
+                || getRank(lastMove->startSquare) != GetPawnRank(neighbourPiece)
+                || lastMove->targetSquare != neighbourPosition)
                 continue;
 
             int targetPositionOffset = Piece::getColour(piece) == Piece::White ? 8 : -8;
 
             moves.push_back(
-                    EnPassantMove(square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition)
+                    new EnPassantMove(square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition)
             );
         }
     }
