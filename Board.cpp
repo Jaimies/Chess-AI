@@ -104,7 +104,7 @@ private:
     std::queue<Move *> moveHistory;
     std::queue<int> castlingPieceMovementHistory;
 
-    std::unordered_map<int, std::unordered_set<int>> squaresAttackedByOpponent;
+    std::array<std::unordered_set<int>, 64> squaresAttackedByOpponent;
     std::unordered_set<int> squaresAttackedByOpponentSet;
     std::unordered_set<int> checkSolvingMovePositions;
     std::unordered_map<int, int> pins;
@@ -325,12 +325,11 @@ private:
     void generatePins() {
         pins.clear();
 
-        for (const auto& entry: squaresAttackedByOpponent) {
-            auto piecePosition = entry.first;
-            auto pieceType = Piece::getType(squares[piecePosition]);
+        for (int square = 0; square < 64; square++) {
+            auto pieceType = Piece::getType(squares[square]);
 
             if (Piece::isLongRangeSlidingPiece(pieceType))
-                generatePins(pieceType, piecePosition);
+                generatePins(pieceType, square);
         }
     }
 
@@ -373,9 +372,8 @@ private:
         checkSolvingMovePositions.clear();
         if (!isKingUnderAttack) return;
 
-        for (const auto& entry: squaresAttackedByOpponent) {
-            auto piecePosition = entry.first;
-            auto attackedPositions = entry.second;
+        for (int square = 0; square < 64; square++) {
+            auto attackedPositions = squaresAttackedByOpponent[square];
 
             if (attackedPositions.contains(kingPosition)) {
                 checkCount++;
@@ -384,11 +382,11 @@ private:
                     return;
                 }
 
-                checkSolvingMovePositions.insert(piecePosition);
+                checkSolvingMovePositions.insert(square);
 
-                int pieceType = Piece::getType(squares[piecePosition]);
+                int pieceType = Piece::getType(squares[square]);
                 if (Piece::isLongRangeSlidingPiece(pieceType)) {
-                    generateCheckSolvingMovePosition(pieceType, piecePosition);
+                    generateCheckSolvingMovePosition(pieceType, square);
                 }
             }
         }
@@ -437,28 +435,24 @@ private:
     }
 
     void generateSquaresAttackedByOpponent(int colour) {
-        std::vector<Move *> moves;
+        squaresAttackedByOpponentSet.clear();
 
         for (int startSquare = 0; startSquare < 64; startSquare++) {
             int piece = squares[startSquare];
+            squaresAttackedByOpponent[startSquare].clear();
             if (Piece::getColour(piece) != colour) continue;
+
+            std::vector<Move *> moves;
 
             if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, true);
             else if (Piece::getType(piece) == Piece::Pawn)
                 generateCapturePawnMoves(startSquare, piece, moves, false, true);
             else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, true);
-        }
 
-        squaresAttackedByOpponent.clear();
-        squaresAttackedByOpponentSet.clear();
-
-        for (auto move: moves) {
-            if (!squaresAttackedByOpponent.contains(move->startSquare)) {
-                squaresAttackedByOpponent[move->startSquare] = std::unordered_set{move->targetSquare};
+            for (auto move: moves) {
+                squaresAttackedByOpponent[startSquare].insert(move->targetSquare);
+                squaresAttackedByOpponentSet.insert(move->targetSquare);
             }
-
-            squaresAttackedByOpponent[move->startSquare].insert(move->targetSquare);
-            squaresAttackedByOpponentSet.insert(move->targetSquare);
         }
     }
 
