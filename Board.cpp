@@ -33,9 +33,9 @@ public:
             {'n', Piece::Knight},
     };
 
-    static Board *fromFenString(std::string fenString/*, int colourToMove = Piece::White*/) {
+    static Board *fromFenString(std::string fenString, int colourToMove = Piece::White) {
         auto board = new Board();
-        board->colourToMove = Piece::White;
+        board->colourToMove = colourToMove;
         board->loadFenString(fenString);
         board->generateMoves();
         return board;

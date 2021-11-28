@@ -37,5 +37,5 @@ public:
             {'n', Piece::Knight},
     };
 
-    static Board *fromFenString(std::string fenString);
+    static Board *fromFenString(std::string fenString, int colourToMove = Piece::White);
 };
