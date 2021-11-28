@@ -298,8 +298,6 @@ private:
                 file++;
             }
         }
-
-        generateMoves();
     }
 
     void computeMoveData() {
