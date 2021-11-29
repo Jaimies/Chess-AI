@@ -45,8 +45,8 @@ public:
         legalMoves.clear();
 
         int colourToMove = this->colourToMove;
-        generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
         kingPosition = getKingPosition();
+        generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
         isKingUnderAttack = IsKingUnderAttack();
 
         auto pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
@@ -104,7 +104,7 @@ private:
     std::queue<Move *> moveHistory;
     std::queue<int> castlingPieceMovementHistory;
 
-    std::array<std::unordered_set<int>, 64> squaresAttackedByOpponent;
+    std::array<bool, 64> attacksKing;
     std::unordered_set<int> squaresAttackedByOpponentSet;
     std::unordered_set<int> checkSolvingMovePositions;
     std::unordered_map<int, int> pins;
@@ -373,9 +373,7 @@ private:
         if (!isKingUnderAttack) return;
 
         for (int square = 0; square < 64; square++) {
-            auto attackedPositions = squaresAttackedByOpponent[square];
-
-            if (attackedPositions.contains(kingPosition)) {
+            if (attacksKing[square]) {
                 checkCount++;
                 if (checkCount >= 2) {
                     checkSolvingMovePositions.clear();
@@ -439,7 +437,7 @@ private:
 
         for (int startSquare = 0; startSquare < 64; startSquare++) {
             int piece = squares[startSquare];
-            squaresAttackedByOpponent[startSquare].clear();
+            attacksKing[startSquare] = false;
             if (Piece::getColour(piece) != colour) continue;
 
             std::vector<Move *> moves;
@@ -450,7 +448,9 @@ private:
             else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, true);
 
             for (auto move: moves) {
-                squaresAttackedByOpponent[startSquare].insert(move->targetSquare);
+                if (move->targetSquare == kingPosition)
+                    attacksKing[startSquare] = true;
+
                 squaresAttackedByOpponentSet.insert(move->targetSquare);
             }
         }
