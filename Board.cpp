@@ -105,7 +105,7 @@ private:
     std::queue<int> castlingPieceMovementHistory;
 
     std::array<bool, 64> attacksKing;
-    std::unordered_set<int> squaresAttackedByOpponentSet;
+    std::unordered_set<int> squaresAttackedByOpponent;
     std::unordered_set<int> checkSolvingMovePositions;
     std::unordered_map<int, int> pins;
 
@@ -424,16 +424,16 @@ private:
     }
 
     bool IsKingUnderAttack() {
-        return squaresAttackedByOpponentSet.contains(kingPosition);
+        return squaresAttackedByOpponent.contains(kingPosition);
     }
 
     bool IsKingUnderAttack(Move *potentialMove) {
         if (potentialMove->startSquare != kingPosition) return isKingUnderAttack;
-        return squaresAttackedByOpponentSet.contains(potentialMove->targetSquare);
+        return squaresAttackedByOpponent.contains(potentialMove->targetSquare);
     }
 
     void generateSquaresAttackedByOpponent(int colour) {
-        squaresAttackedByOpponentSet.clear();
+        squaresAttackedByOpponent.clear();
 
         for (int startSquare = 0; startSquare < 64; startSquare++) {
             int piece = squares[startSquare];
@@ -443,15 +443,14 @@ private:
             std::vector<Move *> moves;
 
             if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, true);
-            else if (Piece::getType(piece) == Piece::Pawn)
-                generateCapturePawnMoves(startSquare, piece, moves, false, true);
+            else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, moves, false, true);
             else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, true);
 
             for (auto move: moves) {
                 if (move->targetSquare == kingPosition)
                     attacksKing[startSquare] = true;
 
-                squaresAttackedByOpponentSet.insert(move->targetSquare);
+                squaresAttackedByOpponent.insert(move->targetSquare);
             }
         }
     }
@@ -522,7 +521,7 @@ private:
     }
 
     bool isSquareUnderAttack(int square) const {
-        return squaresAttackedByOpponentSet.contains(square);
+        return squaresAttackedByOpponent.contains(square);
     }
 
     static int getTargetCastlingPositionForKing(int kingPosition, int rookPosition) {
