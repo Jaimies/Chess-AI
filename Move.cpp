@@ -61,7 +61,7 @@ void CastlingMove::undo(Board& board) {
 
 
 int CastlingMove::getTargetCastlingPositionForRook() {
-    return startSquare + (targetSquare - startSquare) > 0 ? 1 : -1;
+    return startSquare + ((targetSquare - startSquare) > 0 ? 1 : -1);
 }
 
 int CastlingMove::getTargetCastlingPositionForKing() {
