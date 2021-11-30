@@ -1,3 +1,4 @@
+#include <array>
 #include <vector>
 #include <queue>
 #include <unordered_set>
@@ -207,6 +208,8 @@ private:
     void addMoveIfLegal(Move *potentialMove) {
         if (isMoveLegal(potentialMove))
             legalMoves.push_back(potentialMove);
+        else
+            delete potentialMove;
     }
 
     bool isMoveLegal(Move *potentialMove) {
@@ -451,6 +454,7 @@ private:
                     attacksKing[startSquare] = true;
 
                 squaresAttackedByOpponent.insert(move->targetSquare);
+                delete move;
             }
         }
     }
