@@ -495,19 +495,20 @@ private:
     }
 
     void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves) {
-        if (IsCastlingPossible(kingSquare, rookSquare)) {
-            moves.push_back(new CastlingMove(kingSquare, rookSquare));
-        }
+        int directionMultiplier = rookSquare > kingSquare ? 1 : -1;
+        int kingTargetSquare = kingSquare + 2 * directionMultiplier;
+        int rookTargetSquare = kingSquare + 1 * directionMultiplier;
+
+        if (IsCastlingPossible(kingSquare, rookSquare, kingTargetSquare))
+            moves.push_back(new CastlingMove(kingSquare, kingTargetSquare, rookSquare, rookTargetSquare));
     }
 
-    bool IsCastlingPossible(int kingSquare, int rookSquare) {
+    bool IsCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
         int king = squares[kingSquare];
         int rook = squares[rookSquare];
 
         int colour = Piece::getColour(king);
         int rookType = rookSquare < kingSquare ? Piece::LeftRook : Piece::RightRook;
-
-        auto targetCastlingPosition = getTargetCastlingPositionForKing(kingSquare, rookSquare);
 
         return rook == (Piece::Rook | colour) &&
                !castlingPieceMoved[rookType | colour] &&

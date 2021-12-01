@@ -26,7 +26,10 @@ public:
 
 class CastlingMove : public Move {
 public:
-    CastlingMove(int kingSquare, int rookSquare);
+    int rookSquare;
+    int rookTargetSquare;
+
+    CastlingMove(int kingSquare, int targetSquare, int rookSquare, int rookTargetSquare);
 
     void apply(Board& board) override;
     void undo(Board& board) override;
