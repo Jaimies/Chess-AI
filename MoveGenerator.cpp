@@ -40,6 +40,26 @@ namespace MoveGenerator {
 
         return evaluation - opponentEvaluation;
     }
+
+    int guessMoveValue(const Board *board, Move *move) {
+        auto movePieceType = Piece::getType(board->squares[move->startSquare]);
+        auto capturePieceType = move->canCapture() ? Piece::getType(board->squares[move->targetSquare]) : Piece::None;
+
+        int moveScoreGuess = 10 * Piece::getValue(capturePieceType) - Piece::getValue(movePieceType);
+
+        if (auto *promotionMove = dynamic_cast<PromotionMove *>(move)) {
+            moveScoreGuess += Piece::getValue(promotionMove->pieceToPromoteTo);
+        }
+
+        return moveScoreGuess;
+    }
+
+    void sortMoves(Board *board, std::vector<Move *> &moves) {
+        std::sort(moves.begin(), moves.end(), [board](Move *move, Move *otherMove) {
+            return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
+        });
+    }
+
     long deepEvaluate(
             Board *board, int depth = 3,
             long alpha = minEvaluation, long beta = maxEvaluation) {
@@ -57,6 +77,7 @@ namespace MoveGenerator {
         }
 
         auto moves = std::vector(board->legalMoves);
+        sortMoves(board, moves);
 
         for (auto move: moves) {
             board->makeMoveWithoutGeneratingMoves(move);

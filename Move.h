@@ -7,8 +7,10 @@ public:
     int startSquare;
     int targetSquare;
 
-    virtual void apply(Board& board);
-    virtual void undo(Board& board);
+    virtual bool canCapture() { return false; };
+
+    virtual void apply(Board &board);
+    virtual void undo(Board &board);
 
     virtual ~Move() = default;
 protected:
@@ -20,8 +22,10 @@ public:
     int capturedPiece;
     NormalMove(int startSquare, int targetSquare, int capturedPiece = Piece::None);
 
-    void apply(Board& board) override;
-    void undo(Board& board) override;
+    void apply(Board &board) override;
+    void undo(Board &board) override;
+
+    bool canCapture() override { return true; }
 };
 
 class CastlingMove : public Move {
@@ -31,11 +35,8 @@ public:
 
     CastlingMove(int kingSquare, int targetSquare, int rookSquare, int rookTargetSquare);
 
-    void apply(Board& board) override;
-    void undo(Board& board) override;
-
-    int getTargetCastlingPositionForRook();
-    int getTargetCastlingPositionForKing();
+    void apply(Board &board) override;
+    void undo(Board &board) override;
 };
 
 class EnPassantMove : public NormalMove {
@@ -44,8 +45,10 @@ public:
 
     EnPassantMove(int startSquare, int targetSquare, int capturedPawn, int capturedPawnPosition);
 
-    void apply(Board& board) override;
-    void undo(Board& board) override;
+    void apply(Board &board) override;
+    void undo(Board &board) override;
+
+    bool canCapture() override { return false; }
 };
 
 class PromotionMove : public NormalMove {
@@ -54,6 +57,6 @@ public:
 
     PromotionMove(int startSquare, int targetSquare, int pieceToPromoteTo, int capturedPiece = Piece::None);
 
-    void apply(Board& board) override;
-    void undo(Board& board) override;
+    void apply(Board &board) override;
+    void undo(Board &board) override;
 };
