@@ -4,11 +4,12 @@
 int countMoves(Board *board, int depth) {
     if (depth == 0) return 1;
 
+    board->generateMoves();
     std::vector<Move *> moves = board->legalMoves;
     auto positionsCount = 0;
 
     for (auto move: moves) {
-        board->makeMove(move);
+        board->makeMoveWithoutGeneratingMoves(move);
         positionsCount += countMoves(board, depth - 1);
         board->unmakeMove(move);
     }
