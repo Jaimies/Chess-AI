@@ -31,6 +31,7 @@ TEST(BoardTest, MoveCountIsCorrectInPosition5) {
     ASSERT_EQ(953, countMoves(board->copy(), 2));
     ASSERT_EQ(27990, countMoves(board->copy(), 3));
     ASSERT_EQ(909807, countMoves(board->copy(), 4));
+    ASSERT_EQ(26957954, countMoves(board->copy(), 5));
 }
 
 TEST(BoardTest, MoveCountIsCorrectInBehtingPosition) {

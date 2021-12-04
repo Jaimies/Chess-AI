@@ -3,6 +3,7 @@
 #include <queue>
 #include <unordered_set>
 #include <unordered_map>
+#include <stack>
 #include "Piece.h"
 #include "Move.h"
 
@@ -77,20 +78,18 @@ public:
         return newBoard;
     }
 
-
     void makeMove(Move *move) {
-        updateCastlingPieceMovement(move);
         _MakeMove(move);
         generateMoves();
         updateGameState();
     }
 
     void makeMoveWithoutGeneratingMoves(Move *move) {
-        updateCastlingPieceMovement(move);
         _MakeMove(move);
     }
 
     void unmakeMove(Move *move) {
+        undoCastlingPieceMovementUpdate();
         move->undo(*this);
 
         changeColourToMove();
@@ -102,8 +101,8 @@ public:
 private:
     int numSquaresToEdge[64][8];
 
-    std::queue<Move *> moveHistory;
-    std::queue<int> castlingPieceMovementHistory;
+    std::stack<Move *> moveHistory;
+    std::stack<int> castlingPieceMovementHistory;
 
     std::array<bool, 64> attacksKing;
     std::unordered_set<int> squaresAttackedByOpponent;
@@ -116,7 +115,7 @@ private:
         computeMoveData();
     }
 
-    Board(int colourToMove, std::queue<Move *> moveHistory,
+    Board(int colourToMove, std::stack<Move *> moveHistory,
           std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares) {
         this->colourToMove = colourToMove;
         this->moveHistory = moveHistory;
@@ -133,7 +132,7 @@ private:
     }
 
     void undoCastlingPieceMovementUpdate() {
-        auto lastMove = castlingPieceMovementHistory.back();
+        auto lastMove = castlingPieceMovementHistory.top();
 
         if (lastMove != Piece::None)
             castlingPieceMoved[lastMove] = false;
@@ -714,7 +713,7 @@ private:
 
             if (moveHistory.empty()) continue;
 
-            auto lastMove = moveHistory.back();
+            auto lastMove = moveHistory.top();
 
             if (neighbourPiece != enemyPawn
                 || getRank(lastMove->startSquare) != GetPawnRank(neighbourPiece)
