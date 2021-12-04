@@ -109,6 +109,8 @@ private:
     std::unordered_set<int> checkSolvingMovePositions;
     std::unordered_map<int, int> pins;
 
+    int kingAttackerPosition;
+
     int kingPosition;
 
     Board() {
@@ -217,7 +219,8 @@ private:
         auto *enPassantMove = dynamic_cast<EnPassantMove *>(potentialMove);
 
         return !violatesPin(potentialMove)
-               && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove))
+               && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove) ||
+                (enPassantMove != nullptr && enPassantMove->capturedPawnPosition == kingAttackerPosition))
                && (enPassantMove == nullptr || isValidEnPassantMove(enPassantMove));
     }
 
@@ -384,8 +387,11 @@ private:
 
         for (int square = 0; square < 64; square++) {
             if (attacksKing[square]) {
+                kingAttackerPosition = square;
                 checkCount++;
+
                 if (checkCount >= 2) {
+                    kingAttackerPosition = -1;
                     checkSolvingMovePositions.clear();
                     return;
                 }

@@ -78,3 +78,14 @@ TEST(BoardTest, MoveCountIsCorrectInPosition2) {
     ASSERT_EQ(4085603, countMoves(board->copy(), 4));
     ASSERT_EQ(193690690, countMoves(board->copy(), 5));
 }
+
+TEST(BoardTest, MoveCountIsCorrectInPosition3) {
+    Board *board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
+
+    ASSERT_EQ(14, countMoves(board->copy(), 1));
+    ASSERT_EQ(191, countMoves(board->copy(), 2));
+    ASSERT_EQ(2812, countMoves(board->copy(), 3));
+    ASSERT_EQ(43238, countMoves(board->copy(), 4));
+    ASSERT_EQ(674624, countMoves(board->copy(), 5));
+    ASSERT_EQ(11030083, countMoves(board->copy(), 6));
+}
