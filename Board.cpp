@@ -251,15 +251,25 @@ private:
         auto rightPawnPosition = std::max(move->startSquare, move->capturedPawnPosition);
         auto leftPawnPosition = std::min(move->startSquare, move->capturedPawnPosition);
         auto isKingOnTheLeft = kingPosition < leftPawnPosition;
-        auto directionIndex = isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
+        auto rookDirectionIndex = isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
+        auto kingDirectionIndex = !isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
 
         auto edgePawnPosition = isKingOnTheLeft ? rightPawnPosition : leftPawnPosition;
-        auto squaresToEdge = numSquaresToEdge[edgePawnPosition][directionIndex];
+        auto squaresToRookEdge = numSquaresToEdge[edgePawnPosition][rookDirectionIndex];
+        auto squaresToKingEdge = numSquaresToEdge[edgePawnPosition][kingDirectionIndex];
 
-        auto searchDirection = isKingOnTheLeft ? 1 : -1;
+        auto rookDirection = isKingOnTheLeft ? 1 : -1;
 
-        for (auto offset = 1; offset <= squaresToEdge; offset++) {
-            auto position = edgePawnPosition + offset * searchDirection;
+        for (auto offset = 2; offset <= squaresToKingEdge; offset++) {
+            auto position = edgePawnPosition - offset * rookDirection;
+            auto piece = squares[position];
+
+            if (position == kingPosition) break;
+            if (piece != Piece::None) return true;
+        }
+
+        for (auto offset = 1; offset <= squaresToRookEdge; offset++) {
+            auto position = edgePawnPosition + offset * rookDirection;
             auto piece = squares[position];
 
             if (piece != Piece::None) {
