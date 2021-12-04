@@ -68,3 +68,13 @@ TEST(BoardTest, DoesntAllowEnPassantWhereDoingSoExposesTheKing) {
     ASSERT_EQ(997, countMoves(board->copy(), 3));
     ASSERT_EQ(30436, countMoves(board->copy(), 4));
 }
+
+TEST(BoardTest, MoveCountIsCorrectInPosition2) {
+    Board *board = Board::fromFenString("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+
+    ASSERT_EQ(48, countMoves(board->copy(), 1));
+    ASSERT_EQ(2039, countMoves(board->copy(), 2));
+    ASSERT_EQ(97862, countMoves(board->copy(), 3));
+    ASSERT_EQ(4085603, countMoves(board->copy(), 4));
+    ASSERT_EQ(193690690, countMoves(board->copy(), 5));
+}

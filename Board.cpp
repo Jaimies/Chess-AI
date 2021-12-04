@@ -212,15 +212,13 @@ private:
     }
 
     bool isMoveLegal(Move *potentialMove) {
-        auto *enPassantMove = dynamic_cast<EnPassantMove *>(potentialMove);
-
-        if (enPassantMove != nullptr)
-            return isValidEnPassantMove(enPassantMove);
-
         if (dynamic_cast<CastlingMove *>(potentialMove) != nullptr) return true;
 
+        auto *enPassantMove = dynamic_cast<EnPassantMove *>(potentialMove);
+
         return !violatesPin(potentialMove)
-               && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove));
+               && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove))
+               && (enPassantMove == nullptr || isValidEnPassantMove(enPassantMove));
     }
 
     bool violatesPin(Move *move) {
