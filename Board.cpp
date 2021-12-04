@@ -734,7 +734,7 @@ private:
     constexpr static const int knightMoveOffsets[]{6, 10, 15, 17, -6, -10, -15, -17};
     constexpr static const int pawnCaptureOffsets[]{7, 9};
 
-    constexpr static const int leftDirectionIndex = 2;
+    constexpr static const int leftDirectionIndex = 3;
     constexpr static const int rightDirectionIndex = 2;
 };
 
