@@ -126,7 +126,7 @@ private:
     }
 
     void _MakeMove(Move *move) {
-        undoCastlingPieceMovementUpdate();
+        updateCastlingPieceMovement(move);
         move->apply(*this);
         changeColourToMove();
         moveHistory.push(move);
