@@ -79,12 +79,19 @@ namespace MoveGenerator {
         auto moves = std::vector(board->legalMoves);
         sortMoves(board, moves);
 
-        for (auto move: moves) {
+        for (int index = 0; index < moves.size(); index++) {
+            auto move = moves[index];
             board->makeMoveWithoutGeneratingMoves(move);
             auto evaluation = -deepEvaluate(board, depth - 1, -beta, -alpha);
             board->unmakeMove(move);
 
-            if (evaluation >= beta) return beta;
+            delete move;
+
+            if (evaluation >= beta) {
+                index++;
+                for (; index < moves.size(); index++) delete moves[index];
+                return beta;
+            }
             alpha = std::max(alpha, evaluation);
         }
 

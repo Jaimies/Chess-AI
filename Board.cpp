@@ -206,6 +206,8 @@ private:
                 return isMoveLegal(move);
             }) != moves.end();
 
+            for(auto move: moves) delete move;
+
             if (hasLegalMoves) return true;
         }
 
