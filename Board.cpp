@@ -42,7 +42,7 @@ public:
         return board;
     }
 
-    void generateMoves() {
+    void generateMoves(bool generateOnlyCaptures = false) {
         legalMoves.clear();
 
         int colourToMove = this->colourToMove;
@@ -50,7 +50,18 @@ public:
         generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
         isKingUnderAttack = IsKingUnderAttack();
 
-        auto pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
+        auto _pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
+        std::vector<Move *> pseudoLegalMoves;
+
+        if (generateOnlyCaptures) {
+            std::copy_if(_pseudoLegalMoves.begin(), _pseudoLegalMoves.end(), std::back_inserter(pseudoLegalMoves),
+                         [](Move *move) {
+                             auto *normalMove = dynamic_cast<NormalMove *>(move);
+                             if (normalMove == nullptr) return false;
+
+                             return normalMove->capturedPiece != Piece::None;
+                         });
+        } else pseudoLegalMoves = _pseudoLegalMoves;
 
         generateCheckSolvingMovePositions();
         generatePins();

@@ -60,13 +60,42 @@ namespace MoveGenerator {
         });
     }
 
+    long searchCaptures(Board *board, long alpha, long beta) {
+        auto evaluation = evaluate(board);
+        if (evaluation >= beta) return beta;
+
+        alpha = std::max(alpha, evaluation);
+
+        board->generateMoves(true);
+        auto moves = std::vector(board->legalMoves);
+        sortMoves(board, moves);
+
+        for (int index = 0; index < moves.size(); index++) {
+            auto move = moves[index];
+            board->makeMoveWithoutGeneratingMoves(move);
+            auto evaluation = -searchCaptures(board, -beta, -alpha);
+            board->unmakeMove(move);
+
+            delete move;
+
+            if (evaluation >= beta) {
+                index++;
+                for (; index < moves.size(); index++) delete moves[index];
+                return beta;
+            }
+            alpha = std::max(alpha, evaluation);
+        }
+
+        return alpha;
+    }
+
     long deepEvaluate(
             Board *board, int depth = 3,
             long alpha = minEvaluation, long beta = maxEvaluation) {
         if (depth == 0) {
             positionsAnalyzed++;
             board->checkIfLegalMovesExist();
-            return evaluate(board);
+            return searchCaptures(board, alpha, beta);
         }
 
         board->generateMoves();
