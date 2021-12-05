@@ -12,6 +12,7 @@ int countMoves(Board *board, int depth) {
         board->makeMoveWithoutGeneratingMoves(move);
         positionsCount += countMoves(board, depth - 1);
         board->unmakeMove(move);
+        delete move;
     }
 
     return positionsCount;
