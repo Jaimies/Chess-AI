@@ -1,6 +1,5 @@
 #include <array>
 #include <vector>
-#include <queue>
 #include <unordered_set>
 #include <unordered_map>
 #include <stack>
@@ -179,10 +178,17 @@ private:
         int file = square % 8;
         int colour = Piece::getColour(piece);
 
+        if (!isRookAtStartRank(colour, square)) return Piece::None;
+
         if (file == 0) return Piece::LeftRook | colour;
         if (file == 7) return Piece::RightRook | colour;
 
         return Piece::None;
+    }
+
+    static bool isRookAtStartRank(int colour, int square) {
+        int rank = square / 8;
+        return colour == Piece::White && rank == 0 || colour == Piece::Black && rank == 7;
     }
 
     bool LegalMovesExist(int colour) {
