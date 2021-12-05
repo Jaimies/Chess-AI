@@ -20,6 +20,20 @@ void Move::apply(Board &board) {}
 
 void Move::undo(Board &board) {}
 
+std::array<char, 8> fileLetters{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+
+int getSquareFromPosition(char file, char rank) {
+    int rankNumber = rank - '0' - 1;
+    int fileNumber = std::distance(fileLetters.begin(), std::find(fileLetters.begin(), fileLetters.end(), file));
+    return rankNumber * 8 + fileNumber;
+}
+
+NormalMove *NormalMove::fromString(std::string str) {
+    int startSquare = getSquareFromPosition(str[0], str[1]);
+    int targetSquare = getSquareFromPosition(str[2], str[3]);
+    return new NormalMove(startSquare, targetSquare);
+}
+
 void NormalMove::apply(Board &board) {
     auto piece = board.squares[startSquare];
 

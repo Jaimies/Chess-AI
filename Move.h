@@ -22,6 +22,8 @@ public:
     int capturedPiece;
     NormalMove(int startSquare, int targetSquare, int capturedPiece = Piece::None);
 
+    static NormalMove * fromString(std::string str);
+
     void apply(Board &board) override;
     void undo(Board &board) override;
 
