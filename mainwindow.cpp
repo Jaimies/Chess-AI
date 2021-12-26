@@ -67,8 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
 
             Label *icon = new Label(wdg);
             auto iconName = iconNames[pieceType];
-            auto iconPath = ":/images/" + iconName + ".png";
-            auto pixmap = QPixmap(iconPath.c_str());
+            auto iconColor = (Piece::getColour(piece) == Piece::White)? "white" : "black";
+            auto iconPath = ":/images/" + iconName + "_" + iconColor + ".svg";
+            auto pixmap = QPixmap(QIcon(iconPath.c_str()).pixmap(QSize(70, 70)));
             icon->setPixmap(pixmap);
 
             icon->move(file * 100 + 15, rank * 100 + 15);
