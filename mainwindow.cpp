@@ -123,6 +123,9 @@ void generatePossibleMoveMarkers(QWidget *wdg) {
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    this->setWindowTitle(tr("Chess AI"));
+    this->setMinimumSize(800, 800);
+
     QWidget *wdg = new DragWidget(this);
 
     for (unsigned int square = 0; square < 64; square++) {
