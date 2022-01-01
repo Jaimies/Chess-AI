@@ -10,12 +10,12 @@
 #include <QPainter>
 #include <QVBoxLayout>
 
-class Label : public QFrame
+class Icon : public QFrame
 {
 public:
-    ~Label() {};
+    ~Icon() {};
 
-    Label(QWidget *parent): QFrame(parent) {};
+    Icon(QWidget *parent): QFrame(parent) {};
     void setPixmap(const QPixmap& pixmap) {
         mPixmap = pixmap;
         update();
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
             int file = square % 8;
             int pieceType = Piece::getType(piece);
 
-            Label *icon = new Label(wdg);
+            Icon *icon = new Icon(wdg);
             auto iconName = iconNames[pieceType];
             auto iconColor = (Piece::getColour(piece) == Piece::White)? "white" : "black";
             auto iconPath = ":/images/" + iconName + "_" + iconColor + ".svg";
