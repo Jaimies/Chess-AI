@@ -15,13 +15,17 @@ SOURCES += \
     mainwindow.cpp \
     Board.cpp \
     Piece.cpp \
-    Move.cpp
+    Move.cpp \
+    VectorUtil.cpp \
+    icon.cpp
 
 HEADERS += \
     mainwindow.h \
     Move.h \
     Board.h \
-    Piece.h
+    Piece.h \
+    VectorUtil.h \
+    icon.h
 
 FORMS += \
     mainwindow.ui

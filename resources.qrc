@@ -13,5 +13,6 @@
         <file>images/bishop_black.svg</file>
         <file>images/knight_black.svg</file>
         <file>images/pawn_black.svg</file>
+        <file>images/circle.svg</file>
     </qresource>
 </RCC>
