@@ -3,17 +3,19 @@
 
 #include "Piece.h"
 #include "Board.cpp"
+#include <QDrag>
 #include <QLabel>
+#include <QMimeData>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QVBoxLayout>
 
-class Label : public QWidget
+class Label : public QFrame
 {
 public:
     ~Label() {};
 
-    Label(QWidget *parent): QWidget(parent) {};
+    Label(QWidget *parent): QFrame(parent) {};
     void setPixmap(const QPixmap& pixmap) {
         mPixmap = pixmap;
         update();
@@ -36,6 +38,29 @@ protected:
         painter.setTransform(transform);
         painter.drawPixmap(QPoint(0,0), mPixmap);
     };
+
+    void dragEnterEvent(QDragEnterEvent *event) override {
+
+    };
+    void dragMoveEvent(QDragMoveEvent *event) override {
+
+    };
+    void dropEvent(QDropEvent *event) override {
+
+    };
+    void mousePressEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton) {
+            QDrag *drag = new QDrag(this);
+            QMimeData *mimeData = new QMimeData();
+
+            drag->setMimeData(mimeData);
+            drag->setPixmap(this->mPixmap);
+            drag->setHotSpot(QPoint(this->width() / 2, this->height() / 2));
+
+            Qt::DropAction dropAction = drag->exec();
+         }
+    };
+
     QPixmap mPixmap;
 };
 
