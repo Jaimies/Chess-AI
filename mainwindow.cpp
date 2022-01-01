@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include "icon.h"
+#include "ui_piece.h"
 
 class Icon;
 
@@ -78,7 +79,7 @@ protected:
     }
 
     void mousePressEvent(QMouseEvent *event) override {
-        Icon *child = static_cast<Icon *>(childAt(event->pos()));
+        UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
         if (!child) return;
 
         this->draggedIcon = child;
@@ -97,8 +98,8 @@ protected:
 
         child->setVisible(false);
 
-        auto possibleMoves = VectorUtil::filter(board->legalMoves, [](auto move) {
-            return move->startSquare == 8;
+        auto possibleMoves = VectorUtil::filter(board->legalMoves, [child](auto move) {
+            return move->startSquare == child->square;
         });
 
         for(auto move: possibleMoves) {
@@ -107,7 +108,7 @@ protected:
         drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
     }
 
-    Icon *draggedIcon = nullptr;
+    UiPiece *draggedIcon = nullptr;
 };
 
 std::map<int, std::string> iconNames{
@@ -145,7 +146,7 @@ MainWindow::MainWindow(QWidget *parent)
             int file = square % 8;
             int pieceType = Piece::getType(piece);
 
-            Icon *icon = new Icon(wdg);
+            auto *icon = new UiPiece(wdg, square);
             auto iconName = iconNames[pieceType];
             auto iconColor = (Piece::getColour(piece) == Piece::White) ? "white" : "black";
             auto iconPath = ":/images/" + iconName + "_" + iconColor + ".svg";
