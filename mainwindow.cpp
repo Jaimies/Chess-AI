@@ -38,19 +38,6 @@ protected:
         }
     }
 
-    void dragMoveEvent(QDragMoveEvent *event) override {
-        if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
-            if (event->source() == this) {
-                event->setDropAction(Qt::MoveAction);
-                event->accept();
-            } else {
-                event->acceptProposedAction();
-            }
-        } else {
-            event->ignore();
-        }
-    }
-
     void dropEvent(QDropEvent *event) override {
         if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
             QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
