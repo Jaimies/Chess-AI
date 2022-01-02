@@ -13,8 +13,6 @@
 #include "icon.h"
 #include "ui_piece.h"
 
-class Icon;
-
 std::array<Icon *, 64> possibleMoveIcons;
 Board *board = Board::fromFenString(Board::startPosition);
 
@@ -57,7 +55,7 @@ protected:
             event->ignore();
         }
 
-        for(auto icon: possibleMoveIcons) {
+        for (auto icon: possibleMoveIcons) {
             icon->setVisible(false);
         }
 
@@ -67,7 +65,9 @@ protected:
 
     void mousePressEvent(QMouseEvent *event) override {
         UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
-        if (!child) return;
+        if (!child
+            || Piece::getColour(board->squares[child->getSquare()]) != board->colourToMove)
+            return;
 
         this->draggedIcon = child;
 
@@ -89,7 +89,7 @@ protected:
             return move->startSquare == child->getSquare();
         });
 
-        for(auto move: possibleMoves) {
+        for (auto move: possibleMoves) {
             possibleMoveIcons[move->targetSquare]->setVisible(true);
         }
         drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
