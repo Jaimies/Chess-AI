@@ -28,6 +28,8 @@ void generatePossibleMoveMarkers(QWidget *wdg) {
     }
 }
 
+std::array<Move *, 64> moves{nullptr};
+
 void DragWidget::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         if (event->source() == this) {
@@ -39,6 +41,10 @@ void DragWidget::dragEnterEvent(QDragEnterEvent *event) {
     } else {
         event->ignore();
     }
+}
+
+static bool isValidCoordinate(int coordinate) {
+    return coordinate >= 0 && coordinate <= 7;
 }
 
 void DragWidget::dropEvent(QDropEvent *event) {
@@ -64,8 +70,18 @@ void DragWidget::dropEvent(QDropEvent *event) {
         icon->setVisible(false);
     }
 
-    if (!draggedIcon) return;
+    int file = event->pos().x() / 100;
+    int rank = event->pos().y() / 100;
+
+    if (!draggedIcon || !isValidCoordinate(file) || !isValidCoordinate(rank)) return;
+
+    int square = rank * 8 + file;
+
+    draggedIcon->moveToSquare(square);
+    GameState::board->makeMove(moves[square]);
     draggedIcon->setVisible(true);
+
+    for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
 
 void DragWidget::mousePressEvent(QMouseEvent *event) {
@@ -96,6 +112,7 @@ void DragWidget::mousePressEvent(QMouseEvent *event) {
 
     for (auto move: possibleMoves) {
         auto icons = GameState::possibleMoveIcons;
+        moves[move->targetSquare] = move;
         GameState::possibleMoveIcons[move->targetSquare]->setVisible(true);
     }
     drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
