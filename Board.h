@@ -3,16 +3,16 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include "Piece.h"
-
-class Move;
+#include "Move.h"
 
 class Board {
 public:
     std::array<int, 64> squares;
-    std::vector<Move> legalMoves;
+    std::vector<Move *> legalMoves;
 
     int colourToMove = Piece::White;
 
@@ -37,5 +37,86 @@ public:
             {'n', Piece::Knight},
     };
 
+    void generateMoves(bool generateOnlyCaptures = false);
+    void checkIfLegalMovesExist();
+    void makeMove(Move *move);
+    void makeMoveWithoutGeneratingMoves(Move *move);
+    void unmakeMove(Move *move);
+    Board *copy();
+
     static Board *fromFenString(std::string fenString, int colourToMove = Piece::White);
+
+    static inline const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+private:
+    int numSquaresToEdge[64][8];
+
+    std::stack<Move *> moveHistory;
+    std::stack<int> castlingPieceMovementHistory;
+
+    std::array<bool, 64> attacksKing;
+    std::unordered_set<int> squaresAttackedByOpponent;
+    std::unordered_set<int> checkSolvingMovePositions;
+    std::unordered_map<int, int> pins;
+
+    int kingAttackerPosition;
+
+    int kingPosition;
+
+    Board();
+
+    Board(int colourToMove, std::stack<Move *> moveHistory,
+          std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares);
+
+    void computeMoveData();
+    void loadFenString(std::string fenString);
+    void generatePins();
+    void generatePins(int pieceType, int startSquare);
+    void generateSquaresAttackedByOpponent(int color);
+    std::vector<Move *> generatePseudoLegalMoves(int color);
+    void generateCheckSolvingMovePositions();
+    void generateCheckSolvingMovePosition(int pieceType, int startSquare);
+    void generateCastlingMoves(std::vector<Move *> &moves);
+    void addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move *> &moves);
+    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves);
+    bool IsCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition);
+    bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition);
+    bool isSquareUnderAttack(int square) const;
+    bool AllSquaresAreClearBetween(int firstSquare, int secondSquare);
+    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly);
+    void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves);
+    void generateForwardPawnMoves(
+        int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
+    );
+    bool IsSquareInFrontClear(int startSquare, int piece);
+    void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
+                                  bool canCaptureFriendly);
+    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly);
+    void generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves);
+
+    void updateCastlingPieceMovement(Move *move);
+    void undoCastlingPieceMovementUpdate();
+
+    void _MakeMove(Move *move);
+    bool isMoveLegal(Move *potentialMove);
+    bool violatesPin(Move *move);
+    bool coversCheck(Move *potentialMove) const;
+    bool isValidEnPassantMove(EnPassantMove *move) const;
+    void addMoveIfLegal(Move *move);
+    bool LegalMovesExist(int colour);
+
+    int getKingPosition();
+    bool IsKingUnderAttack();
+    bool IsKingUnderAttack(Move *potentialMove);
+
+    void changeColourToMove();
+    void updateGameState();
+
+
+    constexpr static const int directionOffsets[]{8, -8, 1, -1, 7, -7, 9, -9};
+    constexpr static const int knightMoveOffsets[]{6, 10, 15, 17, -6, -10, -15, -17};
+    constexpr static const int pawnCaptureOffsets[]{7, 9};
+
+    constexpr static const int leftDirectionIndex = 3;
+    constexpr static const int rightDirectionIndex = 2;
 };

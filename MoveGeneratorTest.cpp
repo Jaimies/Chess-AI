@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "Board.cpp"
+#include "Board.h"
 #include "MoveGenerator.cpp"
 
 TEST(MoveGeneratorTest, FindsBestMoveInPositionWithCheckmate) {

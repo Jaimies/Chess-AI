@@ -18,7 +18,8 @@ SOURCES += \
     Move.cpp \
     VectorUtil.cpp \
     icon.cpp \
-    ui_piece.cpp
+    ui_piece.cpp \
+    dragwidget.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -27,7 +28,9 @@ HEADERS += \
     Piece.h \
     VectorUtil.h \
     icon.h \
-    ui_piece.h
+    ui_piece.h \
+    dragwidget.h \
+    game_state.h
 
 FORMS += \
     mainwindow.ui
