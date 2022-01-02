@@ -86,7 +86,7 @@ protected:
         child->setVisible(false);
 
         auto possibleMoves = VectorUtil::filter(board->legalMoves, [child](auto move) {
-            return move->startSquare == child->square;
+            return move->startSquare == child->getSquare();
         });
 
         for(auto move: possibleMoves) {
@@ -96,15 +96,6 @@ protected:
     }
 
     UiPiece *draggedIcon = nullptr;
-};
-
-std::map<int, std::string> iconNames{
-        {1, "king"},
-        {2, "queen"},
-        {3, "bishop"},
-        {4, "knight"},
-        {5, "rook"},
-        {6, "pawn"},
 };
 
 void generatePossibleMoveMarkers(QWidget *wdg) {
@@ -136,15 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
             int file = square % 8;
             int pieceType = Piece::getType(piece);
 
-            auto *icon = new UiPiece(wdg, square);
-            auto iconName = iconNames[pieceType];
-            auto iconColor = (Piece::getColour(piece) == Piece::White) ? "white" : "black";
-            auto iconPath = ":/images/" + iconName + "_" + iconColor + ".svg";
-            auto pixmap = QIcon(iconPath.c_str()).pixmap(QSize(70, 70));
-            icon->setPixmap(pixmap);
-            icon->move(file * 100 + 15, rank * 100 + 15);
-            icon->setFixedSize(70, 70);
-            icon->show();
+            new UiPiece(wdg, square, piece);
         }
     }
 

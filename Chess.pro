@@ -17,7 +17,8 @@ SOURCES += \
     Piece.cpp \
     Move.cpp \
     VectorUtil.cpp \
-    icon.cpp
+    icon.cpp \
+    ui_piece.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -25,7 +26,8 @@ HEADERS += \
     Board.h \
     Piece.h \
     VectorUtil.h \
-    icon.h
+    icon.h \
+    ui_piece.h
 
 FORMS += \
     mainwindow.ui
