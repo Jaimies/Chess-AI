@@ -14,6 +14,7 @@
 #include "ui_piece.h"
 #include "dragwidget.h"
 #include "game_manager.h"
+#include "promotion_dialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow) {

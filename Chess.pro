@@ -17,6 +17,7 @@ SOURCES += \
     Piece.cpp \
     Move.cpp \
     icon.cpp \
+    promotion_dialog.cpp \
     ui_piece.cpp \
     dragwidget.cpp \
     game_manager.cpp
@@ -28,6 +29,7 @@ HEADERS += \
     Piece.h \
     VectorUtil.h \
     icon.h \
+    promotion_dialog.h \
     ui_piece.h \
     dragwidget.h \
     game_manager.h

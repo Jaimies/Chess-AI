@@ -2,6 +2,7 @@
 
 #include "Board.h"
 #include "ui_piece.h"
+#include "promotion_dialog.h"
 #include <vector>
 
 class DragWidget;
@@ -16,6 +17,7 @@ public:
 
 private:
     std::vector<UiPiece *> pieces;
+    PromotionDialog *promotionDialog;
 
     UiPiece *getPieceAtSquare(int square);
 };

@@ -5,12 +5,15 @@
 
 class UiPiece : public Icon {
 public:
-    UiPiece(QWidget *parent, int square, int piece) : Icon(parent), square(square) {
+    UiPiece(QWidget *parent, int square, int piece, bool isDraggable = true)
+        : Icon(parent), isDraggable(isDraggable), square(square) {
         setPiece(piece);
         moveToSquare(square);
         setFixedSize(70, 70);
         show();
     };
+
+    const bool isDraggable;
 
     void setPiece(int piece);
     void moveToSquare(int square);

@@ -85,7 +85,7 @@ void DragWidget::dropEvent(QDropEvent *event) {
 
 void DragWidget::mousePressEvent(QMouseEvent *event) {
     UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
-    if (!child
+    if (!child || !child->isDraggable
         || Piece::getColour(gameManager->board->squares[child->getSquare()]) != gameManager->board->colourToMove)
         return;
 

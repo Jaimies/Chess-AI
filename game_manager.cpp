@@ -1,5 +1,6 @@
 #include "game_manager.h"
 #include "dragwidget.h"
+#include "promotion_dialog.h"
 
 void GameManager::setup(DragWidget *wdg) {
     for (int square = 0; square < 64; square++) {
@@ -8,9 +9,24 @@ void GameManager::setup(DragWidget *wdg) {
         if (piece != Piece::None)
             pieces.push_back(new UiPiece(dynamic_cast<QWidget *>(wdg), square, piece));
     }
+
+    promotionDialog = new PromotionDialog(wdg);
+    promotionDialog->setVisible(false);
 }
 
 void GameManager::makeMove(Move *move) {
+    auto promotionMove = dynamic_cast<PromotionMove *>(move);
+    if(promotionMove) {
+        if (promotionDialog) {
+            promotionDialog->setVisible(true);
+            getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
+            int promotionRank = move->targetSquare / 8;
+            int promotionFile = move->targetSquare % 8;
+            promotionDialog->move(std::min(promotionFile * 100, 400), promotionRank * 100);
+        }
+        return;
+    }
+
     board->makeMove(move);
 
     if (move->getCapturedSquare() != -1) {
