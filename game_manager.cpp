@@ -13,10 +13,15 @@ void GameManager::setup(DragWidget *wdg) {
 void GameManager::makeMove(Move *move) {
     board->makeMove(move);
 
-    if(move->getCapturedSquare() != -1) {
+    if (move->getCapturedSquare() != -1) {
         auto piece = getPieceAtSquare(move->getCapturedSquare());
         if (piece) piece->setVisible(false);
     }
+
+    auto castlingMove = dynamic_cast<CastlingMove *>(move);
+
+    if (castlingMove)
+        getPieceAtSquare(castlingMove->rookSquare)->moveToSquare(castlingMove->rookTargetSquare);
 
     getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
 }
