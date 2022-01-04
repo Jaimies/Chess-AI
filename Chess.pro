@@ -16,7 +16,6 @@ SOURCES += \
     Board.cpp \
     Piece.cpp \
     Move.cpp \
-    VectorUtil.cpp \
     icon.cpp \
     ui_piece.cpp \
     dragwidget.cpp
