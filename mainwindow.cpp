@@ -22,15 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->setMinimumSize(800, 800);
 
     auto manager = new GameManager();
-    QWidget *wdg = new DragWidget(this, manager);
-
-    for (unsigned int square = 0; square < 64; square++) {
-        auto piece = manager->board->squares[square];
-
-        if (piece != Piece::None)
-            new UiPiece(wdg, square, piece);
-    }
-
+    DragWidget *wdg = new DragWidget(this, manager);
+    manager->setup(wdg);
     setCentralWidget(wdg);
 }
 

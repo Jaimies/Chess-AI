@@ -18,7 +18,8 @@ SOURCES += \
     Move.cpp \
     icon.cpp \
     ui_piece.cpp \
-    dragwidget.cpp
+    dragwidget.cpp \
+    game_manager.cpp
 
 HEADERS += \
     mainwindow.h \
