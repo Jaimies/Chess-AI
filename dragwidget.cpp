@@ -13,7 +13,6 @@
 #include "icon.h"
 #include "ui_piece.h"
 #include "dragwidget.h"
-#include "game_state.h"
 
 void DragWidget::generatePossibleMoveMarkers() {
     for (unsigned int square = 0; square < 64; square++) {
@@ -78,7 +77,8 @@ void DragWidget::dropEvent(QDropEvent *event) {
     int square = rank * 8 + file;
 
     draggedIcon->moveToSquare(square);
-    GameState::board->makeMove(moves[square]);
+
+    gameManager->board->makeMove(moves[square]);
     draggedIcon->setVisible(true);
 
     for (int square = 0; square < 64; square++) moves[square] = nullptr;
@@ -87,7 +87,7 @@ void DragWidget::dropEvent(QDropEvent *event) {
 void DragWidget::mousePressEvent(QMouseEvent *event) {
     UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
     if (!child
-        || Piece::getColour(GameState::board->squares[child->getSquare()]) != GameState::board->colourToMove)
+        || Piece::getColour(gameManager->board->squares[child->getSquare()]) != gameManager->board->colourToMove)
         return;
 
     this->draggedIcon = child;
@@ -106,7 +106,7 @@ void DragWidget::mousePressEvent(QMouseEvent *event) {
 
     child->setVisible(false);
 
-    auto possibleMoves = VectorUtil::filter(GameState::board->legalMoves, [child](auto move) {
+    auto possibleMoves = VectorUtil::filter(gameManager->board->legalMoves, [child](auto move) {
         return move->startSquare == child->getSquare();
     });
 

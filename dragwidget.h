@@ -14,10 +14,11 @@
 #include <QVBoxLayout>
 #include "icon.h"
 #include "ui_piece.h"
+#include "game_manager.h"
 
 class DragWidget : public QFrame {
 public:
-    explicit DragWidget(QWidget *parent = nullptr) {
+    explicit DragWidget(QWidget *parent, GameManager *gameManager) : QFrame(parent), gameManager(gameManager) {
         setAcceptDrops(true);
         generatePossibleMoveMarkers();
     }
@@ -33,4 +34,5 @@ private:
     void generatePossibleMoveMarkers();
 
     std::array<Icon *, 64> possibleMoveIcons;
+    GameManager *gameManager;
 };

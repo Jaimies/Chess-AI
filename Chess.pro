@@ -30,7 +30,7 @@ HEADERS += \
     icon.h \
     ui_piece.h \
     dragwidget.h \
-    game_state.h
+    game_manager.h
 
 FORMS += \
     mainwindow.ui

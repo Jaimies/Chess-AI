@@ -13,9 +13,7 @@
 #include "icon.h"
 #include "ui_piece.h"
 #include "dragwidget.h"
-#include "game_state.h"
-
-auto board = GameState::board;
+#include "game_manager.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -23,10 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowTitle(tr("Chess AI"));
     this->setMinimumSize(800, 800);
 
-    QWidget *wdg = new DragWidget(this);
+    auto manager = new GameManager();
+    QWidget *wdg = new DragWidget(this, manager);
 
     for (unsigned int square = 0; square < 64; square++) {
-        auto piece = board->squares[square];
+        auto piece = manager->board->squares[square];
 
         if (piece != Piece::None)
             new UiPiece(wdg, square, piece);

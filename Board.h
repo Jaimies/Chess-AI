@@ -11,7 +11,7 @@
 
 class Board {
 public:
-    std::array<int, 64> squares;
+    std::array<int, 64> squares = {0};
     std::vector<Move *> legalMoves;
 
     int colourToMove = Piece::White;
@@ -111,7 +111,6 @@ private:
 
     void changeColourToMove();
     void updateGameState();
-
 
     constexpr static const int directionOffsets[]{8, -8, 1, -1, 7, -7, 9, -9};
     constexpr static const int knightMoveOffsets[]{6, 10, 15, 17, -6, -10, -15, -17};
