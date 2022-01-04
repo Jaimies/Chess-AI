@@ -15,16 +15,16 @@
 #include "dragwidget.h"
 #include "game_state.h"
 
-void generatePossibleMoveMarkers(QWidget *wdg) {
+void DragWidget::generatePossibleMoveMarkers() {
     for (unsigned int square = 0; square < 64; square++) {
         int rank = square / 8;
         int file = square % 8;
-        auto possibleMoveIcon = new Icon(wdg);
+        auto possibleMoveIcon = new Icon(this);
         possibleMoveIcon->setPixmap(QIcon(":images/circle.svg").pixmap(QSize(30, 30)));
         possibleMoveIcon->move(file * 100 + 40, rank * 100 + 40);
         possibleMoveIcon->setFixedSize(20, 20);
         possibleMoveIcon->setVisible(false);
-        GameState::possibleMoveIcons[square] = possibleMoveIcon;
+        possibleMoveIcons[square] = possibleMoveIcon;
     }
 }
 
@@ -66,7 +66,7 @@ void DragWidget::dropEvent(QDropEvent *event) {
         event->ignore();
     }
 
-    for (auto icon: GameState::possibleMoveIcons) {
+    for (auto icon: possibleMoveIcons) {
         icon->setVisible(false);
     }
 
@@ -111,9 +111,9 @@ void DragWidget::mousePressEvent(QMouseEvent *event) {
     });
 
     for (auto move: possibleMoves) {
-        auto icons = GameState::possibleMoveIcons;
+        auto icons = possibleMoveIcons;
         moves[move->targetSquare] = move;
-        GameState::possibleMoveIcons[move->targetSquare]->setVisible(true);
+        possibleMoveIcons[move->targetSquare]->setVisible(true);
     }
     drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
 }

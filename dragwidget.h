@@ -15,12 +15,11 @@
 #include "icon.h"
 #include "ui_piece.h"
 
-void generatePossibleMoveMarkers(QWidget *wdg);
-
 class DragWidget : public QFrame {
 public:
     explicit DragWidget(QWidget *parent = nullptr) {
         setAcceptDrops(true);
+        generatePossibleMoveMarkers();
     }
 
 protected:
@@ -29,4 +28,9 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
 
     UiPiece *draggedIcon = nullptr;
+
+private:
+    void generatePossibleMoveMarkers();
+
+    std::array<Icon *, 64> possibleMoveIcons;
 };

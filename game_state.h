@@ -5,5 +5,4 @@
 
 namespace GameState {
     static Board *board = Board::fromFenString(Board::startPosition);
-    static std::array<Icon *, 64> possibleMoveIcons;
 };

@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
             new UiPiece(wdg, square, piece);
     }
 
-    generatePossibleMoveMarkers(wdg);
     setCentralWidget(wdg);
 }
 
