@@ -12,7 +12,10 @@ public:
 
     explicit GameManager() {};
     void setup(DragWidget *wdg);
+    void makeMove(Move *move);
 
 private:
     std::vector<UiPiece *> pieces;
+
+    UiPiece *getPieceAtSquare(int square);
 };

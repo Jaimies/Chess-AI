@@ -9,3 +9,22 @@ void GameManager::setup(DragWidget *wdg) {
             pieces.push_back(new UiPiece(dynamic_cast<QWidget *>(wdg), square, piece));
     }
 }
+
+void GameManager::makeMove(Move *move) {
+    board->makeMove(move);
+
+    if(move->getCapturedSquare() != -1) {
+        auto piece = getPieceAtSquare(move->getCapturedSquare());
+        if (piece) piece->setVisible(false);
+    }
+
+    getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
+}
+
+UiPiece *GameManager::getPieceAtSquare(int square) {
+    for (auto piece: pieces) {
+        if (piece->getSquare() == square) return piece;
+    }
+
+    return nullptr;
+}

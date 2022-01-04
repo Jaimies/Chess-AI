@@ -12,6 +12,8 @@ public:
     virtual void apply(Board &board);
     virtual void undo(Board &board);
 
+    virtual int getCapturedSquare() { return -1; };
+
     virtual ~Move() = default;
 protected:
     Move(int startSquare, int targetSquare);
@@ -28,6 +30,7 @@ public:
     void undo(Board &board) override;
 
     bool canCapture() override { return true; }
+    int getCapturedSquare() override { return targetSquare; }
 };
 
 class CastlingMove : public Move {
@@ -51,6 +54,7 @@ public:
     void undo(Board &board) override;
 
     bool canCapture() override { return false; }
+    int getCapturedSquare() override { return capturedPawnPosition; }
 };
 
 class PromotionMove : public NormalMove {
@@ -61,4 +65,6 @@ public:
 
     void apply(Board &board) override;
     void undo(Board &board) override;
+
+    int getCapturedSquare() override { return targetSquare; }
 };
