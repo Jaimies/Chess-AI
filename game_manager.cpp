@@ -10,6 +10,11 @@ void GameManager::setup(DragWidget *wdg) {
             pieces.push_back(new UiPiece(dynamic_cast<QWidget *>(wdg), square, piece));
     }
 
+    promotionDialogBackground = new QWidget(wdg);
+    promotionDialogBackground->setVisible(false);
+    promotionDialogBackground->setFixedSize(800, 800);
+    promotionDialogBackground->setObjectName("promotionDialogBackground");
+    promotionDialogBackground->setStyleSheet("#promotionDialogBackground { background-color: rgba(255, 255, 255, 140); }");
     promotionDialog = new PromotionDialog(wdg);
     promotionDialog->setVisible(false);
 }
@@ -19,6 +24,7 @@ void GameManager::makeMove(Move *move) {
     if(promotionMove) {
         if (promotionDialog) {
             promotionDialog->setVisible(true);
+            promotionDialogBackground->setVisible(true);
             getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
             int promotionRank = move->targetSquare / 8;
             int promotionFile = move->targetSquare % 8;
