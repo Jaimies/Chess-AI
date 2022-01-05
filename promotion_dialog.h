@@ -3,8 +3,7 @@
 #include <QWidget>
 #include "ui_piece.h"
 
-class PromotionDialog : public QWidget
-{
+class PromotionDialog : public QWidget {
 public:
     PromotionDialog(QWidget *wdg);
 
@@ -17,4 +16,17 @@ protected:
 private:
     std::vector<UiPiece *> pieces;
     std::function<void(int)> onPieceSelected;
+};
+
+class PromotionDialogOverlay : public QWidget {
+public:
+    PromotionDialogOverlay(QWidget *wdg);
+
+    void setOnClickListener(std::function<void()> onPieceSelected);
+
+protected:
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+private:
+    std::function<void()> onPieceSelected;
 };

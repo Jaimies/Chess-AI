@@ -10,11 +10,7 @@ void GameManager::setup(DragWidget *wdg) {
             pieces.push_back(new UiPiece(dynamic_cast<QWidget *>(wdg), square, piece));
     }
 
-    promotionDialogBackground = new QWidget(wdg);
-    promotionDialogBackground->setVisible(false);
-    promotionDialogBackground->setFixedSize(800, 800);
-    promotionDialogBackground->setObjectName("promotionDialogBackground");
-    promotionDialogBackground->setStyleSheet("#promotionDialogBackground { background-color: rgba(255, 255, 255, 140); }");
+    promotionDialogBackground = new PromotionDialogOverlay(wdg);
     promotionDialog = new PromotionDialog(wdg);
     promotionDialog->setVisible(false);
 }
@@ -23,8 +19,12 @@ void GameManager::makeMove(Move *move) {
     auto color = Piece::getColour(board->squares[move->startSquare]);
     auto promotionMove = dynamic_cast<PromotionMove *>(move);
 
+    auto pieceToMove = getPieceAtSquare(move->startSquare);
+    auto pieceToCapture = getPieceAtSquare(move->targetSquare);
+
     if (promotionMove) {
         if (promotionDialog) {
+
             promotionDialog->show(color, move->targetSquare, [this, move, color](int pieceType) {
                 auto piece = pieceType | color;
                 board->makeMove(new PromotionMove(move->startSquare, move->targetSquare, piece));
@@ -32,9 +32,16 @@ void GameManager::makeMove(Move *move) {
                 promotionDialog->setVisible(false);
                 promotionDialogBackground->setVisible(false);
             });
+            promotionDialogBackground->setOnClickListener([this, move, pieceToMove, pieceToCapture]() {
+                pieceToCapture->setVisible(true);
+                pieceToMove->moveToSquare(move->startSquare);
+                promotionDialog->setVisible(false);
+                promotionDialogBackground->setVisible(false);
+            });
+
             promotionDialogBackground->setVisible(true);
-            getPieceAtSquare(move->targetSquare)->setVisible(false);
-            getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
+            pieceToCapture->setVisible(false);
+            pieceToMove->moveToSquare(move->targetSquare);
         }
         return;
     }
@@ -51,12 +58,12 @@ void GameManager::makeMove(Move *move) {
     if (castlingMove)
         getPieceAtSquare(castlingMove->rookSquare)->moveToSquare(castlingMove->rookTargetSquare);
 
-    getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
+    pieceToMove->moveToSquare(move->targetSquare);
 }
 
 UiPiece *GameManager::getPieceAtSquare(int square) {
     for (auto piece: pieces) {
-        if (piece->isVisible() && piece->getSquare() == square) return piece;
+        if (piece->getSquare() == square) return piece;
     }
 
     return nullptr;

@@ -18,7 +18,7 @@ public:
 private:
     std::vector<UiPiece *> pieces;
     PromotionDialog *promotionDialog;
-    QWidget *promotionDialogBackground;
+    PromotionDialogOverlay *promotionDialogBackground;
 
     UiPiece *getPieceAtSquare(int square);
 };
