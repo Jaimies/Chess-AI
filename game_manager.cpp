@@ -20,15 +20,21 @@ void GameManager::setup(DragWidget *wdg) {
 }
 
 void GameManager::makeMove(Move *move) {
+    auto color = Piece::getColour(board->squares[move->startSquare]);
     auto promotionMove = dynamic_cast<PromotionMove *>(move);
-    if(promotionMove) {
+
+    if (promotionMove) {
         if (promotionDialog) {
-            promotionDialog->setVisible(true);
+            promotionDialog->show(color, move->targetSquare, [this, move, color](int pieceType) {
+                auto piece = pieceType | color;
+                board->makeMove(new PromotionMove(move->startSquare, move->targetSquare, piece));
+                getPieceAtSquare(move->targetSquare)->setPiece(piece);
+                promotionDialog->setVisible(false);
+                promotionDialogBackground->setVisible(false);
+            });
             promotionDialogBackground->setVisible(true);
+            getPieceAtSquare(move->targetSquare)->setVisible(false);
             getPieceAtSquare(move->startSquare)->moveToSquare(move->targetSquare);
-            int promotionRank = move->targetSquare / 8;
-            int promotionFile = move->targetSquare % 8;
-            promotionDialog->move(std::min(promotionFile * 100, 400), promotionRank * 100);
         }
         return;
     }
@@ -50,7 +56,7 @@ void GameManager::makeMove(Move *move) {
 
 UiPiece *GameManager::getPieceAtSquare(int square) {
     for (auto piece: pieces) {
-        if (piece->getSquare() == square) return piece;
+        if (piece->isVisible() && piece->getSquare() == square) return piece;
     }
 
     return nullptr;
