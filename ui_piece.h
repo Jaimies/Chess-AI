@@ -18,6 +18,7 @@ public:
     void setPiece(int piece);
     void moveToSquare(int square);
     int getSquare();
+    void removeFromBoard();
 
 private:
     int square;

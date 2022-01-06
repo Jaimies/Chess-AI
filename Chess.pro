@@ -20,7 +20,8 @@ SOURCES += \
     promotion_dialog.cpp \
     ui_piece.cpp \
     dragwidget.cpp \
-    game_manager.cpp
+    game_manager.cpp \
+    MoveGenerator.cpp
 
 HEADERS += \
     mainwindow.h \

@@ -1,6 +1,7 @@
 #include "ui_piece.h"
 #include <QIcon>
 #include <QWidget>
+#include <QLayout>
 #include "Piece.h"
 
 std::map<int, std::string> iconNames{
@@ -30,3 +31,8 @@ void UiPiece::setPiece(int piece) {
 }
 
 int UiPiece::getSquare() { return this->square; }
+
+void UiPiece::removeFromBoard() {
+    setVisible(false);
+    this->square = -1;
+}

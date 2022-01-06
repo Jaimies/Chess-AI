@@ -76,10 +76,11 @@ void DragWidget::dropEvent(QDropEvent *event) {
 
     int square = rank * 8 + file;
 
+    draggedIcon->setVisible(true);
+
     auto move = moves[square];
     if (move) gameManager->makeMove(move);
 
-    draggedIcon->setVisible(true);
     for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
 

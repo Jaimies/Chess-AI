@@ -13,7 +13,7 @@ public:
 
     explicit GameManager() {};
     void setup(DragWidget *wdg);
-    void makeMove(Move *move);
+    void makeMove(Move *move, bool isMachineMove = false);
 
 private:
     std::vector<UiPiece *> pieces;
@@ -21,4 +21,5 @@ private:
     PromotionDialogOverlay *promotionDialogBackground;
 
     UiPiece *getPieceAtSquare(int square);
+    void makeMachineMoveIfNecessary();
 };
