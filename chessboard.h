@@ -21,12 +21,14 @@ public:
     explicit ChessBoardWidget(QWidget *parent, GameManager *gameManager) : QFrame(parent), gameManager(gameManager) {
         setAcceptDrops(true);
         generatePossibleMoveMarkers();
+        setFixedSize(800, 800);
     }
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
     UiPiece *draggedIcon = nullptr;
 

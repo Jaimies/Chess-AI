@@ -117,3 +117,21 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
     }
     drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
 }
+
+void ChessBoardWidget::paintEvent(QPaintEvent *event) {
+    QPainter painter(this);
+
+    for (unsigned int square = 0; square < 64; square++) {
+        auto rank = square / 8;
+        auto file = square % 8;
+        bool isWhiteCell = (rank + file) % 2 == 0;
+        auto color = isWhiteCell
+                     ? QColor(247, 223, 176)
+                     : QColor(163, 112, 67);
+
+        painter.setBrush(color);
+
+        QRect r(rank * 100, file * 100, 100, 100);
+        painter.drawRect(r);
+    }
+}
