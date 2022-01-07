@@ -5,6 +5,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class ChessBoardWidget;
+
 class MainWindow : public QMainWindow
 {
 public:
@@ -12,8 +14,9 @@ public:
     ~MainWindow();
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
+    ChessBoardWidget *chessBoard;
 };

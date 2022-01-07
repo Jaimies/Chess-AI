@@ -9,41 +9,33 @@
 #include <QMimeData>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QTimer>
 #include <QVBoxLayout>
 #include "icon.h"
 #include "ui_piece.h"
 #include "chessboard.h"
 #include "game_manager.h"
 #include "promotion_dialog.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->setWindowTitle(tr("Chess AI"));
-    this->setMinimumSize(800, 800);
+    this->setMinimumSize(1300, 900);
 
     auto manager = new GameManager();
-    ChessBoardWidget *wdg = new ChessBoardWidget(this, manager);
-    manager->setup(wdg);
-    setCentralWidget(wdg);
+    auto rootWidget = new QWidget(this);
+    chessBoard = new ChessBoardWidget(rootWidget, manager);
+
+    manager->setup(chessBoard);
+    setCentralWidget(rootWidget);
 }
 
-void MainWindow::paintEvent(QPaintEvent *event) {
-    QPainter painter(this);
-
-    for (unsigned int square = 0; square < 64; square++) {
-        auto rank = square / 8;
-        auto file = square % 8;
-        bool isWhiteCell = (rank + file) % 2 == 0;
-        auto color = isWhiteCell
-                     ? QColor(247, 223, 176)
-                     : QColor(163, 112, 67);
-
-        painter.setBrush(color);
-
-        QRect r(rank * 100, file * 100, 100, 100);
-        painter.drawRect(r);
-    }
+void MainWindow::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+    std::cout << event->size().height() << std::endl;
+    chessBoard->move(50, (event->size().height() - 800) / 2);
 }
 
 MainWindow::~MainWindow() {
