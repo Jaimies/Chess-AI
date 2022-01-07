@@ -12,7 +12,7 @@
 #include <QVBoxLayout>
 #include "icon.h"
 #include "ui_piece.h"
-#include "dragwidget.h"
+#include "chessboard.h"
 #include "game_manager.h"
 #include "promotion_dialog.h"
 
@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setMinimumSize(800, 800);
 
     auto manager = new GameManager();
-    DragWidget *wdg = new DragWidget(this, manager);
+    ChessBoardWidget *wdg = new ChessBoardWidget(this, manager);
     manager->setup(wdg);
     setCentralWidget(wdg);
 }

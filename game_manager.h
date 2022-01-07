@@ -5,14 +5,14 @@
 #include "promotion_dialog.h"
 #include <vector>
 
-class DragWidget;
+class ChessBoardWidget;
 
 class GameManager {
 public:
     Board *board = Board::fromFenString(Board::startPosition);
 
     explicit GameManager() {};
-    void setup(DragWidget *wdg);
+    void setup(ChessBoardWidget *wdg);
     void makeMove(Move *move, bool isMachineMove = false);
 
 private:

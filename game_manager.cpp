@@ -1,10 +1,10 @@
 #include "game_manager.h"
-#include "dragwidget.h"
+#include "chessboard.h"
 #include "promotion_dialog.h"
 #include "MoveGenerator.cpp"
 #include <thread>
 
-void GameManager::setup(DragWidget *wdg) {
+void GameManager::setup(ChessBoardWidget *wdg) {
     for (int square = 0; square < 64; square++) {
         auto piece = board->squares[square];
 

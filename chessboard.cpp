@@ -12,9 +12,9 @@
 #include <QVBoxLayout>
 #include "icon.h"
 #include "ui_piece.h"
-#include "dragwidget.h"
+#include "chessboard.h"
 
-void DragWidget::generatePossibleMoveMarkers() {
+void ChessBoardWidget::generatePossibleMoveMarkers() {
     for (unsigned int square = 0; square < 64; square++) {
         int rank = square / 8;
         int file = square % 8;
@@ -29,7 +29,7 @@ void DragWidget::generatePossibleMoveMarkers() {
 
 std::array<Move *, 64> moves{nullptr};
 
-void DragWidget::dragEnterEvent(QDragEnterEvent *event) {
+void ChessBoardWidget::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         if (event->source() == this) {
             event->setDropAction(Qt::MoveAction);
@@ -46,7 +46,7 @@ static bool isValidCoordinate(int coordinate) {
     return coordinate >= 0 && coordinate <= 7;
 }
 
-void DragWidget::dropEvent(QDropEvent *event) {
+void ChessBoardWidget::dropEvent(QDropEvent *event) {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
@@ -84,7 +84,7 @@ void DragWidget::dropEvent(QDropEvent *event) {
     for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
 
-void DragWidget::mousePressEvent(QMouseEvent *event) {
+void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
     UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
     if (!child || !child->isDraggable
         || Piece::getColour(gameManager->board->squares[child->getSquare()]) != gameManager->board->colourToMove)

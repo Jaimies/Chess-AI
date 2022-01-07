@@ -16,9 +16,9 @@
 #include "ui_piece.h"
 #include "game_manager.h"
 
-class DragWidget : public QFrame {
+class ChessBoardWidget : public QFrame {
 public:
-    explicit DragWidget(QWidget *parent, GameManager *gameManager) : QFrame(parent), gameManager(gameManager) {
+    explicit ChessBoardWidget(QWidget *parent, GameManager *gameManager) : QFrame(parent), gameManager(gameManager) {
         setAcceptDrops(true);
         generatePossibleMoveMarkers();
     }

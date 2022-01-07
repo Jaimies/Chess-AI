@@ -19,7 +19,7 @@ SOURCES += \
     icon.cpp \
     promotion_dialog.cpp \
     ui_piece.cpp \
-    dragwidget.cpp \
+    chessboard.cpp \
     game_manager.cpp \
     MoveGenerator.cpp
 
@@ -32,7 +32,7 @@ HEADERS += \
     icon.h \
     promotion_dialog.h \
     ui_piece.h \
-    dragwidget.h \
+    chessboard.h \
     game_manager.h
 
 FORMS += \
