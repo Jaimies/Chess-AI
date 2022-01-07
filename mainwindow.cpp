@@ -1,3 +1,4 @@
+#include "analysis_info_display.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -26,16 +27,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto manager = new GameManager();
     auto rootWidget = new QWidget(this);
+    info = new AnalysisInfoDisplay(rootWidget);
     chessBoard = new ChessBoardWidget(rootWidget, manager);
 
-    manager->setup(chessBoard);
+    manager->setup(chessBoard, info);
     setCentralWidget(rootWidget);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
-    std::cout << event->size().height() << std::endl;
-    chessBoard->move(50, (event->size().height() - 800) / 2);
+    auto boardYPosition = (event->size().height() - 800) / 2;
+    chessBoard->move(50, boardYPosition);
+    info->move(900, boardYPosition + 40);
 }
 
 MainWindow::~MainWindow() {

@@ -11,6 +11,7 @@ CONFIG += c++2a
 RESOURCES = resources.qrc
 
 SOURCES += \
+    analysis_info_display.cpp \
     main.cpp \
     mainwindow.cpp \
     Board.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
     MoveGenerator.cpp
 
 HEADERS += \
+    analysis_info_display.h \
     mainwindow.h \
     Move.h \
     Board.h \

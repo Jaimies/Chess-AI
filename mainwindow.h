@@ -1,4 +1,6 @@
 #pragma once
+#include "analysis_info_display.h"
+
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -19,4 +21,5 @@ protected:
 private:
     Ui::MainWindow *ui;
     ChessBoardWidget *chessBoard;
+    AnalysisInfoDisplay *info;
 };

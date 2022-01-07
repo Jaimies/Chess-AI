@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     }
     MainWindow w;
     w.setWindowState(Qt::WindowMaximized);
+    a.setStyleSheet("QLabel{font-size: 30px;}");
     w.show();
     return a.exec();
 }
