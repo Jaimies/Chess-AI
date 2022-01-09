@@ -22,7 +22,8 @@ SOURCES += \
     ui_piece.cpp \
     chessboard.cpp \
     game_manager.cpp \
-    MoveGenerator.cpp
+    MoveGenerator.cpp \
+    zobrist_hash_generator.cpp
 
 HEADERS += \
     analysis_info_display.h \
@@ -35,7 +36,8 @@ HEADERS += \
     promotion_dialog.h \
     ui_piece.h \
     chessboard.h \
-    game_manager.h
+    game_manager.h \
+    zobrist_hash_generator.h
 
 FORMS += \
     mainwindow.ui

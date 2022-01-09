@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Piece.h"
 #include "Move.h"
+#include "zobrist_hash_generator.h"
 
 using Evaluation = long;
 
@@ -10,6 +11,8 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
 namespace MoveGenerator {
     unsigned long positionsAnalyzed = 0;
+    std::unordered_map<uint64_t, long> transpositions;
+    std::vector<uint64_t> depthHashes;
 
     std::vector<int> getPiecesOfColour(Board *board, int colour) {
         std::vector<int> result;
@@ -90,7 +93,7 @@ namespace MoveGenerator {
     }
 
     long deepEvaluate(
-            Board *board, int depth = 3,
+            Board *board, int depth,
             long alpha = minEvaluation, long beta = maxEvaluation) {
         if (depth == 0) {
             positionsAnalyzed++;
@@ -111,7 +114,19 @@ namespace MoveGenerator {
         for (int index = 0; index < moves.size(); index++) {
             auto move = moves[index];
             board->makeMoveWithoutGeneratingMoves(move);
-            auto evaluation = -deepEvaluate(board, depth - 1, -beta, -alpha);
+
+            auto boardHash = hash(board) ^ depthHashes[depth - 1];
+            auto cachedEvaluation = transpositions.find(boardHash);
+
+            auto evaluation = cachedEvaluation == transpositions.end()
+                              ? -deepEvaluate(board, depth - 1, -beta, -alpha)
+                              : cachedEvaluation->second;
+
+            if (cachedEvaluation == transpositions.end())
+                transpositions.insert(std::make_pair(boardHash, evaluation));
+            else
+                transpositions.end();
+
             board->unmakeMove(move);
 
             delete move;
@@ -129,6 +144,13 @@ namespace MoveGenerator {
 
     Move *_getBestMove(Board *board) {
         positionsAnalyzed = 0;
+        int depth = 5;
+        generateHashes();
+        depthHashes.clear();
+        transpositions.clear();
+
+        for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
+            depthHashes.push_back(get64rand());
 
         if (board->legalMoves.empty()) return nullptr;
 
@@ -138,7 +160,7 @@ namespace MoveGenerator {
 
         for (auto move: moves) {
             board->makeMove(move);
-            auto evaluation = -deepEvaluate(board);
+            auto evaluation = -deepEvaluate(board, depth);
             board->unmakeMove(move);
 
             if (evaluation >= bestEvaluation) {
