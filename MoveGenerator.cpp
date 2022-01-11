@@ -92,9 +92,9 @@ namespace MoveGenerator {
         return alpha;
     }
 
-    long deepEvaluate(
+    int64_t deepEvaluate(
             Board *board, int depth,
-            long alpha = minEvaluation, long beta = maxEvaluation) {
+            int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
         if (depth == 0) {
             positionsAnalyzed++;
             board->checkIfLegalMovesExist();
@@ -124,8 +124,6 @@ namespace MoveGenerator {
 
             if (cachedEvaluation == transpositions.end())
                 transpositions.insert(std::make_pair(boardHash, evaluation));
-            else
-                transpositions.end();
 
             board->unmakeMove(move);
 
@@ -154,16 +152,22 @@ namespace MoveGenerator {
 
         if (board->legalMoves.empty()) return nullptr;
 
-        long bestEvaluation = minEvaluation;
+        int64_t bestDeepEvaluation = minEvaluation;
+        int64_t bestEvaluation = minEvaluation;
+
         Move *bestMove = nullptr;
         auto moves = board->legalMoves;
 
         for (auto move: moves) {
             board->makeMove(move);
-            auto evaluation = -deepEvaluate(board, depth);
+            auto deepEvaluation = -deepEvaluate(board, depth) /** 200 - evaluate(board)*/;
+            auto evaluation = -evaluate(board);
+
+
             board->unmakeMove(move);
 
-            if (evaluation >= bestEvaluation) {
+            if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+                bestDeepEvaluation = deepEvaluation;
                 bestEvaluation = evaluation;
                 bestMove = move;
             }

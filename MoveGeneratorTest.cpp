@@ -16,3 +16,9 @@ TEST(MoveGeneratorTest, FindsBestMoveInPositionWithPotentialCaptures) {
 
     ASSERT_TRUE(move->startSquare == 42 && move->targetSquare == 35);
 }
+
+TEST(MoveGeneratorTest, FindsCorrectBestMoveInPosition2) {
+    Board *board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
+    auto move = MoveGenerator::getBestMove(board);
+    ASSERT_TRUE(move->startSquare == 25 && move->targetSquare == 29);
+}
