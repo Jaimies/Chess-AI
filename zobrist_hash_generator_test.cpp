@@ -18,3 +18,19 @@ TEST(ZobristHashGeneratorTest, TwoBoardsWithTheSamePositionAreReturnTheSameHash)
 
     ASSERT_EQ(hash(board), hash(otherBoard));
 }
+
+TEST(ZobristHashGeneratorTest, ConsidersCastlingRights) {
+    generateHashes();
+
+    auto board = Board::fromFenString(Board::startPosition);
+    auto originalHash = hash(board);
+    board->castlingPieceMoved[Piece::White | Piece::King] = true;
+    auto hashAfterFirstChange = hash(board);
+
+    ASSERT_FALSE(hashAfterFirstChange == originalHash);
+
+    board->castlingPieceMoved[Piece::Black | Piece::RightRook] = true;
+
+    ASSERT_FALSE(hash(board) == hashAfterFirstChange);
+    ASSERT_FALSE(hash(board) == originalHash);
+}

@@ -44,6 +44,27 @@ public:
     void unmakeMove(Move *move);
     Board *copy();
 
+    bool canWhiteCastleLeft() {
+        return !castlingPieceMoved[Piece::King | Piece::White]
+               && !castlingPieceMoved[Piece::LeftRook | Piece::White];
+    };
+
+    bool canWhiteCastleRight() {
+        return !castlingPieceMoved[Piece::King | Piece::White]
+               && !castlingPieceMoved[Piece::RightRook | Piece::White];
+    };
+
+    bool canBlackCastleLeft() {
+        return !castlingPieceMoved[Piece::King | Piece::Black]
+               && !castlingPieceMoved[Piece::LeftRook | Piece::Black];
+
+    };
+
+    bool canBlackCastleRight() {
+        return !castlingPieceMoved[Piece::King | Piece::Black]
+               && !castlingPieceMoved[Piece::RightRook | Piece::Black];
+    };
+
     static Board *fromFenString(std::string fenString, int colourToMove = Piece::White);
 
     static inline const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
