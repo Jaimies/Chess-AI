@@ -3,6 +3,7 @@
 #include "Piece.h"
 #include "Move.h"
 #include "zobrist_hash_generator.h"
+#include "threadpool.h"
 
 using Evaluation = long;
 
@@ -122,8 +123,8 @@ namespace MoveGenerator {
                               ? -deepEvaluate(board, depth - 1, -beta, -alpha)
                               : cachedEvaluation->second;
 
-            if (cachedEvaluation == transpositions.end())
-                transpositions.insert(std::make_pair(boardHash, evaluation));
+//            if (cachedEvaluation == transpositions.end())
+//                transpositions.insert(std::make_pair(boardHash, evaluation));
 
             board->unmakeMove(move);
 
@@ -147,6 +148,8 @@ namespace MoveGenerator {
         depthHashes.clear();
         transpositions.clear();
 
+        ThreadPool threadPool;
+
         for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
             depthHashes.push_back(get64rand());
 
@@ -159,19 +162,23 @@ namespace MoveGenerator {
         auto moves = board->legalMoves;
 
         for (auto move: moves) {
-            board->makeMove(move);
-            auto deepEvaluation = -deepEvaluate(board, depth) /** 200 - evaluate(board)*/;
-            auto evaluation = -evaluate(board);
+            threadPool.execute([board, depth, move, &bestDeepEvaluation, &bestEvaluation, &bestMove]() {
+                auto ourBoard = board->copy();
+                ourBoard->makeMove(move);
+                auto deepEvaluation = -deepEvaluate(ourBoard, depth);
+                auto evaluation = -evaluate(ourBoard);
 
+                ourBoard->unmakeMove(move);
 
-            board->unmakeMove(move);
-
-            if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
-                bestDeepEvaluation = deepEvaluation;
-                bestEvaluation = evaluation;
-                bestMove = move;
-            }
+                if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+                    bestDeepEvaluation = deepEvaluation;
+                    bestEvaluation = evaluation;
+                    bestMove = move;
+                }
+            });
         }
+
+        threadPool.awaitAll();
 
         return bestMove;
     }
