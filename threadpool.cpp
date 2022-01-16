@@ -1,27 +1,48 @@
 #include "threadpool.h"
 
-void ThreadPool::execute(const std::function<void()> &action) {
-    if (activeThreadCount < threadCount)
-        threads.push_back(new std::thread([this, action]() {
-            action();
-            mutex.lock();
-            activeThreadCount--;
-            mutex.unlock();
-        }));
-    else
-        action();
+Job* ThreadPool::startNewJob() {
+    jobsMutex.lock();
+    auto job = new Job(this);
+    jobs.emplace_back(job);
+    jobsMutex.unlock();
+    return job;
+}
 
+void ThreadPool::notifyThreadCountIncreased() {
+    mutex.lock();
+    activeThreadCount--;
+    mutex.unlock();
+}
+
+void ThreadPool::notifyThreadCountDecreased() {
     mutex.lock();
     activeThreadCount++;
     mutex.unlock();
 }
 
-void ThreadPool::awaitAll() {
-    for(auto thread: threads) {
+bool ThreadPool::shouldStartANewThread() const {
+    return activeThreadCount < threadCount;
+}
+
+void Job::execute(const std::function<void(bool)> &action) {
+    if (threadPool->shouldStartANewThread()) {
+        threadsMutex.lock();
+        threads.push_back(new std::thread([this, action]() {
+            action(true);
+            threadPool->notifyThreadCountDecreased();
+        }));
+        
+        threadsMutex.unlock();
+        threadPool->notifyThreadCountIncreased();
+    } else
+        action(false);
+}
+
+void Job::awaitAll() {
+    threadsMutex.lock();
+    for (auto thread: threads) {
         thread->join();
         delete thread;
     }
-
-    activeThreadCount = 0;
-    threads.clear();
+    threadsMutex.unlock();
 }

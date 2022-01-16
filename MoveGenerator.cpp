@@ -94,7 +94,7 @@ namespace MoveGenerator {
     }
 
     int64_t deepEvaluate(
-            Board *board, int depth,
+            Board *board, int depth, ThreadPool *threadPool,
             int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
         if (depth == 0) {
             positionsAnalyzed++;
@@ -109,34 +109,42 @@ namespace MoveGenerator {
             return evaluate(board);
         }
 
+        auto job = threadPool->startNewJob();
+
         auto moves = std::vector(board->legalMoves);
         sortMoves(board, moves);
 
         for (int index = 0; index < moves.size(); index++) {
-            auto move = moves[index];
-            board->makeMoveWithoutGeneratingMoves(move);
+            job->execute([moves, index, board, depth, &alpha, beta, threadPool](bool isOnNewThread) {
+                auto ourBoard = isOnNewThread ? board->copy() : board;
 
-            auto boardHash = hash(board) ^ depthHashes[depth - 1];
-            auto cachedEvaluation = transpositions.find(boardHash);
+                auto move = moves[index];
+                ourBoard->makeMoveWithoutGeneratingMoves(move);
 
-            auto evaluation = cachedEvaluation == transpositions.end()
-                              ? -deepEvaluate(board, depth - 1, -beta, -alpha)
-                              : cachedEvaluation->second;
+                auto boardHash = hash(ourBoard) ^ depthHashes[depth - 1];
+                auto cachedEvaluation = transpositions.find(boardHash);
+
+                auto evaluation = cachedEvaluation == transpositions.end()
+                                  ? (-deepEvaluate(ourBoard, depth - 1, threadPool, -beta, -alpha))
+                                  : cachedEvaluation->second;
 
 //            if (cachedEvaluation == transpositions.end())
 //                transpositions.insert(std::make_pair(boardHash, evaluation));
 
-            board->unmakeMove(move);
+                ourBoard->unmakeMove(move);
 
-            delete move;
+                delete move;
 
-            if (evaluation >= beta) {
-                index++;
-                for (; index < moves.size(); index++) delete moves[index];
-                return beta;
-            }
-            alpha = std::max(alpha, evaluation);
+//            if (evaluation >= beta) {
+//                index++;
+//                for (; index < moves.size(); index++) delete moves[index];
+//                return beta;
+//            }
+                alpha = std::max(alpha, evaluation);
+            });
         }
+
+        job->awaitAll();
 
         return alpha;
     }
@@ -148,7 +156,8 @@ namespace MoveGenerator {
         depthHashes.clear();
         transpositions.clear();
 
-        ThreadPool threadPool;
+        auto threadPool = new ThreadPool();
+        auto job = threadPool->startNewJob();
 
         for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
             depthHashes.push_back(get64rand());
@@ -162,10 +171,10 @@ namespace MoveGenerator {
         auto moves = board->legalMoves;
 
         for (auto move: moves) {
-            threadPool.execute([board, depth, move, &bestDeepEvaluation, &bestEvaluation, &bestMove]() {
+            job->execute([board, depth, move, &bestDeepEvaluation, &bestEvaluation, &bestMove, threadPool](bool isNewThread) {
                 auto ourBoard = board->copy();
                 ourBoard->makeMove(move);
-                auto deepEvaluation = -deepEvaluate(ourBoard, depth);
+                auto deepEvaluation = -deepEvaluate(ourBoard, depth, threadPool);
                 auto evaluation = -evaluate(ourBoard);
 
                 ourBoard->unmakeMove(move);
@@ -178,7 +187,7 @@ namespace MoveGenerator {
             });
         }
 
-        threadPool.awaitAll();
+        job->awaitAll();
 
         return bestMove;
     }
