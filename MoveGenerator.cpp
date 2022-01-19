@@ -94,7 +94,7 @@ namespace MoveGenerator {
     }
 
     int64_t deepEvaluate(
-            Board *board, int depth, ThreadPool *threadPool,
+            Board *board, int depth, Job *parentJob,
             int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
         if (depth == 0) {
             positionsAnalyzed++;
@@ -109,13 +109,18 @@ namespace MoveGenerator {
             return evaluate(board);
         }
 
-        auto job = threadPool->startNewJob();
+        auto job = parentJob->startNewJob();
 
         auto moves = std::vector(board->legalMoves);
         sortMoves(board, moves);
 
+        int64_t *finalEvaluation = nullptr;
+
         for (int index = 0; index < moves.size(); index++) {
-            job->execute([moves, index, board, depth, &alpha, beta, threadPool](bool isOnNewThread) {
+            job->execute([job, moves, index, board, depth, &alpha, beta, parentJob, &finalEvaluation](bool isOnNewThread) {
+                if (!job->active())
+                    return;
+
                 auto ourBoard = isOnNewThread ? board->copy() : board;
 
                 auto move = moves[index];
@@ -125,7 +130,7 @@ namespace MoveGenerator {
                 auto cachedEvaluation = transpositions.find(boardHash);
 
                 auto evaluation = cachedEvaluation == transpositions.end()
-                                  ? (-deepEvaluate(ourBoard, depth - 1, threadPool, -beta, -alpha))
+                                  ? (-deepEvaluate(ourBoard, depth - 1, parentJob, -beta, -alpha))
                                   : cachedEvaluation->second;
 
 //            if (cachedEvaluation == transpositions.end())
@@ -135,16 +140,21 @@ namespace MoveGenerator {
 
                 delete move;
 
-//            if (evaluation >= beta) {
-//                index++;
-//                for (; index < moves.size(); index++) delete moves[index];
-//                return beta;
-//            }
+                if (evaluation >= beta) {
+                    job->cancelAll();
+                    finalEvaluation = new long(beta);
+                    return;
+                }
+
+                if (!job->active()) return;
                 alpha = std::max(alpha, evaluation);
             });
         }
 
         job->awaitAll();
+
+        if (finalEvaluation != nullptr)
+            return *finalEvaluation;
 
         return alpha;
     }
@@ -171,10 +181,10 @@ namespace MoveGenerator {
         auto moves = board->legalMoves;
 
         for (auto move: moves) {
-            job->execute([board, depth, move, &bestDeepEvaluation, &bestEvaluation, &bestMove, threadPool](bool isNewThread) {
+            job->execute([board, depth, move, &bestDeepEvaluation, &bestEvaluation, &bestMove, job](bool isNewThread) {
                 auto ourBoard = board->copy();
                 ourBoard->makeMove(move);
-                auto deepEvaluation = -deepEvaluate(ourBoard, depth, threadPool);
+                auto deepEvaluation = -deepEvaluate(ourBoard, depth, job);
                 auto evaluation = -evaluate(ourBoard);
 
                 ourBoard->unmakeMove(move);

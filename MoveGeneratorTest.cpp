@@ -8,6 +8,7 @@ TEST(MoveGeneratorTest, FindsBestMoveInPositionWithCheckmate) {
 
     ASSERT_TRUE(move->startSquare == 62 && move->targetSquare == 45
                 || move->startSquare == 52 && move->targetSquare == 44
+                || move->startSquare == 53 && move->targetSquare == 45
                 || move->startSquare == 62 && move->targetSquare == 47);
 }
 

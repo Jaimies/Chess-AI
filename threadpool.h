@@ -26,13 +26,22 @@ private :
 
 class Job {
 public:
-    explicit Job(ThreadPool *threadPool) : threadPool(threadPool) {}
+    explicit Job(ThreadPool *threadPool, Job *parent = nullptr) : threadPool(threadPool), parent(parent) {}
 
     void execute(const std::function<void(bool)>& action);
     void awaitAll();
+    void cancelAll();
+
+    bool active() { return isActive; }
+
+    Job *startNewJob();
 
 private:
     ThreadPool *threadPool;
+    Job *parent;
+    std::vector<Job *> children;
+    std::mutex childrenMutex;
+    bool isActive = true;
     std::mutex threadsMutex;
     std::vector<std::thread *> threads;
 };
