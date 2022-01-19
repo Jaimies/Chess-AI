@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Board.cpp"
+#include "Board.h"
 
 int countMoves(Board *board, int depth) {
     if (depth == 0) return 1;
