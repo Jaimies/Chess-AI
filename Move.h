@@ -13,6 +13,7 @@ public:
     virtual void undo(Board &board);
 
     virtual int getCapturedSquare() { return -1; };
+    std::string toString() const;
 
     virtual ~Move() = default;
 protected:
