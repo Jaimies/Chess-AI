@@ -1,5 +1,7 @@
 #include <limits>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 #include "Piece.h"
 #include "Move.h"
 #include "zobrist_hash_generator.h"
@@ -122,8 +124,8 @@ namespace MoveGenerator {
                               ? -deepEvaluate(board, depth - 1, -beta, -alpha)
                               : cachedEvaluation->second;
 
-            if (cachedEvaluation == transpositions.end())
-                transpositions.insert(std::make_pair(boardHash, evaluation));
+//            if (cachedEvaluation == transpositions.end())
+//                transpositions.insert(std::make_pair(boardHash, evaluation));
 
             board->unmakeMove(move);
 
@@ -158,19 +160,30 @@ namespace MoveGenerator {
         Move *bestMove = nullptr;
         auto moves = board->legalMoves;
 
+        std::mutex mutex;
+        std::vector<std::thread *> threads;
+
         for (auto move: moves) {
-            board->makeMove(move);
-            auto deepEvaluation = -deepEvaluate(board, depth) /** 200 - evaluate(board)*/;
-            auto evaluation = -evaluate(board);
+            threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
+                board->makeMove(move);
+                auto deepEvaluation = -deepEvaluate(board, depth);
+                auto evaluation = -evaluate(board);
 
+                board->unmakeMove(move);
 
-            board->unmakeMove(move);
+                if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+                    mutex.lock();
+                    bestDeepEvaluation = deepEvaluation;
+                    bestEvaluation = evaluation;
+                    bestMove = move;
+                    mutex.unlock();
+                }
+            }, board->copy()));
+        }
 
-            if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
-                bestDeepEvaluation = deepEvaluation;
-                bestEvaluation = evaluation;
-                bestMove = move;
-            }
+        for(auto thread: threads) {
+            thread->join();
+            delete thread;
         }
 
         return bestMove;
