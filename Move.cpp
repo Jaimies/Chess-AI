@@ -20,11 +20,20 @@ void Move::apply(Board &board) {}
 
 void Move::undo(Board &board) {}
 
-std::array<char, 8> fileLetters{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+static std::string toString(int position) {
+    int file = position % 8;
+    int rank = position / 8;
+
+    return std::string(1, file + 'a') + (std::to_string(rank + 1));
+}
+
+std::string Move::toString() const {
+    return ::toString(startSquare) + ::toString(targetSquare);
+}
 
 int getSquareFromPosition(char file, char rank) {
     int rankNumber = rank - '0' - 1;
-    int fileNumber = std::distance(fileLetters.begin(), std::find(fileLetters.begin(), fileLetters.end(), file));
+    int fileNumber = file - 'a';
     return rankNumber * 8 + fileNumber;
 }
 

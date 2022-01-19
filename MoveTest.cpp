@@ -15,3 +15,17 @@ TEST(MoveTest, FromString) {
     EXPECT_EQ(move3->startSquare, 51);
     EXPECT_EQ(move3->targetSquare, 36);
 }
+
+TEST(MoveTest, ToString) {
+    std::vector<std::string> positions{
+            "a1b1",
+            "d2d4",
+            "d7e5",
+            "a5b4",
+            "d1f2",
+    };
+
+    for (auto position: positions) {
+        EXPECT_EQ(NormalMove::fromString(position)->toString(), position);
+    }
+}

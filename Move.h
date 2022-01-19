@@ -14,6 +14,8 @@ public:
 
     virtual int getCapturedSquare() { return -1; };
 
+    std::string toString() const;
+
     virtual ~Move() = default;
 protected:
     Move(int startSquare, int targetSquare);
