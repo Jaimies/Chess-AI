@@ -31,11 +31,9 @@ std::string Move::toString() const {
     return ::toString(startSquare) + ::toString(targetSquare);
 }
 
-std::array<char, 8> fileLetters{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-
 int getSquareFromPosition(char file, char rank) {
     int rankNumber = rank - '0' - 1;
-    int fileNumber = std::distance(fileLetters.begin(), std::find(fileLetters.begin(), fileLetters.end(), file));
+    int fileNumber = file - 'a';
     return rankNumber * 8 + fileNumber;
 }
 
