@@ -1,6 +1,5 @@
 #include "analysis_info_display.h"
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 #include "VectorUtil.h"
 #include "Piece.h"
@@ -20,8 +19,7 @@
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), ui(new Ui::MainWindow) {
-    ui->setupUi(this);
+        : QMainWindow(parent) {
     this->setWindowTitle(tr("Chess AI"));
     this->setMinimumSize(1300, 900);
 
@@ -39,8 +37,4 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
     auto boardYPosition = (event->size().height() - 800) / 2;
     chessBoard->move(50, boardYPosition);
     info->move(900, boardYPosition + 40);
-}
-
-MainWindow::~MainWindow() {
-    delete ui;
 }

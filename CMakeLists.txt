@@ -15,6 +15,7 @@ include_directories(src/main)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools REQUIRED)
+find_package(folly CONFIG REQUIRED)
 
 set(TS_FILES Chess_en_CA.ts)
 
@@ -64,7 +65,7 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(Chess PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Chess PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Folly::folly)
 
 set_target_properties(Chess PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

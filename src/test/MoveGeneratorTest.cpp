@@ -6,8 +6,9 @@ TEST(MoveGeneratorTest, FindsBestMoveInPositionWithCheckmate) {
     auto board = Board::fromFenString("rnbqkbnr/pppppppp/8/8/2B5/5Q2/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Piece::Black);
     auto move = MoveGenerator::getBestMove(board);
 
-    ASSERT_TRUE((move->startSquare == 62 && move->targetSquare == 45)
-                || (move->startSquare == 52 && move->targetSquare == 44));
+    ASSERT_TRUE(move->startSquare == 62 && move->targetSquare == 45
+                || move->startSquare == 62 && move->targetSquare == 47
+                || move->startSquare == 52 && move->targetSquare == 44);
 }
 
 TEST(MoveGeneratorTest, FindsBestMoveInPositionWithPotentialCaptures) {

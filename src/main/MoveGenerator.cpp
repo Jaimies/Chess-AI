@@ -5,6 +5,7 @@
 #include "Piece.h"
 #include "Move.h"
 #include "zobrist_hash_generator.h"
+#include <folly/concurrency/ConcurrentHashMap.h>
 
 using Evaluation = long;
 
@@ -13,7 +14,7 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
 namespace MoveGenerator {
     unsigned long positionsAnalyzed = 0;
-    std::unordered_map<uint64_t, long> transpositions;
+    folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
     std::vector<uint64_t> depthHashes;
 
     std::vector<int> getPiecesOfColour(Board *board, int colour) {
@@ -124,8 +125,8 @@ namespace MoveGenerator {
                               ? -deepEvaluate(board, depth - 1, -beta, -alpha)
                               : cachedEvaluation->second;
 
-//            if (cachedEvaluation == transpositions.end())
-//                transpositions.insert(std::make_pair(boardHash, evaluation));
+            if (cachedEvaluation == transpositions.end())
+                transpositions.insert(std::pair(boardHash, evaluation));
 
             board->unmakeMove(move);
 
@@ -171,7 +172,8 @@ namespace MoveGenerator {
 
                 board->unmakeMove(move);
 
-                if (deepEvaluation > bestDeepEvaluation || deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+                if (deepEvaluation > bestDeepEvaluation ||
+                    deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
                     mutex.lock();
                     bestDeepEvaluation = deepEvaluation;
                     bestEvaluation = evaluation;
@@ -181,7 +183,7 @@ namespace MoveGenerator {
             }, board->copy()));
         }
 
-        for(auto thread: threads) {
+        for (auto thread: threads) {
             thread->join();
             delete thread;
         }
