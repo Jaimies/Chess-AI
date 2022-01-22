@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "Piece.h"
-#include "Move.h"
+#include "../main/Piece.h"
+#include "../main/Move.h"
 
 TEST(MoveTest, FromString) {
     auto move = NormalMove::fromString("a1b1");

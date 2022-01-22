@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "Board.h"
-#include "MoveGenerator.cpp"
+#include "../main/Board.h"
+#include "../main/MoveGenerator.cpp"
 
 TEST(MoveGeneratorTest, FindsBestMoveInPositionWithCheckmate) {
     auto board = Board::fromFenString("rnbqkbnr/pppppppp/8/8/2B5/5Q2/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Piece::Black);

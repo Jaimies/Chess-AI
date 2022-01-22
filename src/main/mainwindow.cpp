@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include "icon.h"
-#include "ui_piece.h"
+#include "piece_ui.h"
 #include "chessboard.h"
 #include "game_manager.h"
 #include "promotion_dialog.h"

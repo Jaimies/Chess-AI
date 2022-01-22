@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "ui_piece.h"
+#include "piece_ui.h"
 
 class PromotionDialog : public QWidget {
 public:

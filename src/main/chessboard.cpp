@@ -11,7 +11,7 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include "icon.h"
-#include "ui_piece.h"
+#include "piece_ui.h"
 #include "chessboard.h"
 
 void ChessBoardWidget::generatePossibleMoveMarkers() {

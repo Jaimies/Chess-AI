@@ -1,7 +1,6 @@
 #pragma once
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 #include "VectorUtil.h"
 #include "Piece.h"
@@ -13,7 +12,7 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include "icon.h"
-#include "ui_piece.h"
+#include "piece_ui.h"
 #include "game_manager.h"
 
 class ChessBoardWidget : public QFrame {

@@ -35,4 +35,4 @@ cmake-build-release/
 *.out
 *.app
 
-*.pro.user
+*.user

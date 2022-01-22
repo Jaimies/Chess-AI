@@ -1,4 +1,4 @@
-#include "ui_piece.h"
+#include "piece_ui.h"
 #include <QIcon>
 #include <QWidget>
 #include <QLayout>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Board.h"
-#include "ui_piece.h"
+#include "piece_ui.h"
 #include "promotion_dialog.h"
 #include "analysis_info_display.h"
 #include <vector>
