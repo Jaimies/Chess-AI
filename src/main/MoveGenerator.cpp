@@ -12,26 +12,117 @@ using Evaluation = long;
 const Evaluation minEvaluation = std::numeric_limits<Evaluation>::min() + 10;
 const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
+std::array<Evaluation, 64> *kingMidGameSquareValues = new std::array<Evaluation, 64>{
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -30, -40, -40, -50, -50, -40, -40, -30,
+        -20, -30, -30, -40, -40, -30, -30, -20,
+        -10, -20, -20, -20, -20, -20, -20, -10,
+        20, 20, 0, 0, 0, 0, 20, 20,
+        20, 30, 10, 0, 0, 10, 30, 20
+};
+
+std::array<Evaluation, 64> *kingEndGameSquareValues = new std::array<Evaluation, 64>{
+        -50, -40, -30, -20, -20, -30, -40, -50,
+        -30, -20, -10, 0, 0, -10, -20, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 30, 40, 40, 30, -10, -30,
+        -30, -10, 20, 30, 30, 20, -10, -30,
+        -30, -30, 0, 0, 0, 0, -30, -30,
+        -50, -30, -30, -30, -30, -30, -30, -50
+};
+
+std::array<Evaluation, 64> *queenSquareValues = new std::array<Evaluation, 64>{
+        -20, -10, -10, -5, -5, -10, -10, -20,
+        -10, 0, 0, 0, 0, 0, 0, -10,
+        -10, 0, 5, 5, 5, 5, 0, -10,
+        -5, 0, 5, 5, 5, 5, 0, -5,
+        0, 0, 5, 5, 5, 5, 0, -5,
+        -10, 5, 5, 5, 5, 5, 0, -10,
+        -10, 0, 5, 0, 0, 0, 0, -10,
+        -20, -10, -10, -5, -5, -10, -10, -20
+};
+
+std::array<Evaluation, 64> *bishopSquareValues = new std::array<Evaluation, 64>{
+        -20, -10, -10, -10, -10, -10, -10, -20,
+        -10, 0, 0, 0, 0, 0, 0, -10,
+        -10, 0, 5, 10, 10, 5, 0, -10,
+        -10, 5, 5, 10, 10, 5, 5, -10,
+        -10, 0, 10, 10, 10, 10, 0, -10,
+        -10, 10, 10, 10, 10, 10, 10, -10,
+        -10, 5, 0, 0, 0, 0, 5, -10,
+        -20, -10, -10, -10, -10, -10, -10, -20,
+};
+
+std::array<Evaluation, 64> *knightSquareValues = new std::array<Evaluation, 64>{
+        -50, -40, -30, -30, -30, -30, -40, -50,
+        -40, -20, 0, 0, 0, 0, -20, -40,
+        -30, 0, 10, 15, 15, 10, 0, -30,
+        -30, 5, 15, 20, 20, 15, 5, -30,
+        -30, 0, 15, 20, 20, 15, 0, -30,
+        -30, 5, 10, 15, 15, 10, 5, -30,
+        -40, -20, 0, 5, 5, 0, -20, -40,
+        -50, -40, -30, -30, -30, -30, -40, -50,
+};
+
+std::array<Evaluation, 64> *rookSquareValues = new std::array<Evaluation, 64>{
+        0, 0, 0, 0, 0, 0, 0, 0,
+        5, 10, 10, 10, 10, 10, 10, 5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        -5, 0, 0, 0, 0, 0, 0, -5,
+        0, 0, 0, 5, 5, 0, 0, 0
+};
+
+std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
+        0, 0, 0, 0, 0, 0, 0, 0,
+        50, 50, 50, 50, 50, 50, 50, 50,
+        10, 10, 20, 30, 30, 20, 10, 10,
+        5, 5, 10, 25, 25, 10, 5, 5,
+        0, 0, 0, 20, 20, 0, 0, 0,
+        5, -5, -10, 0, 0, -10, -5, 5,
+        5, 10, 10, -20, -20, 10, 10, 5,
+        0, 0, 0, 0, 0, 0, 0, 0
+};
+
+std::array<std::array<Evaluation, 64> *, 6> pieceSquareValues{
+        kingMidGameSquareValues,
+        queenSquareValues,
+        bishopSquareValues,
+        knightSquareValues,
+        rookSquareValues,
+        pawnSquareValues,
+};
+
 namespace MoveGenerator {
     unsigned long positionsAnalyzed = 0;
     folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
     std::vector<uint64_t> depthHashes;
 
-    std::vector<int> getPiecesOfColour(Board *board, int colour) {
-        std::vector<int> result;
+    Evaluation getPiecePositionValue(int piece, int position) {
+        auto squareValueTable = pieceSquareValues[Piece::getType(piece) + 1];
+        std::array<Evaluation, 64> valueTable;
 
-        for (auto square: board->squares) {
-            if (Piece::getColour(square) == colour) result.push_back(square);
+        if (Piece::getColour(piece) == Piece::Black) {
+            std::reverse_copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
+        } else {
+            std::copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
         }
 
-        return result;
+        return valueTable[position];
     }
 
-    long evaluate(const std::vector<int> &pieces) {
+    long evaluate(Board *board, int color) {
         long sum = 0;
 
-        for (auto piece: pieces) {
-            sum += Piece::getValue(piece);
+        for (int square = 0; square < 64; square++) {
+            auto piece = board->squares[square];
+            if (Piece::getColour(piece) != color) continue;
+            sum += Piece::getValue(piece) + getPiecePositionValue(piece, square);
         }
 
         return sum;
@@ -41,8 +132,8 @@ namespace MoveGenerator {
         if (!board->hasLegalMoves)
             return board->isKingUnderAttack ? minEvaluation : 0;
 
-        auto evaluation = evaluate(getPiecesOfColour(board, board->colourToMove));
-        auto opponentEvaluation = evaluate(getPiecesOfColour(board, Piece::getOpponentColour(board->colourToMove)));
+        auto evaluation = evaluate(board, board->colourToMove);
+        auto opponentEvaluation = evaluate(board, Piece::getOpponentColour(board->colourToMove));
 
         return evaluation - opponentEvaluation;
     }

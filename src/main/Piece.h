@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 class Piece {
 public:
     static const int None = 0;
@@ -15,6 +17,12 @@ public:
 
     static const int LeftRook = 32;
     static const int RightRook = 64;
+
+    static const int PawnValue = 1000;
+    static const int BishopValue = 3000;
+    static const int KnightValue = 3000;
+    static const int RookValue = 5000;
+    static const int QueenValue = 9000;
 
     static int getColour(int piece);
     static int getType(int piece);

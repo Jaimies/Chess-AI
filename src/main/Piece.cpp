@@ -30,10 +30,10 @@ int Piece::getOpponentColourFromPiece(int piece) {
 
 int Piece::getValue(int piece) {
     auto type = getType(piece);
-    if (type == Pawn) return 1;
-    if (type == King) return 0;
-    if (type == Knight || type == Bishop) return 3;
-    if (type == Queen) return 9;
-    if (type == Rook) return 5;
+    if (type == Pawn) return PawnValue;
+    if (type == Knight) return KnightValue;
+    if (type == Bishop) return BishopValue;
+    if (type == Queen) return QueenValue;
+    if (type == Rook) return RookValue;
     return 0;
 }
