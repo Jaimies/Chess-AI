@@ -89,22 +89,15 @@ std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
         0, 0, 0, 0, 0, 0, 0, 0
 };
 
-std::array<std::array<Evaluation, 64> *, 6> pieceSquareValues{
-        kingMidGameSquareValues,
-        queenSquareValues,
-        bishopSquareValues,
-        knightSquareValues,
-        rookSquareValues,
-        pawnSquareValues,
-};
-
 namespace MoveGenerator {
     unsigned long positionsAnalyzed = 0;
     folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
     std::vector<uint64_t> depthHashes;
 
-    Evaluation getPiecePositionValue(int piece, int position) {
-        auto squareValueTable = pieceSquareValues[Piece::getType(piece) + 1];
+    std::array<Evaluation, 64> *&getSquareValueTable(Board *board, int piece);
+
+    Evaluation getPiecePositionValue(Board *board, int piece, int position) {
+        auto squareValueTable = getSquareValueTable(board, piece);
         std::array<Evaluation, 64> valueTable;
 
         if (Piece::getColour(piece) == Piece::Black) {
@@ -116,13 +109,31 @@ namespace MoveGenerator {
         return valueTable[position];
     }
 
+    std::array<Evaluation, 64> *&getSquareValueTable(Board *board, int piece) {
+        auto type = Piece::getType(piece);
+
+        if (type == Piece::Pawn) return pawnSquareValues;
+        if (type == Piece::Rook) return rookSquareValues;
+        if (type == Piece::Bishop) return bishopSquareValues;
+        if (type == Piece::Knight) return knightSquareValues;
+
+        if (type == Piece::King) {
+            if (board->isInEndgame()) return kingEndGameSquareValues;
+            return kingMidGameSquareValues;
+        }
+
+        if (type == Piece::Queen) return queenSquareValues;
+
+        throw std::invalid_argument("Expected a piece with a type, got " + std::to_string(piece));
+    }
+
     long evaluate(Board *board, int color) {
         long sum = 0;
 
         for (int square = 0; square < 64; square++) {
             auto piece = board->squares[square];
             if (Piece::getColour(piece) != color) continue;
-            sum += Piece::getValue(piece) + getPiecePositionValue(piece, square);
+            sum += Piece::getValue(piece) + getPiecePositionValue(board, piece, square);
         }
 
         return sum;

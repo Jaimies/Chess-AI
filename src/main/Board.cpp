@@ -48,6 +48,7 @@ Board *Board::fromFenString(std::string fenString, int colourToMove) {
     board->colourToMove = colourToMove;
     board->loadFenString(fenString);
     board->generateMoves();
+    board->updateEndgameState();
     return board;
 }
 
@@ -95,7 +96,10 @@ void Board::makeMove(Move *move) {
     _MakeMove(move);
     generateMoves();
     updateGameState();
+    updateEndgameState();
 }
+
+void Board::updateEndgameState() { _isInEndgame = determineIfIsInEndgame(); }
 
 void Board::unmakeMove(Move *move) {
     undoCastlingPieceMovementUpdate();
@@ -122,6 +126,7 @@ Board::Board(int colourToMove, std::stack<Move *> moveHistory, std::unordered_ma
     this->castlingPieceMoved = castlingPieceMoved;
     this->squares = squares;
     computeMoveData();
+    updateEndgameState();
 }
 
 void Board::computeMoveData() {
@@ -717,4 +722,29 @@ void Board::generateEnPassantMoves(int square, int piece, std::vector<Move *> &m
                 new EnPassantMove(square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition)
         );
     }
+}
+
+bool Board::isInEndgame() const {
+    return _isInEndgame;
+}
+
+template<typename T>
+bool contains(std::array<T, 64> array, T element) {
+    return std::find(array.begin(), array.end(), element) != array.end();
+}
+
+bool Board::determineIfIsInEndgame() const {
+    return isSideInEndgamePosition(Piece::White) && isSideInEndgamePosition(Piece::Black);
+}
+
+bool Board::isSideInEndgamePosition(int colour) const {
+    bool hasQueen = contains(squares, Piece::Queen | colour);
+    bool hasRook = contains(squares, Piece::Rook | colour);
+    return !hasQueen || !hasRook && getMinorPieceCount(colour) <= 1;
+}
+
+unsigned long Board::getMinorPieceCount(int colour) const {
+    return std::count_if(squares.begin(), squares.end(), [colour](int piece) {
+        return piece == (Piece::Knight | colour) || piece == (Piece::Bishop | colour);
+    });
 }

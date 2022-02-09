@@ -121,3 +121,11 @@ TEST(BoardTest, MoveCountIsCorrectInPositionWithPins) {
     ASSERT_EQ(1060, countMoves(board->copy(), 3));
     ASSERT_EQ(18010, countMoves(board->copy(), 4));
 }
+
+TEST(BoardTest, IsInEndgame) {
+    ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/8/1Q2K3 w - - 0 1")->isInEndgame());
+    ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/2B5/1Q2K3 w - - 0 1")->isInEndgame());
+    ASSERT_FALSE(Board::fromFenString("q7/1k6/8/8/8/8/1NB5/1Q2K3 w - - 0 1")->isInEndgame());
+    ASSERT_TRUE(Board::fromFenString("q7/1k1b4/8/8/8/8/2B5/1Q2K3 w - - 0 1")->isInEndgame());
+    ASSERT_FALSE(Board::fromFenString("q7/1kr5/8/8/8/8/8/4K3 w - - 0 1")->isInEndgame());
+}

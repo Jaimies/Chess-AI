@@ -44,6 +44,8 @@ public:
     void unmakeMove(Move *move);
     Board *copy();
 
+    bool isInEndgame() const;
+
     bool canWhiteCastleLeft() {
         return !castlingPieceMoved[Piece::King | Piece::White]
                && !castlingPieceMoved[Piece::LeftRook | Piece::White];
@@ -81,8 +83,8 @@ private:
     std::unordered_map<int, int> pins;
 
     int kingAttackerPosition;
-
     int kingPosition;
+    bool _isInEndgame = false;
 
     Board();
 
@@ -104,6 +106,8 @@ private:
     bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition);
     bool isSquareUnderAttack(int square) const;
     bool AllSquaresAreClearBetween(int firstSquare, int secondSquare);
+    bool isSideInEndgamePosition(int colour) const;
+    bool determineIfIsInEndgame() const;
     void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly);
     void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves);
     void generateForwardPawnMoves(
@@ -139,4 +143,7 @@ private:
 
     constexpr static const int leftDirectionIndex = 3;
     constexpr static const int rightDirectionIndex = 2;
+
+    unsigned long getMinorPieceCount(int colour) const;
+    void updateEndgameState();
 };
