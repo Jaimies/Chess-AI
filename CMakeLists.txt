@@ -33,6 +33,7 @@ set(PROJECT_SOURCES
         src/main/promotion_dialog.cpp src/main/promotion_dialog.h
         src/main/piece_ui.cpp src/main/piece_ui.h
         src/main/zobrist_hash_generator.cpp src/main/zobrist_hash_generator.h
+        src/main/MoveGenerator.cpp src/main/MoveGenerator.h
 
         resources.qrc
         ${TS_FILES}

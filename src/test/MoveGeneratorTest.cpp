@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "../main/Board.h"
-#include "../main/MoveGenerator.cpp"
+#include "../main/MoveGenerator.h"
 
 TEST(MoveGeneratorTest, FindsBestMoveInPositionWithCheckmate) {
     auto board = Board::fromFenString("rnbqkbnr/pppppppp/8/8/2B5/5Q2/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Piece::Black);
@@ -25,15 +25,20 @@ TEST(MoveGeneratorTest, FindsCorrectBestMoveInPosition2) {
     ASSERT_TRUE(move->startSquare == 25 && move->targetSquare == 29);
 }
 
-TEST(MoveGeneratorTest, getSquareValueTable) {
-    auto boardInEndGame = Board::fromFenString("q7/1k6/8/8/8/8/8/1Q2K3 w - - 0 1");
-    auto boardInMidGame = Board::fromFenString(Board::startPosition);
+TEST(MoveGeneratorTest, UsesSensiblePositioning) {
+    Board *board = Board::fromFenString(Board::startPosition);
+    board->makeMove(NormalMove::fromString("e2e4"));
+    auto move = MoveGenerator::getBestMove(board);
+    std::cout << move->startSquare << " " << move->targetSquare;
+}
 
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::Pawn | Piece::White), pawnSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::Knight | Piece::White), knightSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::Bishop | Piece::White), bishopSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::Queen | Piece::White), queenSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::Rook | Piece::White), rookSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInMidGame, Piece::King | Piece::White), kingMidGameSquareValues);
-    ASSERT_EQ(MoveGenerator::getSquareValueTable(boardInEndGame, Piece::King | Piece::White), kingEndGameSquareValues);
+TEST(MoveGeneratorTest, evaluationIncludesPositioning) {
+    Board *boardWithBetterPosition = Board::fromFenString("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+    Board *boardWithBetterPositionButLessMaterial = Board::fromFenString("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/R1BQKBNR w KQkq - 0 1");
+    Board *board = Board::fromFenString(Board::startPosition);
+
+    std::cout << MoveGenerator::evaluate(boardWithBetterPosition) << std::endl;
+    std::cout << MoveGenerator::evaluate(boardWithBetterPositionButLessMaterial) << std::endl;
+    std::cout << MoveGenerator::evaluate(board) << std::endl;
+    EXPECT_TRUE(MoveGenerator::evaluate(boardWithBetterPosition) > MoveGenerator::evaluate(board));
 }

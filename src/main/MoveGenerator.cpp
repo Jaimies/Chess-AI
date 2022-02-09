@@ -6,6 +6,7 @@
 #include "Move.h"
 #include "zobrist_hash_generator.h"
 #include <folly/concurrency/ConcurrentHashMap.h>
+#include "MoveGenerator.h"
 
 using Evaluation = long;
 
@@ -89,211 +90,207 @@ std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
         0, 0, 0, 0, 0, 0, 0, 0
 };
 
-namespace MoveGenerator {
-    unsigned long positionsAnalyzed = 0;
-    folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
-    std::vector<uint64_t> depthHashes;
+unsigned long MoveGenerator::positionsAnalyzed = 0;
+folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
+std::vector<uint64_t> depthHashes;
 
-    std::array<Evaluation, 64> *&getSquareValueTable(Board *board, int piece);
+Evaluation getPiecePositionValue(Board *board, int piece, int position) {
+    auto squareValueTable = MoveGenerator::getSquareValueTable(board, piece);
+    std::array<Evaluation, 64> valueTable;
 
-    Evaluation getPiecePositionValue(Board *board, int piece, int position) {
-        auto squareValueTable = getSquareValueTable(board, piece);
-        std::array<Evaluation, 64> valueTable;
+    if (Piece::getColour(piece) == Piece::White) {
+        std::reverse_copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
+    } else {
+        std::copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
+    }
 
-        if (Piece::getColour(piece) == Piece::Black) {
-            std::reverse_copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
-        } else {
-            std::copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
+    return valueTable[position];
+}
+
+std::array<Evaluation, 64> *&MoveGenerator::getSquareValueTable(Board *board, int piece) {
+    auto type = Piece::getType(piece);
+
+    if (type == Piece::Pawn) return pawnSquareValues;
+    if (type == Piece::Rook) return rookSquareValues;
+    if (type == Piece::Bishop) return bishopSquareValues;
+    if (type == Piece::Knight) return knightSquareValues;
+
+    if (type == Piece::King) {
+        if (board->isInEndgame()) return kingEndGameSquareValues;
+        return kingMidGameSquareValues;
+    }
+
+    if (type == Piece::Queen) return queenSquareValues;
+
+    throw std::invalid_argument("Expected a piece with a type, got " + std::to_string(piece));
+}
+
+long evaluate(Board *board, int color) {
+    long sum = 0;
+
+    for (int square = 0; square < 64; square++) {
+        auto piece = board->squares[square];
+        if (Piece::getColour(piece) != color) continue;
+        sum += Piece::getValue(piece) + getPiecePositionValue(board, piece, square);
+    }
+
+    return sum;
+}
+
+long MoveGenerator::evaluate(Board *board) {
+    if (!board->hasLegalMoves)
+        return board->isKingUnderAttack ? minEvaluation : 0;
+
+    auto evaluation = evaluate(board, board->colourToMove);
+    auto opponentEvaluation = evaluate(board, Piece::getOpponentColour(board->colourToMove));
+
+    return evaluation - opponentEvaluation;
+}
+
+int guessMoveValue(const Board *board, Move *move) {
+    auto movePieceType = Piece::getType(board->squares[move->startSquare]);
+    auto capturePieceType = move->canCapture() ? Piece::getType(board->squares[move->targetSquare]) : Piece::None;
+
+    int moveScoreGuess = 10 * Piece::getValue(capturePieceType) - Piece::getValue(movePieceType);
+
+    if (auto *promotionMove = dynamic_cast<PromotionMove *>(move)) {
+        moveScoreGuess += Piece::getValue(promotionMove->pieceToPromoteTo);
+    }
+
+    return moveScoreGuess;
+}
+
+void sortMoves(Board *board, std::vector<Move *> &moves) {
+    std::sort(moves.begin(), moves.end(), [board](Move *move, Move *otherMove) {
+        return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
+    });
+}
+
+long searchCaptures(Board *board, long alpha, long beta) {
+    auto evaluation = MoveGenerator::evaluate(board);
+    if (evaluation >= beta) return beta;
+
+    alpha = std::max(alpha, evaluation);
+
+    board->generateMoves(true);
+    auto moves = std::vector(board->legalMoves);
+    sortMoves(board, moves);
+
+    for (int index = 0; index < moves.size(); index++) {
+        auto move = moves[index];
+        board->makeMoveWithoutGeneratingMoves(move);
+        auto evaluation = -searchCaptures(board, -beta, -alpha);
+        board->unmakeMove(move);
+
+        delete move;
+
+        if (evaluation >= beta) {
+            index++;
+            for (; index < moves.size(); index++) delete moves[index];
+            return beta;
         }
-
-        return valueTable[position];
-    }
-
-    std::array<Evaluation, 64> *&getSquareValueTable(Board *board, int piece) {
-        auto type = Piece::getType(piece);
-
-        if (type == Piece::Pawn) return pawnSquareValues;
-        if (type == Piece::Rook) return rookSquareValues;
-        if (type == Piece::Bishop) return bishopSquareValues;
-        if (type == Piece::Knight) return knightSquareValues;
-
-        if (type == Piece::King) {
-            if (board->isInEndgame()) return kingEndGameSquareValues;
-            return kingMidGameSquareValues;
-        }
-
-        if (type == Piece::Queen) return queenSquareValues;
-
-        throw std::invalid_argument("Expected a piece with a type, got " + std::to_string(piece));
-    }
-
-    long evaluate(Board *board, int color) {
-        long sum = 0;
-
-        for (int square = 0; square < 64; square++) {
-            auto piece = board->squares[square];
-            if (Piece::getColour(piece) != color) continue;
-            sum += Piece::getValue(piece) + getPiecePositionValue(board, piece, square);
-        }
-
-        return sum;
-    }
-
-    long evaluate(Board *board) {
-        if (!board->hasLegalMoves)
-            return board->isKingUnderAttack ? minEvaluation : 0;
-
-        auto evaluation = evaluate(board, board->colourToMove);
-        auto opponentEvaluation = evaluate(board, Piece::getOpponentColour(board->colourToMove));
-
-        return evaluation - opponentEvaluation;
-    }
-
-    int guessMoveValue(const Board *board, Move *move) {
-        auto movePieceType = Piece::getType(board->squares[move->startSquare]);
-        auto capturePieceType = move->canCapture() ? Piece::getType(board->squares[move->targetSquare]) : Piece::None;
-
-        int moveScoreGuess = 10 * Piece::getValue(capturePieceType) - Piece::getValue(movePieceType);
-
-        if (auto *promotionMove = dynamic_cast<PromotionMove *>(move)) {
-            moveScoreGuess += Piece::getValue(promotionMove->pieceToPromoteTo);
-        }
-
-        return moveScoreGuess;
-    }
-
-    void sortMoves(Board *board, std::vector<Move *> &moves) {
-        std::sort(moves.begin(), moves.end(), [board](Move *move, Move *otherMove) {
-            return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
-        });
-    }
-
-    long searchCaptures(Board *board, long alpha, long beta) {
-        auto evaluation = evaluate(board);
-        if (evaluation >= beta) return beta;
-
         alpha = std::max(alpha, evaluation);
+    }
 
-        board->generateMoves(true);
-        auto moves = std::vector(board->legalMoves);
-        sortMoves(board, moves);
+    return alpha;
+}
 
-        for (int index = 0; index < moves.size(); index++) {
-            auto move = moves[index];
-            board->makeMoveWithoutGeneratingMoves(move);
-            auto evaluation = -searchCaptures(board, -beta, -alpha);
+int64_t deepEvaluate(
+        Board *board, int depth,
+        int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
+    if (depth == 0) {
+        MoveGenerator::positionsAnalyzed++;
+        board->checkIfLegalMovesExist();
+        return searchCaptures(board, alpha, beta);
+    }
+
+    board->generateMoves();
+
+    if (board->legalMoves.empty()) {
+        MoveGenerator::positionsAnalyzed++;
+        return MoveGenerator::evaluate(board);
+    }
+
+    auto moves = std::vector(board->legalMoves);
+    sortMoves(board, moves);
+
+    for (int index = 0; index < moves.size(); index++) {
+        auto move = moves[index];
+        board->makeMoveWithoutGeneratingMoves(move);
+
+        auto boardHash = hash(board) ^ depthHashes[depth - 1];
+        auto cachedEvaluation = transpositions.find(boardHash);
+
+        auto evaluation = cachedEvaluation == transpositions.end()
+                          ? -deepEvaluate(board, depth - 1, -beta, -alpha)
+                          : cachedEvaluation->second;
+
+        if (cachedEvaluation == transpositions.end())
+            transpositions.insert(std::pair(boardHash, evaluation));
+
+        board->unmakeMove(move);
+
+        delete move;
+
+        if (evaluation >= beta) {
+            index++;
+            for (; index < moves.size(); index++) delete moves[index];
+            return beta;
+        }
+        alpha = std::max(alpha, evaluation);
+    }
+
+    return alpha;
+}
+
+Move *_getBestMove(Board *board) {
+    MoveGenerator::positionsAnalyzed = 0;
+    int depth = 5;
+    generateHashes();
+    depthHashes.clear();
+    transpositions.clear();
+
+    for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
+        depthHashes.push_back(get64rand());
+
+    if (board->legalMoves.empty()) return nullptr;
+
+    int64_t bestDeepEvaluation = minEvaluation;
+    int64_t bestEvaluation = minEvaluation;
+
+    Move *bestMove = nullptr;
+    auto moves = board->legalMoves;
+
+    std::mutex mutex;
+    std::vector<std::thread *> threads;
+
+    for (auto move: moves) {
+        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
+            board->makeMove(move);
+            auto deepEvaluation = -deepEvaluate(board, depth);
+            auto evaluation = -MoveGenerator::evaluate(board);
+
             board->unmakeMove(move);
 
-            delete move;
-
-            if (evaluation >= beta) {
-                index++;
-                for (; index < moves.size(); index++) delete moves[index];
-                return beta;
+            if (deepEvaluation > bestDeepEvaluation ||
+                deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+                mutex.lock();
+                bestDeepEvaluation = deepEvaluation;
+                bestEvaluation = evaluation;
+                bestMove = move;
+                mutex.unlock();
             }
-            alpha = std::max(alpha, evaluation);
-        }
-
-        return alpha;
+        }, board->copy()));
     }
 
-    int64_t deepEvaluate(
-            Board *board, int depth,
-            int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
-        if (depth == 0) {
-            positionsAnalyzed++;
-            board->checkIfLegalMovesExist();
-            return searchCaptures(board, alpha, beta);
-        }
-
-        board->generateMoves();
-
-        if (board->legalMoves.empty()) {
-            positionsAnalyzed++;
-            return evaluate(board);
-        }
-
-        auto moves = std::vector(board->legalMoves);
-        sortMoves(board, moves);
-
-        for (int index = 0; index < moves.size(); index++) {
-            auto move = moves[index];
-            board->makeMoveWithoutGeneratingMoves(move);
-
-            auto boardHash = hash(board) ^ depthHashes[depth - 1];
-            auto cachedEvaluation = transpositions.find(boardHash);
-
-            auto evaluation = cachedEvaluation == transpositions.end()
-                              ? -deepEvaluate(board, depth - 1, -beta, -alpha)
-                              : cachedEvaluation->second;
-
-            if (cachedEvaluation == transpositions.end())
-                transpositions.insert(std::pair(boardHash, evaluation));
-
-            board->unmakeMove(move);
-
-            delete move;
-
-            if (evaluation >= beta) {
-                index++;
-                for (; index < moves.size(); index++) delete moves[index];
-                return beta;
-            }
-            alpha = std::max(alpha, evaluation);
-        }
-
-        return alpha;
+    for (auto thread: threads) {
+        thread->join();
+        delete thread;
     }
 
-    Move *_getBestMove(Board *board) {
-        positionsAnalyzed = 0;
-        int depth = 5;
-        generateHashes();
-        depthHashes.clear();
-        transpositions.clear();
+    return bestMove;
+}
 
-        for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
-            depthHashes.push_back(get64rand());
-
-        if (board->legalMoves.empty()) return nullptr;
-
-        int64_t bestDeepEvaluation = minEvaluation;
-        int64_t bestEvaluation = minEvaluation;
-
-        Move *bestMove = nullptr;
-        auto moves = board->legalMoves;
-
-        std::mutex mutex;
-        std::vector<std::thread *> threads;
-
-        for (auto move: moves) {
-            threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
-                board->makeMove(move);
-                auto deepEvaluation = -deepEvaluate(board, depth);
-                auto evaluation = -evaluate(board);
-
-                board->unmakeMove(move);
-
-                if (deepEvaluation > bestDeepEvaluation ||
-                    deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
-                    mutex.lock();
-                    bestDeepEvaluation = deepEvaluation;
-                    bestEvaluation = evaluation;
-                    bestMove = move;
-                    mutex.unlock();
-                }
-            }, board->copy()));
-        }
-
-        for (auto thread: threads) {
-            thread->join();
-            delete thread;
-        }
-
-        return bestMove;
-    }
-
-    Move *getBestMove(Board *board) {
-        return _getBestMove(board->copy());
-    }
+Move *MoveGenerator::getBestMove(Board *board) {
+    return _getBestMove(board->copy());
 }

@@ -1,7 +1,7 @@
 #include "game_manager.h"
 #include "chessboard.h"
 #include "promotion_dialog.h"
-#include "MoveGenerator.cpp"
+#include "MoveGenerator.h"
 #include <thread>
 
 void GameManager::setup(ChessBoardWidget *wdg, AnalysisInfoDisplay *info) {
