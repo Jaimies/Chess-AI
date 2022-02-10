@@ -19,7 +19,7 @@ void ChessBoardWidget::generatePossibleMoveMarkers() {
         int file = square % 8;
         auto possibleMoveIcon = new Icon(this);
         possibleMoveIcon->setPixmap(QIcon(":images/circle.svg").pixmap(QSize(30, 30)));
-        possibleMoveIcon->move(file * 100 + 40, rank * 100 + 40);
+        possibleMoveIcon->move(700 - file * 100 + 40, rank * 100 + 40);
         possibleMoveIcon->setFixedSize(20, 20);
         possibleMoveIcon->setVisible(false);
         possibleMoveIcons[square] = possibleMoveIcon;
@@ -68,7 +68,7 @@ void ChessBoardWidget::dropEvent(QDropEvent *event) {
         icon->setVisible(false);
     }
 
-    int file = event->pos().x() / 100;
+    int file = 7 - event->pos().x() / 100;
     int rank = event->pos().y() / 100;
 
     if (!draggedIcon || !isValidCoordinate(file) || !isValidCoordinate(rank)) return;

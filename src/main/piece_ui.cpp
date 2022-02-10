@@ -17,7 +17,7 @@ void UiPiece::moveToSquare(int square) {
     int rank = square / 8;
     int file = square % 8;
 
-    this->move(file * 100 + 15, rank * 100 + 15);
+    this->move(700 - file * 100 + 15, rank * 100 + 15);
     this->square = square;
 }
 
