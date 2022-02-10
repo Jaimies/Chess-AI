@@ -266,7 +266,7 @@ Move *_getBestMove(Board *board) {
 
     for (auto move: moves) {
         threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
-            board->makeMove(move);
+            board->makeMoveWithoutGeneratingMoves(move);
             auto deepEvaluation = -deepEvaluate(board, depth);
             auto evaluation = -MoveGenerator::evaluate(board);
 
