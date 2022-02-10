@@ -67,9 +67,12 @@ void Board::generateMoves(bool generateOnlyCaptures) {
         std::copy_if(_pseudoLegalMoves.begin(), _pseudoLegalMoves.end(), std::back_inserter(pseudoLegalMoves),
                      [](Move *move) {
                          auto *normalMove = dynamic_cast<NormalMove *>(move);
-                         if (normalMove == nullptr) return false;
+                         if (normalMove == nullptr || normalMove->capturedPiece == Piece::None) {
+                             delete move;
+                             return false;
+                         }
 
-                         return normalMove->capturedPiece != Piece::None;
+                         return true;
                      });
     } else pseudoLegalMoves = _pseudoLegalMoves;
 

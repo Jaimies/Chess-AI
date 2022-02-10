@@ -134,3 +134,18 @@ TEST(BoardTest, copy_copiesLegalMoves) {
     Board *boardCopy = board->copy();
     EXPECT_EQ(board->legalMoves, boardCopy->legalMoves);
 }
+
+TEST(BoardTest, generateCaptureMoves) {
+    auto board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
+    board->generateMoves(true);
+    EXPECT_EQ(board->legalMoves.size(), 1);
+    EXPECT_EQ(board->legalMoves[0]->startSquare, 25);
+    EXPECT_EQ(board->legalMoves[0]->targetSquare, 29);
+
+    board->makeMoveWithoutGeneratingMoves(NormalMove::fromString("b4c4"));
+
+    board->generateMoves(true);
+    EXPECT_EQ(board->legalMoves.size(), 1);
+    EXPECT_EQ(board->legalMoves[0]->startSquare, 39);
+    EXPECT_EQ(board->legalMoves[0]->targetSquare, 33);
+}
