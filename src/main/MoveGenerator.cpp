@@ -280,6 +280,8 @@ Move *_getBestMove(Board *board) {
                 bestMove = move;
                 mutex.unlock();
             }
+
+            delete board;
         }, board->copy()));
     }
 
@@ -292,5 +294,8 @@ Move *_getBestMove(Board *board) {
 }
 
 Move *MoveGenerator::getBestMove(Board *board) {
-    return _getBestMove(board->copy());
+    Board *boardCopy = board->copy();
+    Move *bestMove = _getBestMove(boardCopy);
+    delete boardCopy;
+    return bestMove;
 }
