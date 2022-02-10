@@ -110,9 +110,7 @@ void Board::unmakeMove(Move *move) {
 }
 
 Board *Board::copy() {
-    auto newBoard = new Board(colourToMove, moveHistory, castlingPieceMoved, squares);
-    newBoard->generateMoves();
-    return newBoard;
+    return new Board(colourToMove, moveHistory, castlingPieceMoved, squares, legalMoves);
 }
 
 Board::Board() {
@@ -120,11 +118,12 @@ Board::Board() {
 }
 
 Board::Board(int colourToMove, std::stack<Move *> moveHistory, std::unordered_map<int, bool> castlingPieceMoved,
-             std::array<int, 64> squares) {
+             std::array<int, 64> squares, std::vector<Move *> legalMoves) {
     this->colourToMove = colourToMove;
     this->moveHistory = moveHistory;
     this->castlingPieceMoved = castlingPieceMoved;
     this->squares = squares;
+    this->legalMoves = legalMoves;
     computeMoveData();
     updateEndgameState();
 }

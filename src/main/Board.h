@@ -89,7 +89,8 @@ private:
     Board();
 
     Board(int colourToMove, std::stack<Move *> moveHistory,
-          std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares);
+          std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares,
+          std::vector<Move *> legalMoves);
 
     void computeMoveData();
     void loadFenString(std::string fenString);

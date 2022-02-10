@@ -86,7 +86,6 @@ TEST(BoardTest, MoveCountIsCorrectInPosition6) {
     ASSERT_EQ(164075551, countMoves(board->copy(), 5));
 }
 
-
 TEST(BoardTest, MoveCountIsCorrectInPositionWherePawnCanCaptureAndPromote) {
     Board *board = Board::fromFenString("b7/1P6/8/3K3k/8/8/8/8 w - -");
     ASSERT_EQ(12, countMoves(board->copy(), 1));
@@ -128,4 +127,10 @@ TEST(BoardTest, IsInEndgame) {
     ASSERT_FALSE(Board::fromFenString("q7/1k6/8/8/8/8/1NB5/1Q2K3 w - - 0 1")->isInEndgame());
     ASSERT_TRUE(Board::fromFenString("q7/1k1b4/8/8/8/8/2B5/1Q2K3 w - - 0 1")->isInEndgame());
     ASSERT_FALSE(Board::fromFenString("q7/1kr5/8/8/8/8/8/4K3 w - - 0 1")->isInEndgame());
+}
+
+TEST(BoardTest, copy_copiesLegalMoves) {
+    Board *board = Board::fromFenString(Board::startPosition);
+    Board *boardCopy = board->copy();
+    EXPECT_EQ(board->legalMoves, boardCopy->legalMoves);
 }
