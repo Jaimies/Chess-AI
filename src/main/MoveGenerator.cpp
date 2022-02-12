@@ -13,6 +13,8 @@ using Evaluation = long;
 const Evaluation minEvaluation = std::numeric_limits<Evaluation>::min() + 10;
 const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
+const Evaluation checkmateEvaluation = minEvaluation + 1000;
+
 std::array<Evaluation, 64> *kingMidGameSquareValues = new std::array<Evaluation, 64>{
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
@@ -104,7 +106,7 @@ Evaluation getPiecePositionValue(Board *board, int piece, int position) {
         std::copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
     }
 
-    return valueTable[position];
+    return valueTable[position] * 10;
 }
 
 std::array<Evaluation, 64> *&MoveGenerator::getSquareValueTable(Board *board, int piece) {
@@ -137,12 +139,18 @@ long evaluate(Board *board, int color) {
     return sum;
 }
 
-long MoveGenerator::evaluate(Board *board) {
-    if (!board->hasLegalMoves)
-        return board->isKingUnderAttack ? minEvaluation : 0;
+Evaluation evaluatePositionWithoutMoves(Board *board, int depth) {
+    // prefer to checkmate sooner, rather than later
+    if (board->isKingUnderAttack) return checkmateEvaluation - depth;
+    return 0;
+}
 
-    auto evaluation = evaluate(board, board->colourToMove);
-    auto opponentEvaluation = evaluate(board, Piece::getOpponentColour(board->colourToMove));
+long MoveGenerator::evaluate(Board *board, int depth) {
+    if (!board->hasLegalMoves)
+        return evaluatePositionWithoutMoves(board, depth);
+
+    auto evaluation = evaluateSide(board, board->colourToMove);
+    auto opponentEvaluation = evaluateSide(board, Piece::getOpponentColour(board->colourToMove));
 
     return evaluation - opponentEvaluation;
 }
@@ -167,7 +175,7 @@ void sortMoves(Board *board, std::vector<Move *> &moves) {
 }
 
 long searchCaptures(Board *board, long alpha, long beta) {
-    auto evaluation = MoveGenerator::evaluate(board);
+    auto evaluation = MoveGenerator::evaluate(board, 0);
     if (evaluation >= beta) return beta;
 
     alpha = std::max(alpha, evaluation);
@@ -208,7 +216,7 @@ int64_t deepEvaluate(
 
     if (board->legalMoves.empty()) {
         MoveGenerator::positionsAnalyzed++;
-        return MoveGenerator::evaluate(board);
+        return evaluatePositionWithoutMoves(board, depth);
     }
 
     auto moves = std::vector(board->legalMoves);
@@ -268,7 +276,7 @@ Move *_getBestMove(Board *board) {
         threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
             board->makeMoveWithoutGeneratingMoves(move);
             auto deepEvaluation = -deepEvaluate(board, depth);
-            auto evaluation = -MoveGenerator::evaluate(board);
+            auto evaluation = -MoveGenerator::evaluate(board, depth);
 
             board->unmakeMove(move);
 

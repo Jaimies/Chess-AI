@@ -37,8 +37,8 @@ TEST(MoveGeneratorTest, evaluationIncludesPositioning) {
     Board *boardWithBetterPositionButLessMaterial = Board::fromFenString("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/R1BQKBNR w KQkq - 0 1");
     Board *board = Board::fromFenString(Board::startPosition);
 
-    std::cout << MoveGenerator::evaluate(boardWithBetterPosition) << std::endl;
-    std::cout << MoveGenerator::evaluate(boardWithBetterPositionButLessMaterial) << std::endl;
-    std::cout << MoveGenerator::evaluate(board) << std::endl;
-    EXPECT_TRUE(MoveGenerator::evaluate(boardWithBetterPosition) > MoveGenerator::evaluate(board));
+    std::cout << MoveGenerator::evaluate(boardWithBetterPosition, 0) << std::endl;
+    std::cout << MoveGenerator::evaluate(boardWithBetterPositionButLessMaterial, 0) << std::endl;
+    std::cout << MoveGenerator::evaluate(board, 0) << std::endl;
+    EXPECT_TRUE(MoveGenerator::evaluate(boardWithBetterPosition, 0) > MoveGenerator::evaluate(board, 0));
 }
