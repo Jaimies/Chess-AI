@@ -125,8 +125,8 @@ void ChessBoardWidget::paintEvent(QPaintEvent *event) {
         auto file = square % 8;
         bool isWhiteCell = (rank + file) % 2 == 0;
         auto color = isWhiteCell
-                     ? QColor(247, 223, 176)
-                     : QColor(163, 112, 67);
+                     ? QColor(244, 216, 184)
+                     : QColor(190, 134, 102);
 
         painter.setBrush(color);
 

@@ -9,7 +9,7 @@ public:
         : Icon(parent), isDraggable(isDraggable), square(square) {
         setPiece(piece);
         moveToSquare(square);
-        setFixedSize(70, 70);
+        setFixedSize(90, 90);
         show();
     };
 
