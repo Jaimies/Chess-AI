@@ -6,7 +6,9 @@
 
 PromotionDialog::PromotionDialog(QWidget *wdg) : QWidget(wdg) {
     for (int i = 0; i < 4; i++) {
-        pieces.push_back(new UiPiece(this, i, Piece::piecesToPromoteTo[i] | Piece::White, false));
+        auto uiPiece = new UiPiece(this, i, Piece::piecesToPromoteTo[i] | Piece::Black, false);
+        uiPiece->move(i * 100 + 5, 5);
+        pieces.push_back(uiPiece);
     }
 
     setFixedSize(400, 100);
@@ -26,7 +28,7 @@ void PromotionDialog::show(int color, int square, std::function<void(int)> onPie
 
 void PromotionDialog::setColor(int color) {
     for (int i = 0; i < 4; i++) {
-        pieces[i] = new UiPiece(this, i, Piece::piecesToPromoteTo[i] | color, false);
+        pieces[i]->setPiece(Piece::piecesToPromoteTo[i] | color);
     }
 }
 
