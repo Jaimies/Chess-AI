@@ -36,20 +36,20 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
                 makeMachineMoveIfNecessary();
             });
             promotionDialogBackground->setOnClickListener([this, move, pieceToMove, pieceToCapture]() {
-                pieceToCapture->setVisible(true);
+                if (pieceToCapture) pieceToCapture->setVisible(true);
                 pieceToMove->moveToSquare(move->startSquare);
                 promotionDialog->setVisible(false);
                 promotionDialogBackground->setVisible(false);
             });
 
             promotionDialogBackground->setVisible(true);
-            pieceToCapture->removeFromBoard();
+            if (pieceToCapture) pieceToCapture->removeFromBoard();
             pieceToMove->moveToSquare(move->targetSquare);
         }
 
         if (isMachineMove) {
             board->makeMove(move);
-            pieceToCapture->removeFromBoard();
+            if (pieceToCapture) pieceToCapture->removeFromBoard();
             pieceToMove->moveToSquare(move->targetSquare);
             pieceToMove->setPiece(promotionMove->pieceToPromoteTo);
         }
