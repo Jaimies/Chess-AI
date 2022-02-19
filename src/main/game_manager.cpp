@@ -78,8 +78,8 @@ void findTheBestMove(Board *board, GameManager *gameManager) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     gameManager->makeMove(MoveGenerator::getBestMove(board));
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    auto millisCount = std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
-    gameManager->info->updateInfo(MoveGenerator::positionsAnalyzed, millisCount);
+    auto millisCount = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+    gameManager->info->updateInfo(MoveGenerator::positionsAnalyzed, millisCount, MoveGenerator::depthSearchedTo);
 }
 
 void GameManager::makeMachineMoveIfNecessary() {

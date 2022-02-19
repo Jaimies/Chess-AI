@@ -7,8 +7,10 @@
 #include "zobrist_hash_generator.h"
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include "MoveGenerator.h"
+#include "VectorUtil.h"
 
 using Evaluation = long;
+using TranspositionTable = folly::ConcurrentHashMap<uint64_t, int64_t>;
 
 const Evaluation minEvaluation = std::numeric_limits<Evaluation>::min() + 10;
 const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
@@ -93,6 +95,7 @@ std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
 };
 
 unsigned long MoveGenerator::positionsAnalyzed = 0;
+int MoveGenerator::depthSearchedTo = 0;
 folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
 std::vector<uint64_t> depthHashes;
 
@@ -127,7 +130,7 @@ std::array<Evaluation, 64> *&MoveGenerator::getSquareValueTable(Board *board, in
     throw std::invalid_argument("Expected a piece with a type, got " + std::to_string(piece));
 }
 
-long evaluate(Board *board, int color) {
+long evaluateSide(Board *board, int color) {
     long sum = 0;
 
     for (int square = 0; square < 64; square++) {
@@ -251,9 +254,8 @@ int64_t deepEvaluate(
     return alpha;
 }
 
-Move *_getBestMove(Board *board) {
+Move *_getBestMove(Board *board, int depth) {
     MoveGenerator::positionsAnalyzed = 0;
-    int depth = 5;
     generateHashes();
     depthHashes.clear();
     transpositions.clear();
@@ -302,8 +304,22 @@ Move *_getBestMove(Board *board) {
 }
 
 Move *MoveGenerator::getBestMove(Board *board) {
+    using namespace std::chrono;
+
     Board *boardCopy = board->copy();
-    Move *bestMove = _getBestMove(boardCopy);
-    delete boardCopy;
-    return bestMove;
+    steady_clock::time_point begin = steady_clock::now();
+    uint64_t depth = 6;
+
+    while (true) {
+        auto bestMove = _getBestMove(board->copy(), depth);
+        auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
+
+        if (millisCount > 2000) {
+            delete boardCopy;
+            depthSearchedTo = depth;
+            return bestMove;
+        }
+
+        depth++;
+    }
 }

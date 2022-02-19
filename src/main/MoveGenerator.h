@@ -2,6 +2,7 @@
 
 namespace MoveGenerator {
     extern unsigned long positionsAnalyzed;
+    extern int depthSearchedTo;
 
     Move *getBestMove(Board *board);
     long evaluate(Board *board, int depth);
