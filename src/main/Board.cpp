@@ -528,7 +528,7 @@ bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlin
 
     return rook == (Piece::Rook | colour) &&
            !castlingPieceMoved[rookType | colour] &&
-            allSquaresAreClearBetween(kingSquare, rookSquare) &&
+           allSquaresAreClearBetween(kingSquare, rookSquare) &&
            allSquaresAreNotUnderAttackBetween(kingSquare, targetCastlingPosition);
 }
 
@@ -576,23 +576,22 @@ void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *>
 
             auto targetPieceColour = Piece::getColour(targetPiece);
 
-            if (targetPieceColour == colour) {
-                if (canCaptureFriendly)
-                    moves.push_back(new NormalMove(startSquare, targetSquare));
-
-                break;
-            }
-
-            auto targetPieceType = Piece::getType(targetPiece);
-
-            if (!capturesOnly || targetPiece != Piece::None)
+            if (targetPieceColour != colour && (!capturesOnly || targetPiece != Piece::None))
                 moves.push_back(new NormalMove(startSquare, targetSquare, targetPiece));
 
-            if (targetPiece != Piece::None
-                && (!canCaptureFriendly || targetPieceType != Piece::King))
+            if (targetPieceColour == colour && canCaptureFriendly)
+                moves.push_back(new NormalMove(startSquare, targetSquare));
+
+            if (shouldStopGeneratingSlidingMoves(canCaptureFriendly, colour, targetPiece, targetPieceColour))
                 break;
         }
     }
+}
+
+bool Board::shouldStopGeneratingSlidingMoves(bool canCaptureFriendly, int colour, int targetPiece, int targetPieceColour) {
+    return targetPiece != Piece::None
+           && (!canCaptureFriendly || Piece::getType(targetPiece) != Piece::King)
+           || targetPieceColour == colour;
 }
 
 static bool isPawnAboutToPromote(int position, int piece) {

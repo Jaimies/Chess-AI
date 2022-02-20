@@ -156,4 +156,6 @@ private:
 
     unsigned long getMinorPieceCount(int colour) const;
     void updateEndgameState();
+
+    static bool shouldStopGeneratingSlidingMoves(bool canCaptureFriendly, int colour, int targetPiece, int targetPieceColour) ;
 };
