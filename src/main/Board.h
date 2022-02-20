@@ -113,10 +113,10 @@ private:
     void generateCastlingMoves(std::vector<Move *> &moves);
     void addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move *> &moves);
     void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves);
-    bool IsCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition);
+    bool isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition);
     bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition);
     bool isSquareUnderAttack(int square) const;
-    bool AllSquaresAreClearBetween(int firstSquare, int secondSquare);
+    bool allSquaresAreClearBetween(int firstSquare, int secondSquare);
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
     void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly);
@@ -139,7 +139,7 @@ private:
     bool coversCheck(Move *potentialMove) const;
     bool isValidEnPassantMove(EnPassantMove *move) const;
     void addMoveIfLegal(Move *move);
-    bool LegalMovesExist(int colour);
+    bool legalMovesExist(int colour);
 
     bool IsKingUnderAttack();
     bool IsKingUnderAttack(Move *potentialMove);

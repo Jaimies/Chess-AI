@@ -83,7 +83,7 @@ void Board::checkIfLegalMovesExist() {
     generateSquaresAttackedByOpponent(opponentColour);
     generatePins();
     isKingUnderAttack = IsKingUnderAttack();
-    hasLegalMoves = LegalMovesExist(colourToMove);
+    hasLegalMoves = legalMovesExist(colourToMove);
 }
 
 void Board::makeMove(Move *move) {
@@ -340,7 +340,7 @@ bool Board::isMoveLegal(Move *potentialMove) {
            && (enPassantMove == nullptr || isValidEnPassantMove(enPassantMove));
 }
 
-bool Board::LegalMovesExist(int colour) {
+bool Board::legalMovesExist(int colour) {
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
@@ -515,11 +515,11 @@ void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vecto
     int kingTargetSquare = kingSquare + 2 * directionMultiplier;
     int rookTargetSquare = kingSquare + 1 * directionMultiplier;
 
-    if (IsCastlingPossible(kingSquare, rookSquare, kingTargetSquare))
+    if (isCastlingPossible(kingSquare, rookSquare, kingTargetSquare))
         moves.push_back(new CastlingMove(kingSquare, kingTargetSquare, rookSquare, rookTargetSquare));
 }
 
-bool Board::IsCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
+bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
     int king = squares[kingSquare];
     int rook = squares[rookSquare];
 
@@ -528,7 +528,7 @@ bool Board::IsCastlingPossible(int kingSquare, int rookSquare, int targetCastlin
 
     return rook == (Piece::Rook | colour) &&
            !castlingPieceMoved[rookType | colour] &&
-           AllSquaresAreClearBetween(kingSquare, rookSquare) &&
+            allSquaresAreClearBetween(kingSquare, rookSquare) &&
            allSquaresAreNotUnderAttackBetween(kingSquare, targetCastlingPosition);
 }
 
@@ -545,7 +545,7 @@ bool Board::isSquareUnderAttack(int square) const {
     return squaresAttackedByOpponent.contains(square);
 }
 
-bool Board::AllSquaresAreClearBetween(int firstSquare, int secondSquare) {
+bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
     int startSquare = std::min(firstSquare, secondSquare);
     int endSquare = std::max(firstSquare, secondSquare);
 
