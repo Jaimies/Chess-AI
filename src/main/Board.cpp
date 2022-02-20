@@ -60,21 +60,7 @@ void Board::generateMoves(bool generateOnlyCaptures) {
     generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
     isKingUnderAttack = IsKingUnderAttack();
 
-    auto _pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
-    std::vector<Move *> pseudoLegalMoves;
-
-    if (generateOnlyCaptures) {
-        std::copy_if(_pseudoLegalMoves.begin(), _pseudoLegalMoves.end(), std::back_inserter(pseudoLegalMoves),
-                     [](Move *move) {
-                         auto *normalMove = dynamic_cast<NormalMove *>(move);
-                         if (normalMove == nullptr || normalMove->capturedPiece == Piece::None) {
-                             delete move;
-                             return false;
-                         }
-
-                         return true;
-                     });
-    } else pseudoLegalMoves = _pseudoLegalMoves;
+    auto pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
 
     generateCheckSolvingMovePositions();
     generatePins();
@@ -113,7 +99,9 @@ void Board::unmakeMove(Move *move) {
 }
 
 Board *Board::copy() {
-    return new Board(colourToMove, moveHistory, castlingPieceMoved, squares, legalMoves);
+    auto board = new Board(colourToMove, moveHistory, castlingPieceMoved, squares);
+    board->generateMoves();
+    return board;
 }
 
 Board::Board() {
@@ -240,12 +228,27 @@ std::vector<Move *> Board::generatePseudoLegalMoves(int colour) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false, false);
         else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moves);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false, false);
     }
 
     generateCastlingMoves(moves);
+
+    return moves;
+}
+
+std::vector<Move *> Board::generatePseudoLegalCaptures(int color) {
+    auto moves = std::vector<Move *>();
+
+    for (int startSquare = 0; startSquare < 64; startSquare++) {
+        int piece = squares[startSquare];
+        if (Piece::getColour(piece) != color) continue;
+
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false, true);
+        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, moves);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false, true);
+    }
 
     return moves;
 }
@@ -260,12 +263,12 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
 
         std::vector<Move *> moves;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, true);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, true, false);
         else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, moves, false, true);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, true);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, true, false);
 
         for (auto move: moves) {
-            if (move->targetSquare == kingPosition)
+            if (move->targetSquare == kingSquare)
                 attacksKing[startSquare] = true;
 
             squaresAttackedByOpponent.insert(move->targetSquare);
@@ -293,6 +296,9 @@ void Board::loadFenString(std::string fenString) {
             file++;
         }
     }
+
+    kingSquare = _getKingSquare();
+    opponentKingSquare = _getOpponentKingSquare();
 }
 
 void Board::updateCastlingPieceMovement(Move *move) {
@@ -312,6 +318,8 @@ void Board::_MakeMove(Move *move) {
     move->apply(*this);
     changeColourToMove();
     moveHistory.push(move);
+    kingSquare = _getKingSquare();
+    opponentKingSquare = _getOpponentKingSquare();
 }
 
 void Board::addMoveIfLegal(Move *potentialMove) {
