@@ -37,14 +37,22 @@ public:
             {'n', Piece::Knight},
     };
 
-    void generateMoves(bool generateOnlyCaptures = false);
+    void generateMoves();
+    void generateCaptures();
     void checkIfLegalMovesExist();
     void makeMove(Move *move);
     void makeMoveWithoutGeneratingMoves(Move *move);
     void unmakeMove(Move *move);
     Board *copy();
 
+    int getKingSquare() const;
+    int getOpponentKingSquare() const;
+    int _getKingSquare(int colour) const;
+    int _getKingSquare() const;
+    int _getOpponentKingSquare() const;
+
     bool isInEndgame() const;
+    uint64_t getZobristHash() const { return zobristHash; };
 
     bool canWhiteCastleLeft() {
         return !castlingPieceMoved[Piece::King | Piece::White]
@@ -83,14 +91,15 @@ private:
     std::unordered_map<int, int> pins;
 
     int kingAttackerPosition;
-    int kingPosition;
+    int kingSquare;
+    int opponentKingSquare;
     bool _isInEndgame = false;
+    uint64_t zobristHash = 0;
 
     Board();
 
     Board(int colourToMove, std::stack<Move *> moveHistory,
-          std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares,
-          std::vector<Move *> legalMoves);
+          std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares);
 
     void computeMoveData();
     void loadFenString(std::string fenString);
@@ -98,6 +107,7 @@ private:
     void generatePins(int pieceType, int startSquare);
     void generateSquaresAttackedByOpponent(int color);
     std::vector<Move *> generatePseudoLegalMoves(int color);
+    std::vector<Move *> generatePseudoLegalCaptures(int color);
     void generateCheckSolvingMovePositions();
     void generateCheckSolvingMovePosition(int pieceType, int startSquare);
     void generateCastlingMoves(std::vector<Move *> &moves);
@@ -109,7 +119,7 @@ private:
     bool AllSquaresAreClearBetween(int firstSquare, int secondSquare);
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
-    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly);
+    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly);
     void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves);
     void generateForwardPawnMoves(
         int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
@@ -117,7 +127,8 @@ private:
     bool IsSquareInFrontClear(int startSquare, int piece);
     void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly);
-    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly);
+    void generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves);
+    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly);
     void generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves);
 
     void updateCastlingPieceMovement(Move *move);
@@ -131,7 +142,6 @@ private:
     void addMoveIfLegal(Move *move);
     bool LegalMovesExist(int colour);
 
-    int getKingPosition();
     bool IsKingUnderAttack();
     bool IsKingUnderAttack(Move *potentialMove);
 

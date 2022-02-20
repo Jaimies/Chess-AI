@@ -15,3 +15,9 @@ TEST(MoveTest, FromString) {
     EXPECT_EQ(move3->startSquare, 51);
     EXPECT_EQ(move3->targetSquare, 36);
 }
+
+TEST(MoveTest, ToString) {
+    EXPECT_EQ(NormalMove::fromString("a1b1")->toString(), "a1b1");
+    EXPECT_EQ(NormalMove::fromString("d2d4")->toString(), "d2d4");
+    EXPECT_EQ(NormalMove::fromString("d7e5")->toString(), "d7e5");
+}

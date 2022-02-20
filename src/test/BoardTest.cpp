@@ -129,23 +129,25 @@ TEST(BoardTest, IsInEndgame) {
     ASSERT_FALSE(Board::fromFenString("q7/1kr5/8/8/8/8/8/4K3 w - - 0 1")->isInEndgame());
 }
 
-TEST(BoardTest, copy_copiesLegalMoves) {
-    Board *board = Board::fromFenString(Board::startPosition);
-    Board *boardCopy = board->copy();
-    EXPECT_EQ(board->legalMoves, boardCopy->legalMoves);
-}
-
 TEST(BoardTest, generateCaptureMoves) {
     auto board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
-    board->generateMoves(true);
+    board->generateCaptures();
     EXPECT_EQ(board->legalMoves.size(), 1);
     EXPECT_EQ(board->legalMoves[0]->startSquare, 25);
     EXPECT_EQ(board->legalMoves[0]->targetSquare, 29);
 
     board->makeMoveWithoutGeneratingMoves(NormalMove::fromString("b4c4"));
 
-    board->generateMoves(true);
+    board->generateCaptures();
     EXPECT_EQ(board->legalMoves.size(), 1);
     EXPECT_EQ(board->legalMoves[0]->startSquare, 39);
     EXPECT_EQ(board->legalMoves[0]->targetSquare, 33);
+}
+
+TEST(BoardTest, DoesntAllowKingsToGetClose) {
+    auto board = Board::fromFenString("8/8/8/8/8/1k2r3/8/2K5 w - - 0 1", Piece::Black);
+
+    for (auto move: board->legalMoves) {
+        std::cout << move->toString() << std::endl;
+    }
 }

@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "Move.h"
+#include "zobrist_hash_generator.h"
 
 Move::Move(int startSquare, int targetSquare)
         : startSquare(startSquare), targetSquare(targetSquare) {};
@@ -29,6 +30,11 @@ static std::string toString(int position) {
 
 std::string Move::toString() const {
     return ::toString(startSquare) + ::toString(targetSquare);
+}
+
+uint64_t Move::getZorbristHash(std::array<int, 64> squares) {
+    auto piece = squares[startSquare];
+    return hashPiece(startSquare, piece) ^ hashPiece(targetSquare, piece);
 }
 
 int getSquareFromPosition(char file, char rank) {
@@ -91,6 +97,10 @@ void PromotionMove::undo(Board &board) {
     board.squares[startSquare] = Piece::Pawn | Piece::getOpponentColour(board.colourToMove);
 }
 
+uint64_t PromotionMove::getZorbristHash(std::array<int, 64> squares) {
+    return hashPiece(startSquare, squares[startSquare]) ^ hashPiece(targetSquare, pieceToPromoteTo);
+}
+
 void EnPassantMove::apply(Board &board) {
     int pawn = board.squares[startSquare];
 
@@ -103,4 +113,9 @@ void EnPassantMove::undo(Board &board) {
     board.squares[capturedPawnPosition] = capturedPiece;
     board.squares[targetSquare] = Piece::None;
     board.squares[startSquare] = Piece::Pawn | Piece::getOpponentColourFromPiece(capturedPiece);
+}
+
+uint64_t EnPassantMove::getZorbristHash(std::array<int, 64> squares) {
+    return Move::getZorbristHash(squares)
+           ^ hashPiece(capturedPawnPosition, squares[capturedPawnPosition]);
 }

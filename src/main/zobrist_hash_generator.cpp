@@ -48,3 +48,6 @@ uint64_t hash(Board *board) {
     return hash;
 }
 
+uint64_t hashPiece(int square, int piece) {
+    return hashTable[square][piece];
+}

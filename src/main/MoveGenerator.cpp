@@ -183,7 +183,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
 
     alpha = std::max(alpha, evaluation);
 
-    board->generateMoves(true);
+    board->generateCaptures();
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
@@ -229,7 +229,7 @@ int64_t deepEvaluate(
         auto move = moves[index];
         board->makeMoveWithoutGeneratingMoves(move);
 
-        auto boardHash = hash(board) ^ depthHashes[depth - 1];
+        auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
         auto cachedEvaluation = transpositions.find(boardHash);
 
         auto evaluation = cachedEvaluation == transpositions.end()
@@ -255,7 +255,6 @@ int64_t deepEvaluate(
 }
 
 Move *_getBestMove(Board *board, int depth) {
-    MoveGenerator::positionsAnalyzed = 0;
     generateHashes();
     depthHashes.clear();
     transpositions.clear();
@@ -306,6 +305,7 @@ Move *_getBestMove(Board *board, int depth) {
 Move *MoveGenerator::getBestMove(Board *board) {
     using namespace std::chrono;
 
+    positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
     uint64_t depth = 1;

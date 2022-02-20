@@ -6,6 +6,13 @@
 #include "Piece.h"
 #include "Move.h"
 #include "Board.h"
+#include "zobrist_hash_generator.h"
+
+static bool shouldAddMove(int piece, int pieceInTargetSquare, bool canCaptureFriendly, bool capturesOnly) {
+    if (canCaptureFriendly) return true;
+    if (Piece::getColour(pieceInTargetSquare) == Piece::getColour(piece)) return false;
+    return !capturesOnly || pieceInTargetSquare != Piece::None;
+}
 
 static bool IsValidSquarePosition(int squarePosition) {
     return squarePosition >= 0 && squarePosition <= 63;
@@ -52,11 +59,10 @@ Board *Board::fromFenString(std::string fenString, int colourToMove) {
     return board;
 }
 
-void Board::generateMoves(bool generateOnlyCaptures) {
+void Board::generateMoves() {
     legalMoves.clear();
 
     int colourToMove = this->colourToMove;
-    kingPosition = getKingPosition();
     generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
     isKingUnderAttack = IsKingUnderAttack();
 
@@ -74,7 +80,6 @@ void Board::generateMoves(bool generateOnlyCaptures) {
 void Board::checkIfLegalMovesExist() {
     auto opponentColour = Piece::getOpponentColour(colourToMove);
 
-    kingPosition = getKingPosition();
     generateSquaresAttackedByOpponent(opponentColour);
     generatePins();
     isKingUnderAttack = IsKingUnderAttack();
@@ -96,6 +101,7 @@ void Board::unmakeMove(Move *move) {
 
     changeColourToMove();
     moveHistory.pop();
+    zobristHash ^= move->getZorbristHash(squares);
 }
 
 Board *Board::copy() {
@@ -109,14 +115,16 @@ Board::Board() {
 }
 
 Board::Board(int colourToMove, std::stack<Move *> moveHistory, std::unordered_map<int, bool> castlingPieceMoved,
-             std::array<int, 64> squares, std::vector<Move *> legalMoves) {
+             std::array<int, 64> squares) {
     this->colourToMove = colourToMove;
     this->moveHistory = moveHistory;
     this->castlingPieceMoved = castlingPieceMoved;
     this->squares = squares;
-    this->legalMoves = legalMoves;
     computeMoveData();
     updateEndgameState();
+    kingSquare = _getKingSquare();
+    opponentKingSquare = _getOpponentKingSquare();
+    zobristHash = hash(this);
 }
 
 void Board::computeMoveData() {
@@ -299,6 +307,7 @@ void Board::loadFenString(std::string fenString) {
 
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
+    zobristHash = hash(this);
 }
 
 void Board::updateCastlingPieceMovement(Move *move) {
@@ -314,6 +323,7 @@ void Board::updateCastlingPieceMovement(Move *move) {
 }
 
 void Board::_MakeMove(Move *move) {
+    zobristHash ^= move->getZorbristHash(squares);
     updateCastlingPieceMovement(move);
     move->apply(*this);
     changeColourToMove();
@@ -347,9 +357,9 @@ bool Board::LegalMovesExist(int colour) {
 
         std::vector<Move *> moves;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, false, false);
         else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moves);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, false, false);
 
         auto hasLegalMoves = std::find_if(moves.begin(), moves.end(), [this](Move *move) {
             return isMoveLegal(move);
@@ -363,20 +373,12 @@ bool Board::LegalMovesExist(int colour) {
     return false;
 }
 
-int Board::getKingPosition() {
-    for (int square = 0; square < 64; square++) {
-        if (squares[square] == (Piece::King | colourToMove)) return square;
-    }
-
-    return -1;
-}
-
 bool Board::IsKingUnderAttack() {
-    return squaresAttackedByOpponent.contains(kingPosition);
+    return squaresAttackedByOpponent.contains(kingSquare);
 }
 
 bool Board::IsKingUnderAttack(Move *potentialMove) {
-    if (potentialMove->startSquare != kingPosition) return isKingUnderAttack;
+    if (potentialMove->startSquare != kingSquare) return isKingUnderAttack;
     return squaresAttackedByOpponent.contains(potentialMove->targetSquare);
 }
 
@@ -417,12 +419,12 @@ bool Board::violatesPin(Move *move) {
 }
 
 bool Board::coversCheck(Move *potentialMove) const {
-    return potentialMove->startSquare != kingPosition &&
+    return potentialMove->startSquare != kingSquare &&
            checkSolvingMovePositions.contains(potentialMove->targetSquare);
 }
 
 bool Board::isValidEnPassantMove(EnPassantMove *move) const {
-    auto kingFile = kingPosition / 8;
+    auto kingFile = kingSquare / 8;
     auto pawnFile = move->startSquare / 8;
     if (kingFile != pawnFile) return true;
 
@@ -430,7 +432,7 @@ bool Board::isValidEnPassantMove(EnPassantMove *move) const {
 
     auto rightPawnPosition = std::max(move->startSquare, move->capturedPawnPosition);
     auto leftPawnPosition = std::min(move->startSquare, move->capturedPawnPosition);
-    auto isKingOnTheLeft = kingPosition < leftPawnPosition;
+    auto isKingOnTheLeft = kingSquare < leftPawnPosition;
     auto rookDirectionIndex = isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
     auto kingDirectionIndex = !isKingOnTheLeft ? rightDirectionIndex : leftDirectionIndex;
 
@@ -444,7 +446,7 @@ bool Board::isValidEnPassantMove(EnPassantMove *move) const {
         auto position = edgePawnPosition - offset * rookDirection;
         auto piece = squares[position];
 
-        if (position == kingPosition) break;
+        if (position == kingSquare) break;
         if (piece != Piece::None) return true;
     }
 
@@ -563,7 +565,7 @@ static int getTargetCastlingPositionForKing(int kingPosition, int rookPosition) 
     return kingPosition + sign * 2;
 }
 
-void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly) {
+void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly) {
     int pieceType = Piece::getType(piece);
     int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
     int endDirIndex = pieceType == Piece::Rook ? 4 : 8;
@@ -587,7 +589,8 @@ void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *>
 
             auto targetPieceType = Piece::getType(targetPiece);
 
-            moves.push_back(new NormalMove(startSquare, targetSquare, targetPiece));
+            if (!capturesOnly || targetPiece != Piece::None)
+                moves.push_back(new NormalMove(startSquare, targetSquare, targetPiece));
 
             if (targetPiece != Piece::None
                 && (!canCaptureFriendly || targetPieceType != Piece::King))
@@ -675,7 +678,13 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, std::vector<Mov
     }
 }
 
-void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly) {
+void Board::generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves) {
+    bool isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
+    generateCapturePawnMoves(startSquare, piece, moves, isAboutToPromote, false);
+    generateEnPassantMoves(startSquare, piece, moves);
+}
+
+void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly) {
     int file = startSquare % 8;
 
     for (auto offset: knightMoveOffsets) {
@@ -690,7 +699,7 @@ void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> 
 
         int pieceInTargetSquare = squares[targetSquarePosition];
 
-        if (canCaptureFriendly || Piece::getColour(pieceInTargetSquare) != Piece::getColour(piece))
+        if (shouldAddMove(piece, pieceInTargetSquare, canCaptureFriendly, capturesOnly))
             moves.push_back(new NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
     }
 }
@@ -757,4 +766,46 @@ unsigned long Board::getMinorPieceCount(int colour) const {
     return std::count_if(squares.begin(), squares.end(), [colour](int piece) {
         return piece == (Piece::Knight | colour) || piece == (Piece::Bishop | colour);
     });
+}
+
+int Board::_getKingSquare(int colour) const {
+    for (int square = 0; square < 64; square++) {
+        if (squares[square] == (Piece::King | colour)) return square;
+    }
+
+    return -1;
+}
+
+int Board::_getKingSquare() const {
+    return _getKingSquare(colourToMove);
+}
+
+int Board::_getOpponentKingSquare() const {
+    return _getKingSquare(Piece::getOpponentColour(colourToMove));
+}
+
+int Board::getKingSquare() const {
+    return kingSquare;
+}
+
+int Board::getOpponentKingSquare() const {
+    return opponentKingSquare;
+}
+
+void Board::generateCaptures() {
+    legalMoves.clear();
+
+    int colourToMove = this->colourToMove;
+    generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
+    isKingUnderAttack = IsKingUnderAttack();
+
+    auto pseudoLegalMoves = generatePseudoLegalCaptures(colourToMove);
+
+    generateCheckSolvingMovePositions();
+    generatePins();
+
+    for (Move *potentialMove: pseudoLegalMoves)
+        addMoveIfLegal(potentialMove);
+
+    hasLegalMoves = !legalMoves.empty();
 }
