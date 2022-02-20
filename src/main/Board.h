@@ -134,7 +134,6 @@ private:
     void updateCastlingPieceMovement(Move *move);
     void undoCastlingPieceMovementUpdate();
 
-    void _MakeMove(Move *move);
     bool isMoveLegal(Move *potentialMove);
     bool violatesPin(Move *move);
     bool coversCheck(Move *potentialMove) const;

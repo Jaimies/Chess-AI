@@ -87,7 +87,7 @@ void Board::checkIfLegalMovesExist() {
 }
 
 void Board::makeMove(Move *move) {
-    _MakeMove(move);
+    makeMoveWithoutGeneratingMoves(move);
     generateMoves();
     updateGameState();
     updateEndgameState();
@@ -322,16 +322,6 @@ void Board::updateCastlingPieceMovement(Move *move) {
     castlingPieceMovementHistory.push(shouldUpdate ? castlingPiece : 0);
 }
 
-void Board::_MakeMove(Move *move) {
-    zobristHash ^= move->getZorbristHash(squares);
-    updateCastlingPieceMovement(move);
-    move->apply(*this);
-    changeColourToMove();
-    moveHistory.push(move);
-    kingSquare = _getKingSquare();
-    opponentKingSquare = _getOpponentKingSquare();
-}
-
 void Board::addMoveIfLegal(Move *potentialMove) {
     if (isMoveLegal(potentialMove))
         legalMoves.push_back(potentialMove);
@@ -400,7 +390,13 @@ void Board::updateGameState() {
 }
 
 void Board::makeMoveWithoutGeneratingMoves(Move *move) {
-    _MakeMove(move);
+    zobristHash ^= move->getZorbristHash(squares);
+    updateCastlingPieceMovement(move);
+    move->apply(*this);
+    changeColourToMove();
+    moveHistory.push(move);
+    kingSquare = _getKingSquare();
+    opponentKingSquare = _getOpponentKingSquare();
 }
 
 bool Board::violatesPin(Move *move) {
