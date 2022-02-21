@@ -1,5 +1,4 @@
 #include <limits>
-#include <algorithm>
 #include <thread>
 #include <mutex>
 #include "Piece.h"
@@ -101,15 +100,8 @@ std::vector<uint64_t> depthHashes;
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = MoveGenerator::getSquareValueTable(board, piece);
-    std::array<Evaluation, 64> valueTable;
-
-    if (Piece::getColour(piece) == Piece::White) {
-        std::reverse_copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
-    } else {
-        std::copy(squareValueTable->begin(), squareValueTable->end(), valueTable.begin());
-    }
-
-    return valueTable[position] * 10;
+    auto positionToAccess = Piece::getColour(piece) == Piece::White ? 63 - position : position;
+    return (*squareValueTable)[positionToAccess] * 10;
 }
 
 std::array<Evaluation, 64> *&MoveGenerator::getSquareValueTable(Board *board, int piece) {
