@@ -126,7 +126,7 @@ private:
     void generateForwardPawnMoves(
         int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
     );
-    bool IsSquareInFrontClear(int startSquare, int piece);
+    bool isSquareInFrontClear(int startSquare, int piece);
     void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly);
     void generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves);

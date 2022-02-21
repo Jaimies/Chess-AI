@@ -9,7 +9,7 @@
 #include "zobrist_hash_generator.h"
 #include "move_generation_strategy.h"
 
-static bool IsValidSquarePosition(int squarePosition) {
+static bool isValidSquarePosition(int squarePosition) {
     return squarePosition >= 0 && squarePosition <= 63;
 }
 
@@ -596,7 +596,7 @@ void Board::generatePawnMoves(int startSquare, int piece, std::vector<Move *> &m
     generateEnPassantMoves(startSquare, piece, moves);
 }
 
-static int GetPawnRank(int pawnPiece) {
+static int getPawnRank(int pawnPiece) {
     int colour = Piece::getColour(pawnPiece);
 
     if (colour == Piece::None) throw std::invalid_argument("Expected a pawn with a colour, got one with Piece::None");
@@ -606,13 +606,13 @@ static int GetPawnRank(int pawnPiece) {
 
 static bool isPawnAtStartSquare(int square, int piece) {
     int rank = square / 8;
-    return rank == GetPawnRank(piece);
+    return rank == getPawnRank(piece);
 }
 
 void Board::generateForwardPawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote) {
     int possibleOffsets[]{8, 16};
 
-    if (!IsSquareInFrontClear(startSquare, piece)) return;
+    if (!isSquareInFrontClear(startSquare, piece)) return;
 
     for (int pawnOffset: possibleOffsets) {
         int offset = Piece::getColour(piece) == Piece::White ? pawnOffset : -pawnOffset;
@@ -625,7 +625,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, std::vector<Mov
 
         int targetSquarePosition = startSquare + offset;
 
-        if (!IsValidSquarePosition(targetSquarePosition)) continue;
+        if (!isValidSquarePosition(targetSquarePosition)) continue;
 
         int targetPiece = squares[targetSquarePosition];
 
@@ -634,7 +634,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, std::vector<Mov
     }
 }
 
-bool Board::IsSquareInFrontClear(int startSquare, int piece) {
+bool Board::isSquareInFrontClear(int startSquare, int piece) {
     int positionOfPieceInFront = startSquare + (Piece::getColour(piece) == Piece::White ? 8 : -8);
     return squares[positionOfPieceInFront] == Piece::None;
 }
@@ -651,7 +651,7 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, std::vector<Mov
             continue;
         int targetSquarePosition = startSquare + offset;
 
-        if (!IsValidSquarePosition(targetSquarePosition)) continue;
+        if (!isValidSquarePosition(targetSquarePosition)) continue;
         int targetPiece = squares[targetSquarePosition];
 
         if (Piece::getColour(targetPiece) == Piece::getOpponentColourFromPiece(piece) || canCaptureFriendly)
@@ -676,7 +676,7 @@ void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> 
             continue;
 
         int targetSquarePosition = startSquare + offset;
-        if (!IsValidSquarePosition(targetSquarePosition)) continue;
+        if (!isValidSquarePosition(targetSquarePosition)) continue;
 
         int pieceInTargetSquare = squares[targetSquarePosition];
 
@@ -702,7 +702,7 @@ void Board::generateEnPassantMoves(int square, int piece, std::vector<Move *> &m
 
         int neighbourPosition = square + offset;
 
-        if (!IsValidSquarePosition(neighbourPosition)) return;
+        if (!isValidSquarePosition(neighbourPosition)) return;
 
         int neighbourPiece = squares[neighbourPosition];
         int enemyPawn = Piece::Pawn | Piece::getOpponentColourFromPiece(piece);
@@ -712,7 +712,7 @@ void Board::generateEnPassantMoves(int square, int piece, std::vector<Move *> &m
         auto lastMove = moveHistory.top();
 
         if (neighbourPiece != enemyPawn
-            || getRank(lastMove->startSquare) != GetPawnRank(neighbourPiece)
+            || getRank(lastMove->startSquare) != getPawnRank(neighbourPiece)
             || lastMove->targetSquare != neighbourPosition)
             continue;
 
