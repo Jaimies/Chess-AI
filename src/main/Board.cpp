@@ -551,11 +551,6 @@ bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
     return true;
 }
 
-static int getTargetCastlingPositionForKing(int kingPosition, int rookPosition) {
-    int sign = rookPosition - kingPosition > 0 ? 1 : -1;
-    return kingPosition + sign * 2;
-}
-
 void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy) {
     int pieceType = Piece::getType(piece);
     int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
