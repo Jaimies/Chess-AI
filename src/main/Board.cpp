@@ -257,7 +257,8 @@ std::vector<Move *> Board::generatePseudoLegalCaptures(int color) {
 }
 
 void Board::generateSquaresAttackedByOpponent(int colour) {
-    squaresAttackedByOpponent.clear();
+    for (int square = 0; square < 64; square++)
+        squaresAttackedByOpponent[square] = false;
 
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
@@ -274,7 +275,7 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
             if (move->targetSquare == kingSquare)
                 attacksKing[startSquare] = true;
 
-            squaresAttackedByOpponent.insert(move->targetSquare);
+            squaresAttackedByOpponent[move->targetSquare] = true;
             delete move;
         }
     }
@@ -359,12 +360,12 @@ bool Board::legalMovesExist(int colour) {
 }
 
 bool Board::IsKingUnderAttack() {
-    return squaresAttackedByOpponent.contains(kingSquare);
+    return squaresAttackedByOpponent[kingSquare];
 }
 
 bool Board::IsKingUnderAttack(Move *potentialMove) {
     if (potentialMove->startSquare != kingSquare) return isKingUnderAttack;
-    return squaresAttackedByOpponent.contains(potentialMove->targetSquare);
+    return squaresAttackedByOpponent[potentialMove->targetSquare];
 }
 
 void Board::changeColourToMove() {
@@ -537,7 +538,7 @@ bool Board::allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPos
 }
 
 bool Board::isSquareUnderAttack(int square) const {
-    return squaresAttackedByOpponent.contains(square);
+    return squaresAttackedByOpponent[square];
 }
 
 bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {

@@ -88,7 +88,7 @@ private:
     std::stack<int> castlingPieceMovementHistory;
 
     std::array<bool, 64> attacksKing;
-    std::unordered_set<int> squaresAttackedByOpponent;
+    std::array<bool, 64> squaresAttackedByOpponent;
     std::unordered_set<int> checkSolvingMovePositions;
     std::unordered_map<int, int> pins;
 
