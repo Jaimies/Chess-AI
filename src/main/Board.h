@@ -5,9 +5,11 @@
 #include <vector>
 #include <stack>
 #include <unordered_map>
+#include <functional>
 #include <unordered_set>
 #include "Piece.h"
 #include "Move.h"
+#include "move_generation_strategy.h"
 
 class Board {
 public:
@@ -119,7 +121,7 @@ private:
     bool allSquaresAreClearBetween(int firstSquare, int secondSquare);
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
-    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly);
+    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy);
     void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves);
     void generateForwardPawnMoves(
         int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
@@ -128,7 +130,7 @@ private:
     void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly);
     void generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves);
-    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, bool canCaptureFriendly, bool capturesOnly);
+    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy);
     void generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves);
 
     void updateCastlingPieceMovement(Move *move);
@@ -156,6 +158,4 @@ private:
 
     unsigned long getMinorPieceCount(int colour) const;
     void updateEndgameState();
-
-    static bool shouldStopGeneratingSlidingMoves(bool canCaptureFriendly, int colour, int targetPiece, int targetPieceColour) ;
 };

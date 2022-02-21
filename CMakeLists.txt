@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
         src/main/piece_ui.cpp src/main/piece_ui.h
         src/main/zobrist_hash_generator.cpp src/main/zobrist_hash_generator.h
         src/main/MoveGenerator.cpp src/main/MoveGenerator.h
+        src/main/move_generation_strategy.h src/main/move_generation_strategy.cpp
 
         resources.qrc
         ${TS_FILES}
