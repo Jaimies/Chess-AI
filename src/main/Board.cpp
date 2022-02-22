@@ -35,14 +35,14 @@ static int getCastlingPiece(int piece, int square) {
 }
 
 static void generatePawnMove(int startSquare, int targetSquare, bool isPawnAboutToPromote, int pieceToCapture,
-                             std::vector<Move *> &moves) {
+                             MoveProcessor *processor) {
     if (!isPawnAboutToPromote) {
-        moves.push_back(new NormalMove(startSquare, targetSquare, pieceToCapture));
+        processor->processMove(new NormalMove(startSquare, targetSquare, pieceToCapture));
         return;
     }
 
     for (auto piece: Piece::piecesToPromoteTo)
-        moves.push_back(new PromotionMove(startSquare, targetSquare, piece, pieceToCapture));
+        processor->processMove(new PromotionMove(startSquare, targetSquare, piece, pieceToCapture));
 }
 
 Board *Board::fromFenString(std::string fenString, int colourToMove) {
@@ -225,34 +225,38 @@ void Board::generateCheckSolvingMovePositions() {
 }
 
 std::vector<Move *> Board::generatePseudoLegalMoves(int colour) {
-    auto moves = std::vector<Move *>();
+    auto processor = new MoveGenerationProcessor();
 
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, NormalMoveGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moves);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, NormalMoveGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, processor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
     }
 
-    generateCastlingMoves(moves);
+    generateCastlingMoves(processor);
 
+    auto moves = processor->moves;
+    delete processor;
     return moves;
 }
 
 std::vector<Move *> Board::generatePseudoLegalCaptures(int color) {
-    auto moves = std::vector<Move *>();
+    auto processor = new MoveGenerationProcessor();
 
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != color) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, CaptureGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, moves);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, CaptureGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, CaptureGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, processor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, CaptureGenerationStrategy);
     }
 
+    auto moves = processor->moves;
+    delete processor;
     return moves;
 }
 
@@ -260,26 +264,20 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
     for (int square = 0; square < 64; square++)
         squaresAttackedByOpponent[square] = false;
 
+    auto processor = new AttackedSquaresGenerationProcessor(this);
+
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         attacksKing[startSquare] = false;
         if (Piece::getColour(piece) != colour) continue;
 
-        std::vector<Move *> moves;
-        moves.reserve(30);
-
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, AttackedSquaresGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, moves, false, true);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, AttackedSquaresGenerationStrategy);
-
-        for (auto move: moves) {
-            if (move->targetSquare == kingSquare)
-                attacksKing[startSquare] = true;
-
-            squaresAttackedByOpponent[move->targetSquare] = true;
-            delete move;
-        }
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, AttackedSquaresGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, processor, false, true);
+        else if (Piece::getType(piece) == Piece::Knight)
+            generateKnightMoves(startSquare, piece, processor, AttackedSquaresGenerationStrategy);
     }
+
+    delete processor;
 }
 
 void Board::loadFenString(std::string fenString) {
@@ -342,19 +340,13 @@ bool Board::legalMovesExist(int colour) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        std::vector<Move *> moves;
+        auto processor = new LegalMoveSearchProcessor(this);
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, NormalMoveGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moves);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moves, NormalMoveGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, processor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
 
-        auto hasLegalMoves = std::find_if(moves.begin(), moves.end(), [this](Move *move) {
-            return isMoveLegal(move);
-        }) != moves.end();
-
-        for (auto move: moves) delete move;
-
-        if (hasLegalMoves) return true;
+        if (processor->hasLegalMoves) return true;
     }
 
     return false;
@@ -489,31 +481,31 @@ void Board::generateCheckSolvingMovePosition(int pieceType, int startSquare) {
     }
 }
 
-void Board::generateCastlingMoves(std::vector<Move *> &moves) {
+void Board::generateCastlingMoves(MoveProcessor *processor) {
     if (colourToMove == Piece::White)
-        addCastlingMovesIfAvailable(4, Piece::White, moves);
+        addCastlingMovesIfAvailable(4, Piece::White, processor);
     else
-        addCastlingMovesIfAvailable(60, Piece::Black, moves);
+        addCastlingMovesIfAvailable(60, Piece::Black, processor);
 }
 
-void Board::addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move *> &moves) {
+void Board::addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor) {
     int king = squares[kingSquare];
 
     if (king != (Piece::King | colour)) return;
 
     if (!castlingPieceMoved[king] && !isKingUnderAttack) {
-        addCastlingMoveIfPossible(kingSquare, kingSquare - 4, moves);
-        addCastlingMoveIfPossible(kingSquare, kingSquare + 3, moves);
+        addCastlingMoveIfPossible(kingSquare, kingSquare - 4, processor);
+        addCastlingMoveIfPossible(kingSquare, kingSquare + 3, processor);
     }
 }
 
-void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves) {
+void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor) {
     int directionMultiplier = rookSquare > kingSquare ? 1 : -1;
     int kingTargetSquare = kingSquare + 2 * directionMultiplier;
     int rookTargetSquare = kingSquare + 1 * directionMultiplier;
 
     if (isCastlingPossible(kingSquare, rookSquare, kingTargetSquare))
-        moves.push_back(new CastlingMove(kingSquare, kingTargetSquare, rookSquare, rookTargetSquare));
+        processor->processMove(new CastlingMove(kingSquare, kingTargetSquare, rookSquare, rookTargetSquare));
 }
 
 bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
@@ -553,7 +545,7 @@ bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
     return true;
 }
 
-void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy) {
+void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy) {
     int pieceType = Piece::getType(piece);
     int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
     int endDirIndex = pieceType == Piece::Rook ? 4 : 8;
@@ -569,7 +561,7 @@ void Board::generateSlidingMoves(int startSquare, int piece, std::vector<Move *>
             auto targetPieceColour = Piece::getColour(targetPiece);
 
             if (strategy->shouldAddMove(targetPiece, colour))
-                moves.push_back(new NormalMove(startSquare, targetSquare, targetPiece));
+                processor->processMove(new NormalMove(startSquare, targetSquare, targetPiece));
 
             if (strategy->shouldStopGeneratingSlidingMoves(targetPiece, colour))
                 break;
@@ -585,12 +577,12 @@ static bool isPawnAboutToPromote(int position, int piece) {
            || rank == 1 && colour == Piece::Black;
 }
 
-void Board::generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves) {
+void Board::generatePawnMoves(int startSquare, int piece, MoveProcessor *processor) {
     auto isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
 
-    generateForwardPawnMoves(startSquare, piece, moves, isAboutToPromote);
-    generateCapturePawnMoves(startSquare, piece, moves, isAboutToPromote, false);
-    generateEnPassantMoves(startSquare, piece, moves);
+    generateForwardPawnMoves(startSquare, piece, processor, isAboutToPromote);
+    generateCapturePawnMoves(startSquare, piece, processor, isAboutToPromote, false);
+    generateEnPassantMoves(startSquare, piece, processor);
 }
 
 static int getPawnRank(int pawnPiece) {
@@ -606,7 +598,7 @@ static bool isPawnAtStartSquare(int square, int piece) {
     return rank == getPawnRank(piece);
 }
 
-void Board::generateForwardPawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote) {
+void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote) {
     int possibleOffsets[]{8, 16};
 
     if (!isSquareInFrontClear(startSquare, piece)) return;
@@ -627,7 +619,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, std::vector<Mov
         int targetPiece = squares[targetSquarePosition];
 
         if (targetPiece != Piece::None) continue;
-        generatePawnMove(startSquare, targetSquarePosition, isPawnAboutToPromote, Piece::None, moves);
+        generatePawnMove(startSquare, targetSquarePosition, isPawnAboutToPromote, Piece::None, processor);
     }
 }
 
@@ -636,7 +628,7 @@ bool Board::isSquareInFrontClear(int startSquare, int piece) {
     return squares[positionOfPieceInFront] == Piece::None;
 }
 
-void Board::generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
+void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote,
                                      bool canCaptureFriendly) {
     int file = startSquare % 8;
 
@@ -652,17 +644,17 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, std::vector<Mov
         int targetPiece = squares[targetSquarePosition];
 
         if (Piece::getColour(targetPiece) == Piece::getOpponentColourFromPiece(piece) || canCaptureFriendly)
-            generatePawnMove(startSquare, targetSquarePosition, isPawnAboutToPromote, targetPiece, moves);
+            generatePawnMove(startSquare, targetSquarePosition, isPawnAboutToPromote, targetPiece, processor);
     }
 }
 
-void Board::generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves) {
+void Board::generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor) {
     bool isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
-    generateCapturePawnMoves(startSquare, piece, moves, isAboutToPromote, false);
-    generateEnPassantMoves(startSquare, piece, moves);
+    generateCapturePawnMoves(startSquare, piece, processor, isAboutToPromote, false);
+    generateEnPassantMoves(startSquare, piece, processor);
 }
 
-void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy) {
+void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy) {
     int file = startSquare % 8;
 
     for (auto offset: knightMoveOffsets) {
@@ -678,7 +670,7 @@ void Board::generateKnightMoves(int startSquare, int piece, std::vector<Move *> 
         int pieceInTargetSquare = squares[targetSquarePosition];
 
         if (strategy->shouldAddMove(pieceInTargetSquare, Piece::getColour(piece)))
-            moves.push_back(new NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
+            processor->processMove(new NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
     }
 }
 
@@ -686,7 +678,7 @@ static int getRank(int square) {
     return square / 8;
 }
 
-void Board::generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves) {
+void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *processor) {
     auto file = square % 8;
     auto rank = square / 8;
 
@@ -715,7 +707,7 @@ void Board::generateEnPassantMoves(int square, int piece, std::vector<Move *> &m
 
         int targetPositionOffset = Piece::getColour(piece) == Piece::White ? 8 : -8;
 
-        moves.push_back(
+        processor->processMove(
                 new EnPassantMove(square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition)
         );
     }

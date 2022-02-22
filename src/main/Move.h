@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <string>
+#include <array>
+#include "Piece.h"
+
 class Board;
 
 class Move {

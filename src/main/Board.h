@@ -10,6 +10,7 @@
 #include "Piece.h"
 #include "Move.h"
 #include "move_generation_strategy.h"
+#include "move_processor.h"
 
 class Board {
 public:
@@ -112,26 +113,26 @@ private:
     std::vector<Move *> generatePseudoLegalCaptures(int color);
     void generateCheckSolvingMovePositions();
     void generateCheckSolvingMovePosition(int pieceType, int startSquare);
-    void generateCastlingMoves(std::vector<Move *> &moves);
-    void addCastlingMovesIfAvailable(int kingSquare, int colour, std::vector<Move *> &moves);
-    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, std::vector<Move *> &moves);
+    void generateCastlingMoves(MoveProcessor *processor);
+    void addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor);
+    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor);
     bool isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition);
     bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition);
     bool isSquareUnderAttack(int square) const;
     bool allSquaresAreClearBetween(int firstSquare, int secondSquare);
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
-    void generateSlidingMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy);
-    void generatePawnMoves(int startSquare, int piece, std::vector<Move *> &moves);
+    void generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
+    void generatePawnMoves(int startSquare, int piece, MoveProcessor *processor);
     void generateForwardPawnMoves(
-        int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote
+        int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote
     );
     bool isSquareInFrontClear(int startSquare, int piece);
-    void generateCapturePawnMoves(int startSquare, int piece, std::vector<Move *> &moves, bool isPawnAboutToPromote,
+    void generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly);
-    void generateNormalPawnCaptures(int startSquare, int piece, std::vector<Move *> &moves);
-    void generateKnightMoves(int startSquare, int piece, std::vector<Move *> &moves, MoveGenerationStrategy *strategy);
-    void generateEnPassantMoves(int square, int piece, std::vector<Move *> &moves);
+    void generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor);
+    void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
+    void generateEnPassantMoves(int square, int piece, MoveProcessor *processor);
 
     void updateCastlingPieceMovement(Move *move);
     void undoCastlingPieceMovementUpdate();
@@ -158,4 +159,7 @@ private:
 
     unsigned long getMinorPieceCount(int colour) const;
     void updateEndgameState();
+
+    friend class AttackedSquaresGenerationProcessor;
+    friend class LegalMoveSearchProcessor;
 };

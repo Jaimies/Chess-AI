@@ -20,5 +20,6 @@ add_executable(
         ../main/zobrist_hash_generator.cpp ../main/MoveGenerator.cpp BoardTest.cpp
         MoveGeneratorTest.cpp MoveTest.cpp zobrist_hash_generator_test.cpp
         ../main/move_generation_strategy.h ../main/move_generation_strategy.cpp
+        ../main/move_processor.h ../main/move_processor.cpp
 )
 target_link_libraries(all_tests gtest_main Folly::folly)
