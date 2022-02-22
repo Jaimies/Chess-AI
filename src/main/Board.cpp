@@ -266,6 +266,7 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
         if (Piece::getColour(piece) != colour) continue;
 
         std::vector<Move *> moves;
+        moves.reserve(30);
 
         if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moves, AttackedSquaresGenerationStrategy);
         else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, moves, false, true);
