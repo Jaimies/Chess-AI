@@ -109,8 +109,8 @@ private:
     void generatePins();
     void generatePins(int pieceType, int startSquare);
     void generateSquaresAttackedByOpponent(int color);
-    std::vector<Move *> generatePseudoLegalMoves(int color);
-    std::vector<Move *> generatePseudoLegalCaptures(int color);
+    void generateLegalMoves(int color);
+    void generateLegalCaptures(int color);
     void generateCheckSolvingMovePositions();
     void generateCheckSolvingMovePosition(int pieceType, int startSquare);
     void generateCastlingMoves(MoveProcessor *processor);
@@ -160,6 +160,7 @@ private:
     unsigned long getMinorPieceCount(int colour) const;
     void updateEndgameState();
 
+    friend class MoveGenerationProcessor;
     friend class AttackedSquaresGenerationProcessor;
     friend class LegalMoveSearchProcessor;
 };

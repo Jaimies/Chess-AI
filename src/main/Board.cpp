@@ -61,13 +61,10 @@ void Board::generateMoves() {
     generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
     isKingUnderAttack = IsKingUnderAttack();
 
-    auto pseudoLegalMoves = generatePseudoLegalMoves(colourToMove);
-
     generateCheckSolvingMovePositions();
     generatePins();
 
-    for (Move *potentialMove: pseudoLegalMoves)
-        addMoveIfLegal(potentialMove);
+    generateLegalMoves(colourToMove);
 
     hasLegalMoves = !legalMoves.empty();
 }
@@ -224,8 +221,8 @@ void Board::generateCheckSolvingMovePositions() {
     }
 }
 
-std::vector<Move *> Board::generatePseudoLegalMoves(int colour) {
-    auto processor = new MoveGenerationProcessor();
+void Board::generateLegalMoves(int colour) {
+    auto processor = new MoveGenerationProcessor(this);
 
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
@@ -238,13 +235,11 @@ std::vector<Move *> Board::generatePseudoLegalMoves(int colour) {
 
     generateCastlingMoves(processor);
 
-    auto moves = processor->moves;
     delete processor;
-    return moves;
 }
 
-std::vector<Move *> Board::generatePseudoLegalCaptures(int color) {
-    auto processor = new MoveGenerationProcessor();
+void Board::generateLegalCaptures(int color) {
+    auto processor = new MoveGenerationProcessor(this);
 
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
@@ -255,9 +250,7 @@ std::vector<Move *> Board::generatePseudoLegalCaptures(int color) {
         else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, CaptureGenerationStrategy);
     }
 
-    auto moves = processor->moves;
     delete processor;
-    return moves;
 }
 
 void Board::generateSquaresAttackedByOpponent(int colour) {
@@ -769,13 +762,10 @@ void Board::generateCaptures() {
     generateSquaresAttackedByOpponent(Piece::getOpponentColour(colourToMove));
     isKingUnderAttack = IsKingUnderAttack();
 
-    auto pseudoLegalMoves = generatePseudoLegalCaptures(colourToMove);
-
     generateCheckSolvingMovePositions();
     generatePins();
 
-    for (Move *potentialMove: pseudoLegalMoves)
-        addMoveIfLegal(potentialMove);
+    generateLegalCaptures(colourToMove);
 
     hasLegalMoves = !legalMoves.empty();
 }

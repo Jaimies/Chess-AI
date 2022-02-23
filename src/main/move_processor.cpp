@@ -2,7 +2,7 @@
 #include "Board.h"
 
 void MoveGenerationProcessor::processMove(Move *move) {
-    moves.push_back(move);
+    board->addMoveIfLegal(move);
 }
 
 void AttackedSquaresGenerationProcessor::processMove(Move *move) {

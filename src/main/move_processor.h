@@ -10,8 +10,10 @@ public:
 
 class MoveGenerationProcessor : public MoveProcessor {
 public:
-    std::vector<Move *> moves;
+    explicit MoveGenerationProcessor(Board *board) :board(board) {}
     void processMove(Move *move) override;
+private:
+    Board *board;
 };
 
 class AttackedSquaresGenerationProcessor : public MoveProcessor {
