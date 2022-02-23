@@ -154,11 +154,7 @@ int guessMoveValue(const Board *board, Move *move) {
     auto movePieceType = Piece::getType(board->squares[move->startSquare]);
     auto capturePieceType = move->canCapture() ? Piece::getType(board->squares[move->targetSquare]) : Piece::None;
 
-    int moveScoreGuess = 10 * Piece::getValue(capturePieceType) - Piece::getValue(movePieceType);
-
-    if (auto *promotionMove = dynamic_cast<PromotionMove *>(move)) {
-        moveScoreGuess += Piece::getValue(promotionMove->pieceToPromoteTo);
-    }
+    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + move->getAddedValue()) - Piece::getValue(movePieceType);
 
     return moveScoreGuess;
 }

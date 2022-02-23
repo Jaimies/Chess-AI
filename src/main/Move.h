@@ -19,6 +19,7 @@ public:
 
     virtual int getCapturedSquare() { return -1; };
     virtual uint64_t getZorbristHash(std::array<int, 64> squares);
+    virtual int getAddedValue() { return 0; };
     std::string toString() const;
 
     virtual ~Move() = default;
@@ -78,4 +79,5 @@ public:
     uint64_t getZorbristHash(std::array<int, 64> squares) override;
 
     int getCapturedSquare() override { return targetSquare; }
+    int getAddedValue() override { return Piece::getValue(pieceToPromoteTo); }
 };
