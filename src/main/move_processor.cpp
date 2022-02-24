@@ -1,21 +1,19 @@
 #include "move_processor.h"
 #include "Board.h"
 
-void MoveGenerationProcessor::processMove(Move *move) {
+void MoveGenerationProcessor::processMove(MoveVariant move) {
     board->addMoveIfLegal(move);
 }
 
-void AttackedSquaresGenerationProcessor::processMove(Move *move) {
-    if (move->targetSquare == board->kingSquare)
-        board->attacksKing[move->startSquare] = true;
+void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {
+    auto basicMove = visit(GetBasicMoveVisitor(), move);
+    if (basicMove.targetSquare == board->kingSquare)
+        board->attacksKing[basicMove.startSquare] = true;
 
-    board->squaresAttackedByOpponent[move->targetSquare] = true;
-
-    delete move;
+    board->squaresAttackedByOpponent[basicMove.targetSquare] = true;
 }
 
-void LegalMoveSearchProcessor::processMove(Move *move) {
+void LegalMoveSearchProcessor::processMove(MoveVariant move) {
     auto isLegal = board->isMoveLegal(move);
     if (isLegal) hasLegalMoves = true;
-    delete move;
 }

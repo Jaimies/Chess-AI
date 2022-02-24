@@ -150,17 +150,18 @@ long MoveGenerator::evaluate(Board *board, int depth) {
     return evaluation - opponentEvaluation;
 }
 
-int guessMoveValue(const Board *board, Move *move) {
-    auto movePieceType = Piece::getType(board->squares[move->startSquare]);
-    auto capturePieceType = move->canCapture() ? Piece::getType(board->squares[move->targetSquare]) : Piece::None;
+int guessMoveValue(const Board *board, MoveVariant move) {
+    auto movePtr = visit(GetMovePointerVisitor(), move);
+    auto movePieceType = Piece::getType(board->squares[movePtr->startSquare]);
+    auto capturePieceType = movePtr->canCapture() ? Piece::getType(board->squares[movePtr->targetSquare]) : Piece::None;
 
-    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + move->getAddedValue()) - Piece::getValue(movePieceType);
+    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + movePtr->getAddedValue()) - Piece::getValue(movePieceType);
 
     return moveScoreGuess;
 }
 
-void sortMoves(Board *board, std::vector<Move *> &moves) {
-    std::sort(moves.begin(), moves.end(), [board](Move *move, Move *otherMove) {
+void sortMoves(Board *board, std::vector<MoveVariant> &moves) {
+    std::sort(moves.begin(), moves.end(), [board](MoveVariant move, MoveVariant otherMove) {
         return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
     });
 }
@@ -181,13 +182,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
         auto evaluation = -searchCaptures(board, -beta, -alpha);
         board->unmakeMove(move);
 
-        delete move;
-
-        if (evaluation >= beta) {
-            index++;
-            for (; index < moves.size(); index++) delete moves[index];
-            return beta;
-        }
+        if (evaluation >= beta) return beta;
         alpha = std::max(alpha, evaluation);
     }
 
@@ -229,13 +224,7 @@ int64_t deepEvaluate(
 
         board->unmakeMove(move);
 
-        delete move;
-
-        if (evaluation >= beta) {
-            index++;
-            for (; index < moves.size(); index++) delete moves[index];
-            return beta;
-        }
+        if (evaluation >= beta) return beta;
         alpha = std::max(alpha, evaluation);
     }
 
@@ -262,7 +251,7 @@ Move *_getBestMove(Board *board, int depth) {
     std::vector<std::thread *> threads;
 
     for (auto move: moves) {
-        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
+//        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
             board->makeMoveWithoutGeneratingMoves(move);
             auto deepEvaluation = -deepEvaluate(board, depth);
             auto evaluation = -MoveGenerator::evaluate(board, depth);
@@ -274,12 +263,12 @@ Move *_getBestMove(Board *board, int depth) {
                 mutex.lock();
                 bestDeepEvaluation = deepEvaluation;
                 bestEvaluation = evaluation;
-                bestMove = move;
+                bestMove = visit(GetMovePointerVisitor(), move);
                 mutex.unlock();
             }
 
-            delete board;
-        }, board->copy()));
+//            delete board;
+//        }, board->copy()));
     }
 
     for (auto thread: threads) {

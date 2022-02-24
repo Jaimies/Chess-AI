@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(Chess)
 
 find_package(folly CONFIG REQUIRED)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 file(GLOB SOURCES "*.cpp")
@@ -22,4 +24,4 @@ add_executable(
         ../main/move_generation_strategy.h ../main/move_generation_strategy.cpp
         ../main/move_processor.h ../main/move_processor.cpp
 )
-target_link_libraries(all_tests gtest_main Folly::folly)
+target_link_libraries(all_tests gtest_main Folly::folly ${BOOST_LIBRARIES})

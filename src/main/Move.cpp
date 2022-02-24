@@ -43,10 +43,10 @@ int getSquareFromPosition(char file, char rank) {
     return rankNumber * 8 + fileNumber;
 }
 
-NormalMove *NormalMove::fromString(std::string str) {
+NormalMove NormalMove::fromString(std::string str) {
     int startSquare = getSquareFromPosition(str[0], str[1]);
     int targetSquare = getSquareFromPosition(str[2], str[3]);
-    return new NormalMove(startSquare, targetSquare);
+    return {startSquare, targetSquare};
 }
 
 void NormalMove::apply(Board &board) {
@@ -118,4 +118,20 @@ void EnPassantMove::undo(Board &board) {
 uint64_t EnPassantMove::getZorbristHash(std::array<int, 64> squares) {
     return Move::getZorbristHash(squares)
            ^ hashPiece(capturedPawnPosition, squares[capturedPawnPosition]);
+}
+
+uint64_t GetZobristHashVisitor::operator()(NormalMove &move) const {
+    return move.getZorbristHash(board->squares);
+}
+
+uint64_t GetZobristHashVisitor::operator()(PromotionMove &move) const {
+    return move.getZorbristHash(board->squares);
+}
+
+uint64_t GetZobristHashVisitor::operator()(EnPassantMove &move) const {
+    return move.getZorbristHash(board->squares);
+}
+
+uint64_t GetZobristHashVisitor::operator()(CastlingMove &move) const {
+    return move.getZorbristHash(board->squares);
 }

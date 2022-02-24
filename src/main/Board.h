@@ -15,7 +15,7 @@
 class Board {
 public:
     std::array<int, 64> squares = {0};
-    std::vector<Move *> legalMoves;
+    std::vector<MoveVariant> legalMoves;
 
     int colourToMove = Piece::White;
 
@@ -43,9 +43,9 @@ public:
     void generateMoves();
     void generateCaptures();
     void checkIfLegalMovesExist();
-    void makeMove(Move *move);
-    void makeMoveWithoutGeneratingMoves(Move *move);
-    void unmakeMove(Move *move);
+    void makeMove(MoveVariant move);
+    void makeMoveWithoutGeneratingMoves(MoveVariant move);
+    void unmakeMove(MoveVariant move);
     Board *copy();
 
     int getKingSquare() const;
@@ -85,7 +85,7 @@ public:
 private:
     int numSquaresToEdge[64][8];
 
-    std::stack<Move *> moveHistory;
+    std::stack<MoveVariant > moveHistory;
     std::stack<int> castlingPieceMovementHistory;
 
     std::array<bool, 64> attacksKing;
@@ -101,7 +101,7 @@ private:
 
     Board();
 
-    Board(int colourToMove, std::stack<Move *> moveHistory,
+    Board(int colourToMove, std::stack<MoveVariant > moveHistory,
           std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares);
 
     void computeMoveData();
@@ -134,18 +134,18 @@ private:
     void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
     void generateEnPassantMoves(int square, int piece, MoveProcessor *processor);
 
-    void updateCastlingPieceMovement(Move *move);
+    void updateCastlingPieceMovement(MoveVariant move);
     void undoCastlingPieceMovementUpdate();
 
-    bool isMoveLegal(Move *potentialMove);
-    bool violatesPin(Move *move);
-    bool coversCheck(Move *potentialMove) const;
-    bool isValidEnPassantMove(EnPassantMove *move) const;
-    void addMoveIfLegal(Move *move);
+    bool isMoveLegal(MoveVariant potentialMove);
+    bool violatesPin(MoveVariant move);
+    bool coversCheck(MoveVariant potentialMove) const;
+    bool isValidEnPassantMove(EnPassantMove move) const;
+    void addMoveIfLegal(MoveVariant move);
     bool legalMovesExist(int colour);
 
     bool IsKingUnderAttack();
-    bool IsKingUnderAttack(Move *potentialMove);
+    bool IsKingUnderAttack(MoveVariant potentialMove);
 
     void changeColourToMove();
     void updateGameState();
