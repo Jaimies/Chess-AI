@@ -289,7 +289,7 @@ Move *MoveGenerator::getBestMove(Board *board) {
     positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
-    uint64_t depth = 1;
+    int depth = 1;
 
     while (true) {
         auto bestMove = _getBestMove(board->copy(), depth);
