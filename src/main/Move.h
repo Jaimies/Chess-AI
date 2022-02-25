@@ -28,6 +28,7 @@ public:
     virtual uint64_t getZorbristHash(std::array<int, 64> squares);
     virtual int getAddedValue() { return 0; };
     std::string toString() const;
+    MoveVariant toVariant();
 
     virtual ~Move() = default;
 protected:

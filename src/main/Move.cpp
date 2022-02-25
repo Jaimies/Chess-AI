@@ -37,6 +37,13 @@ uint64_t Move::getZorbristHash(std::array<int, 64> squares) {
     return hashPiece(startSquare, piece) ^ hashPiece(targetSquare, piece);
 }
 
+MoveVariant Move::toVariant() {
+    if (auto castMove = dynamic_cast<CastlingMove *>(this)) return *castMove;
+    if (auto castMove = dynamic_cast<PromotionMove *>(this)) return *castMove;
+    if (auto castMove = dynamic_cast<EnPassantMove *>(this)) return *castMove;
+    if (auto castMove = dynamic_cast<NormalMove *>(this)) return *castMove;
+}
+
 int getSquareFromPosition(char file, char rank) {
     int rankNumber = rank - '0' - 1;
     int fileNumber = file - 'a';

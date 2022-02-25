@@ -29,7 +29,8 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
         if (promotionDialog && !isMachineMove) {
             promotionDialog->show(color, move->targetSquare, [this, move, color](int pieceType) {
                 auto piece = pieceType | color;
-                board->makeMove(new PromotionMove(move->startSquare, move->targetSquare, piece));
+                MoveVariant moveToMake = PromotionMove(move->startSquare, move->targetSquare, piece);
+                board->makeMove(moveToMake);
                 getPieceAtSquare(move->targetSquare)->setPiece(piece);
                 promotionDialog->setVisible(false);
                 promotionDialogBackground->setVisible(false);
@@ -48,7 +49,8 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
         }
 
         if (isMachineMove) {
-            board->makeMove(move);
+            auto moveToMake = move->toVariant();
+            board->makeMove(moveToMake);
             if (pieceToCapture) pieceToCapture->removeFromBoard();
             pieceToMove->moveToSquare(move->targetSquare);
             pieceToMove->setPiece(promotionMove->pieceToPromoteTo);
@@ -56,7 +58,8 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
         return;
     }
 
-    board->makeMove(move);
+    auto moveToMake = move->toVariant();
+    board->makeMove(moveToMake);
 
     if (move->getCapturedSquare() != -1) {
         auto piece = getPieceAtSquare(move->getCapturedSquare());

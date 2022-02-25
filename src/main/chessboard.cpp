@@ -105,7 +105,11 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
 
     child->setVisible(false);
 
-    auto possibleMoves = VectorUtil::filter(gameManager->board->legalMoves, [child](auto move) {
+    auto allMoves = VectorUtil::map<MoveVariant, Move *>(gameManager->board->legalMoves, [](MoveVariant &variant) {
+        return visit(GetMovePointerVisitor(), variant);
+    });
+
+    auto possibleMoves = VectorUtil::filter(allMoves, [child](auto move) {
         return move->startSquare == child->getSquare();
     });
 
