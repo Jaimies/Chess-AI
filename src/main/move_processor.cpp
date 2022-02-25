@@ -15,5 +15,5 @@ void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {
 
 void LegalMoveSearchProcessor::processMove(MoveVariant move) {
     auto isLegal = board->isMoveLegal(move);
-    if (isLegal) hasLegalMoves = true;
+    if (isLegal) board->hasLegalMoves = true;
 }

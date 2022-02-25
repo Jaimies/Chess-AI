@@ -75,7 +75,7 @@ void Board::checkIfLegalMovesExist() {
     generateSquaresAttackedByOpponent(opponentColour);
     generatePins();
     isKingUnderAttack = IsKingUnderAttack();
-    hasLegalMoves = legalMovesExist(colourToMove);
+    legalMovesExist(colourToMove);
 }
 
 void Board::makeMove(MoveVariant &move) {
@@ -222,55 +222,42 @@ void Board::generateCheckSolvingMovePositions() {
 }
 
 void Board::generateLegalMoves(int colour) {
-    auto processor = new MoveGenerationProcessor(this);
-
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, processor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moveGenerationProcessor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moveGenerationProcessor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moveGenerationProcessor, NormalMoveGenerationStrategy);
     }
 
-    generateCastlingMoves(processor);
-
-    delete processor;
+    generateCastlingMoves(moveGenerationProcessor);
 }
 
 void Board::generateLegalCaptures(int color) {
-    auto processor = new MoveGenerationProcessor(this);
-
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != color) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, CaptureGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, processor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, CaptureGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moveGenerationProcessor, CaptureGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, moveGenerationProcessor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moveGenerationProcessor, CaptureGenerationStrategy);
     }
-
-    delete processor;
 }
 
 void Board::generateSquaresAttackedByOpponent(int colour) {
     for (int square = 0; square < 64; square++)
         squaresAttackedByOpponent[square] = false;
 
-    auto processor = new AttackedSquaresGenerationProcessor(this);
-
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         attacksKing[startSquare] = false;
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, AttackedSquaresGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, processor, false, true);
-        else if (Piece::getType(piece) == Piece::Knight)
-            generateKnightMoves(startSquare, piece, processor, AttackedSquaresGenerationStrategy);
+        if (Piece::isSlidingPiece(piece))generateSlidingMoves(startSquare, piece, attackedSquaresGenerationProcessor, AttackedSquaresGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, attackedSquaresGenerationProcessor, false, true);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, attackedSquaresGenerationProcessor, AttackedSquaresGenerationStrategy);
     }
-
-    delete processor;
 }
 
 void Board::loadFenString(std::string &fenString) {
@@ -327,21 +314,17 @@ bool Board::isMoveLegal(MoveVariant potentialMove) {
            && (!enPassantMove.has_value() || isValidEnPassantMove(*enPassantMove));
 }
 
-bool Board::legalMovesExist(int colour) {
+void Board::legalMovesExist(int colour) {
     for (int startSquare = 0; startSquare < 64; startSquare++) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        auto processor = new LegalMoveSearchProcessor(this);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, legalMoveSearchProcessor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, legalMoveSearchProcessor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, legalMoveSearchProcessor, NormalMoveGenerationStrategy);
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, processor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, processor, NormalMoveGenerationStrategy);
-
-        if (processor->hasLegalMoves) return true;
+        if (hasLegalMoves) return;
     }
-
-    return false;
 }
 
 bool Board::IsKingUnderAttack() {
@@ -771,4 +754,10 @@ void Board::generateCaptures() {
     generateLegalCaptures(colourToMove);
 
     hasLegalMoves = !legalMoves.empty();
+}
+
+Board::~Board() {
+    delete moveGenerationProcessor;
+    delete legalMoveSearchProcessor;
+    delete attackedSquaresGenerationProcessor;
 }

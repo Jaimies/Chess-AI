@@ -40,6 +40,8 @@ public:
             {'n', Piece::Knight},
     };
 
+    ~Board();
+
     void generateMoves();
     void generateCaptures();
     void checkIfLegalMovesExist();
@@ -98,12 +100,17 @@ private:
     int opponentKingSquare;
     bool _isInEndgame = false;
     uint64_t zobristHash = 0;
+
     ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor(this);
     UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
     GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
     GetBasicMoveVisitor getBasicMoveVisitor = GetBasicMoveVisitor();
     IsCastlingMoveVisitor isCastlingMoveVisitor = IsCastlingMoveVisitor();
     GetEnPassantMoveVisitor getEnPassantMoveVisitor = GetEnPassantMoveVisitor();
+
+    MoveGenerationProcessor *moveGenerationProcessor = new MoveGenerationProcessor(this);
+    AttackedSquaresGenerationProcessor *attackedSquaresGenerationProcessor = new AttackedSquaresGenerationProcessor(this);
+    LegalMoveSearchProcessor *legalMoveSearchProcessor = new LegalMoveSearchProcessor(this);
 
     Board();
 
@@ -148,7 +155,7 @@ private:
     bool coversCheck(MoveVariant potentialMove) const;
     bool isValidEnPassantMove(EnPassantMove move) const;
     void addMoveIfLegal(MoveVariant &move);
-    bool legalMovesExist(int colour);
+    void legalMovesExist(int colour);
 
     bool IsKingUnderAttack();
     bool IsKingUnderAttack(MoveVariant potentialMove);
