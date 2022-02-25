@@ -267,6 +267,7 @@ Move *_getBestMove(Board *board, int depth) {
                 mutex.lock();
                 bestDeepEvaluation = deepEvaluation;
                 bestEvaluation = evaluation;
+                delete bestMove;
                 bestMove = visit(GetMovePointerVisitor(), moveCopy);
                 mutex.unlock();
             }
