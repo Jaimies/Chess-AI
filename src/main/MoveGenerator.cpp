@@ -150,12 +150,18 @@ long MoveGenerator::evaluate(Board *board, int depth) {
     return evaluation - opponentEvaluation;
 }
 
-int guessMoveValue(const Board *board, MoveVariant move) {
-    auto movePtr = visit(GetMovePointerVisitor(), move);
-    auto movePieceType = Piece::getType(board->squares[movePtr->startSquare]);
-    auto capturePieceType = movePtr->canCapture() ? Piece::getType(board->squares[movePtr->targetSquare]) : Piece::None;
+auto determineIfMoveCanCaptureVisitor = DetermineIfMoveCanCaptureVisitor();
+auto getMoveAddedValueVisitor = GetMoveAddedValueVisitor();
+auto getBasicMoveVisitor = GetBasicMoveVisitor();
 
-    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + movePtr->getAddedValue()) - Piece::getValue(movePieceType);
+int guessMoveValue(const Board *board, MoveVariant move) {
+    auto canCapture = visit(determineIfMoveCanCaptureVisitor, move);
+    auto addedValue = visit(getMoveAddedValueVisitor, move);
+    auto basicMove = visit(getBasicMoveVisitor, move);
+    auto movePieceType = Piece::getType(board->squares[basicMove.startSquare]);
+    auto capturePieceType = canCapture ? Piece::getType(board->squares[basicMove.targetSquare]) : Piece::None;
+
+    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + addedValue) - Piece::getValue(movePieceType);
 
     return moveScoreGuess;
 }

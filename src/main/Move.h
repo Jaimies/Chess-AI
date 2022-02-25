@@ -152,3 +152,17 @@ struct GetMovePointerVisitor {
     Move *operator()(CastlingMove &move) const { return new CastlingMove(move); }
     Move *operator()(EnPassantMove &move) const { return new EnPassantMove(move); }
 };
+
+struct DetermineIfMoveCanCaptureVisitor {
+    bool operator()(NormalMove &move) const { return move.canCapture(); }
+    bool operator()(PromotionMove &move) const { return move.canCapture(); }
+    bool operator()(CastlingMove &move) const { return move.canCapture(); }
+    bool operator()(EnPassantMove &move) const { return move.canCapture(); }
+};
+
+struct GetMoveAddedValueVisitor {
+    int operator()(NormalMove &move) const { return move.getAddedValue(); }
+    int operator()(PromotionMove &move) const { return move.getAddedValue(); }
+    int operator()(CastlingMove &move) const { return move.getAddedValue(); }
+    int operator()(EnPassantMove &move) const { return move.getAddedValue(); }
+};
