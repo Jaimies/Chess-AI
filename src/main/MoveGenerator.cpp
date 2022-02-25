@@ -9,7 +9,6 @@
 #include "VectorUtil.h"
 
 using Evaluation = long;
-using TranspositionTable = folly::ConcurrentHashMap<uint64_t, int64_t>;
 
 const Evaluation minEvaluation = std::numeric_limits<Evaluation>::min() + 10;
 const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
