@@ -78,7 +78,7 @@ void Board::checkIfLegalMovesExist() {
     hasLegalMoves = legalMovesExist(colourToMove);
 }
 
-void Board::makeMove(MoveVariant move) {
+void Board::makeMove(MoveVariant &move) {
     makeMoveWithoutGeneratingMoves(move);
     generateMoves();
     updateGameState();
@@ -87,7 +87,7 @@ void Board::makeMove(MoveVariant move) {
 
 void Board::updateEndgameState() { _isInEndgame = determineIfIsInEndgame(); }
 
-void Board::unmakeMove(MoveVariant move) {
+void Board::unmakeMove(MoveVariant &move) {
     undoCastlingPieceMovementUpdate();
     visit(undoMoveVisitor, move);
 
@@ -298,7 +298,7 @@ void Board::loadFenString(std::string fenString) {
     zobristHash = hash(this);
 }
 
-void Board::updateCastlingPieceMovement(MoveVariant move) {
+void Board::updateCastlingPieceMovement(MoveVariant &move) {
     auto basicMove = visit(getBasicMoveVisitor, move);
     int piece = squares[basicMove.startSquare];
     int castlingPiece = getCastlingPiece(piece, basicMove.startSquare);
@@ -311,7 +311,7 @@ void Board::updateCastlingPieceMovement(MoveVariant move) {
     castlingPieceMovementHistory.push(shouldUpdate ? castlingPiece : 0);
 }
 
-void Board::addMoveIfLegal(MoveVariant potentialMove) {
+void Board::addMoveIfLegal(MoveVariant &potentialMove) {
     if (isMoveLegal(potentialMove))
         legalMoves.push_back(potentialMove);
 }
@@ -371,7 +371,7 @@ void Board::updateGameState() {
 //        }
 }
 
-void Board::makeMoveWithoutGeneratingMoves(MoveVariant move) {
+void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
     zobristHash ^= visit(getZobristHashVisitor, move);
     updateCastlingPieceMovement(move);
     visit(applyMoveVisitor, move);
@@ -381,7 +381,7 @@ void Board::makeMoveWithoutGeneratingMoves(MoveVariant move) {
     opponentKingSquare = _getOpponentKingSquare();
 }
 
-bool Board::violatesPin(MoveVariant move) {
+bool Board::violatesPin(MoveVariant &move) {
     auto basicMove = visit(getBasicMoveVisitor, move);
     if (!pins.contains(basicMove.startSquare)) return false;
     if (Piece::getType(squares[basicMove.startSquare]) == Piece::Knight) return true;

@@ -5,14 +5,13 @@ int countMoves(Board *board, int depth) {
     if (depth == 0) return 1;
 
     board->generateMoves();
-    std::vector<Move *> moves = board->legalMoves;
+    std::vector<MoveVariant> moves = board->legalMoves;
     auto positionsCount = 0;
 
     for (auto move: moves) {
         board->makeMoveWithoutGeneratingMoves(move);
         positionsCount += countMoves(board, depth - 1);
         board->unmakeMove(move);
-        delete move;
     }
 
     return positionsCount;
@@ -105,7 +104,8 @@ TEST(BoardTest, MoveCountIsCorrectInBehtingPosition) {
 
 TEST(BoardTest, DoesntAllowEnPassantWhereDoingSoExposesTheKing) {
     Board *board = Board::fromFenString("8/3p1p2/8/r1P1K1Pq/8/8/8/7k", Piece::Black);
-    board->makeMove(new NormalMove(51, 35));
+    MoveVariant move = NormalMove(51, 35);
+    board->makeMove(move);
 
     ASSERT_EQ(7, countMoves(board->copy(), 1));
     ASSERT_EQ(184, countMoves(board->copy(), 2));
@@ -133,21 +133,16 @@ TEST(BoardTest, generateCaptureMoves) {
     auto board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
     board->generateCaptures();
     EXPECT_EQ(board->legalMoves.size(), 1);
-    EXPECT_EQ(board->legalMoves[0]->startSquare, 25);
-    EXPECT_EQ(board->legalMoves[0]->targetSquare, 29);
+    auto expectedMove = visit(GetMovePointerVisitor(), board->legalMoves[0]);
+    EXPECT_EQ(expectedMove->startSquare, 25);
+    EXPECT_EQ(expectedMove->targetSquare, 29);
 
-    board->makeMoveWithoutGeneratingMoves(NormalMove::fromString("b4c4"));
+    MoveVariant move = NormalMove::fromString("b4c4");
+    board->makeMoveWithoutGeneratingMoves(move);
 
     board->generateCaptures();
+    auto expectedMove2 = visit(GetMovePointerVisitor(), board->legalMoves[0]);
     EXPECT_EQ(board->legalMoves.size(), 1);
-    EXPECT_EQ(board->legalMoves[0]->startSquare, 39);
-    EXPECT_EQ(board->legalMoves[0]->targetSquare, 33);
-}
-
-TEST(BoardTest, DoesntAllowKingsToGetClose) {
-    auto board = Board::fromFenString("8/8/8/8/8/1k2r3/8/2K5 w - - 0 1", Piece::Black);
-
-    for (auto move: board->legalMoves) {
-        std::cout << move->toString() << std::endl;
-    }
+    EXPECT_EQ(expectedMove2->startSquare, 39);
+    EXPECT_EQ(expectedMove2->targetSquare, 33);
 }

@@ -43,9 +43,9 @@ public:
     void generateMoves();
     void generateCaptures();
     void checkIfLegalMovesExist();
-    void makeMove(MoveVariant move);
-    void makeMoveWithoutGeneratingMoves(MoveVariant move);
-    void unmakeMove(MoveVariant move);
+    void makeMove(MoveVariant &move);
+    void makeMoveWithoutGeneratingMoves(MoveVariant &move);
+    void unmakeMove(MoveVariant &move);
     Board *copy();
 
     int getKingSquare() const;
@@ -140,14 +140,14 @@ private:
     void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
     void generateEnPassantMoves(int square, int piece, MoveProcessor *processor);
 
-    void updateCastlingPieceMovement(MoveVariant move);
+    void updateCastlingPieceMovement(MoveVariant &move);
     void undoCastlingPieceMovementUpdate();
 
     bool isMoveLegal(MoveVariant potentialMove);
-    bool violatesPin(MoveVariant move);
+    bool violatesPin(MoveVariant &move);
     bool coversCheck(MoveVariant potentialMove) const;
     bool isValidEnPassantMove(EnPassantMove move) const;
-    void addMoveIfLegal(MoveVariant move);
+    void addMoveIfLegal(MoveVariant &move);
     bool legalMovesExist(int colour);
 
     bool IsKingUnderAttack();

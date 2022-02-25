@@ -154,7 +154,7 @@ auto determineIfMoveCanCaptureVisitor = DetermineIfMoveCanCaptureVisitor();
 auto getMoveAddedValueVisitor = GetMoveAddedValueVisitor();
 auto getBasicMoveVisitor = GetBasicMoveVisitor();
 
-int guessMoveValue(const Board *board, MoveVariant move) {
+int guessMoveValue(const Board *board, MoveVariant &move) {
     auto canCapture = visit(determineIfMoveCanCaptureVisitor, move);
     auto addedValue = visit(getMoveAddedValueVisitor, move);
     auto basicMove = visit(getBasicMoveVisitor, move);
@@ -167,7 +167,7 @@ int guessMoveValue(const Board *board, MoveVariant move) {
 }
 
 void sortMoves(Board *board, std::vector<MoveVariant> &moves) {
-    std::sort(moves.begin(), moves.end(), [board](MoveVariant move, MoveVariant otherMove) {
+    std::sort(moves.begin(), moves.end(), [board](MoveVariant &move, MoveVariant otherMove) {
         return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
     });
 }
@@ -182,7 +182,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (const auto& move : moves) {
+    for (auto move : moves) {
         board->makeMoveWithoutGeneratingMoves(move);
         auto evaluation = -searchCaptures(board, -beta, -alpha);
         board->unmakeMove(move);
@@ -213,7 +213,7 @@ int64_t deepEvaluate(
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (const auto& move : moves) {
+    for (auto move : moves) {
         board->makeMoveWithoutGeneratingMoves(move);
 
         auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
