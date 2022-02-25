@@ -181,7 +181,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (auto move : moves) {
+    for (auto move: moves) {
         board->makeMoveWithoutGeneratingMoves(move);
         auto evaluation = -searchCaptures(board, -beta, -alpha);
         board->unmakeMove(move);
@@ -212,7 +212,7 @@ int64_t deepEvaluate(
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (auto move : moves) {
+    for (auto move: moves) {
         board->makeMoveWithoutGeneratingMoves(move);
 
         auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
@@ -254,24 +254,25 @@ Move *_getBestMove(Board *board, int depth) {
     std::vector<std::thread *> threads;
 
     for (auto move: moves) {
-//        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
-            board->makeMoveWithoutGeneratingMoves(move);
+        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
+            auto moveCopy = move;
+            board->makeMoveWithoutGeneratingMoves(moveCopy);
             auto deepEvaluation = -deepEvaluate(board, depth);
             auto evaluation = -MoveGenerator::evaluate(board, depth);
 
-            board->unmakeMove(move);
+            board->unmakeMove(moveCopy);
 
             if (deepEvaluation > bestDeepEvaluation ||
                 deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
                 mutex.lock();
                 bestDeepEvaluation = deepEvaluation;
                 bestEvaluation = evaluation;
-                bestMove = visit(GetMovePointerVisitor(), move);
+                bestMove = visit(GetMovePointerVisitor(), moveCopy);
                 mutex.unlock();
             }
 
-//            delete board;
-//        }, board->copy()));
+            delete board;
+        }, board->copy()));
     }
 
     for (auto thread: threads) {
