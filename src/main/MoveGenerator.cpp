@@ -182,8 +182,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (int index = 0; index < moves.size(); index++) {
-        auto move = moves[index];
+    for (const auto& move : moves) {
         board->makeMoveWithoutGeneratingMoves(move);
         auto evaluation = -searchCaptures(board, -beta, -alpha);
         board->unmakeMove(move);
@@ -214,8 +213,7 @@ int64_t deepEvaluate(
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    for (int index = 0; index < moves.size(); index++) {
-        auto move = moves[index];
+    for (const auto& move : moves) {
         board->makeMoveWithoutGeneratingMoves(move);
 
         auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
