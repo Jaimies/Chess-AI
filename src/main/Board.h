@@ -111,7 +111,7 @@ private:
           std::unordered_map<int, bool> castlingPieceMoved, std::array<int, 64> squares);
 
     void computeMoveData();
-    void loadFenString(std::string fenString);
+    void loadFenString(std::string &fenString);
     void generatePins();
     void generatePins(int pieceType, int startSquare);
     void generateSquaresAttackedByOpponent(int color);

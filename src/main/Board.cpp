@@ -273,7 +273,7 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
     delete processor;
 }
 
-void Board::loadFenString(std::string fenString) {
+void Board::loadFenString(std::string &fenString) {
     std::string position = fenString.substr(0, fenString.find(' '));
 
     int rank = 7, file = 0;
