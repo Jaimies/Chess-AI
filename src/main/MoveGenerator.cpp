@@ -293,7 +293,7 @@ Move *MoveGenerator::getBestMove(Board *board) {
     int depth = 1;
 
     while (true) {
-        auto bestMove = _getBestMove(board->copy(), depth);
+        auto bestMove = _getBestMove(boardCopy, depth);
         auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
 
         if (millisCount > 2000) {
