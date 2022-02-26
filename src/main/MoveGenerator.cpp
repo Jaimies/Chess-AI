@@ -94,7 +94,6 @@ std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
 
 unsigned long MoveGenerator::positionsAnalyzed = 0;
 int MoveGenerator::depthSearchedTo = 0;
-folly::ConcurrentHashMap<uint64_t, int64_t> transpositions;
 std::vector<uint64_t> depthHashes;
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
@@ -194,7 +193,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
 }
 
 int64_t deepEvaluate(
-        Board *board, int depth,
+        Board *board, int depth, folly::ConcurrentHashMap<uint64_t, int64_t> *transpositions,
         int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
@@ -216,14 +215,14 @@ int64_t deepEvaluate(
         board->makeMoveWithoutGeneratingMoves(move);
 
         auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
-        auto cachedEvaluation = transpositions.find(boardHash);
+        auto cachedEvaluation = transpositions->find(boardHash);
 
-        auto evaluation = cachedEvaluation == transpositions.end()
-                          ? -deepEvaluate(board, depth - 1, -beta, -alpha)
+        auto evaluation = cachedEvaluation == transpositions->end()
+                          ? -deepEvaluate(board, depth - 1, transpositions, -beta, -alpha)
                           : cachedEvaluation->second;
 
-        if (cachedEvaluation == transpositions.end())
-            transpositions.insert(std::pair(boardHash, evaluation));
+        if (cachedEvaluation == transpositions->end())
+            transpositions->insert(std::pair(boardHash, evaluation));
 
         board->unmakeMove(move);
 
@@ -236,8 +235,8 @@ int64_t deepEvaluate(
 
 Move *_getBestMove(Board *board, int depth) {
     generateHashes();
+    auto transpositions = new folly::ConcurrentHashMap<uint64_t, int64_t>();
     depthHashes.clear();
-    transpositions.clear();
 
     for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
         depthHashes.push_back(get64rand());
@@ -257,7 +256,7 @@ Move *_getBestMove(Board *board, int depth) {
         threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto deepEvaluation = -deepEvaluate(board, depth);
+            auto deepEvaluation = -deepEvaluate(board, depth, transpositions);
             auto evaluation = -MoveGenerator::evaluate(board, depth);
 
             board->unmakeMove(moveCopy);
@@ -281,6 +280,7 @@ Move *_getBestMove(Board *board, int depth) {
         delete thread;
     }
 
+    delete transpositions;
     return bestMove;
 }
 
