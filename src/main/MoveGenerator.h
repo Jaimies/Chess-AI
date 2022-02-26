@@ -6,5 +6,5 @@ namespace MoveGenerator {
 
     Move *getBestMove(Board *board);
     long evaluate(Board *board, int depth);
-    std::array<int64_t, 64> *&getSquareValueTable(Board *board, int piece);
+    const std::array<int64_t, 64> *getSquareValueTable(Board *board, int piece);
 }

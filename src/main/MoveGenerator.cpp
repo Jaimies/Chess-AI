@@ -15,7 +15,7 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
 const Evaluation checkmateEvaluation = minEvaluation + 1000;
 
-std::array<Evaluation, 64> *kingMidGameSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *kingMidGameSquareValues = new std::array<Evaluation, 64>{
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
@@ -26,7 +26,7 @@ std::array<Evaluation, 64> *kingMidGameSquareValues = new std::array<Evaluation,
         20, 30, 10, 0, 0, 10, 30, 20
 };
 
-std::array<Evaluation, 64> *kingEndGameSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *kingEndGameSquareValues = new std::array<Evaluation, 64>{
         -50, -40, -30, -20, -20, -30, -40, -50,
         -30, -20, -10, 0, 0, -10, -20, -30,
         -30, -10, 20, 30, 30, 20, -10, -30,
@@ -37,7 +37,7 @@ std::array<Evaluation, 64> *kingEndGameSquareValues = new std::array<Evaluation,
         -50, -30, -30, -30, -30, -30, -30, -50
 };
 
-std::array<Evaluation, 64> *queenSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *queenSquareValues = new std::array<Evaluation, 64>{
         -20, -10, -10, -5, -5, -10, -10, -20,
         -10, 0, 0, 0, 0, 0, 0, -10,
         -10, 0, 5, 5, 5, 5, 0, -10,
@@ -48,7 +48,7 @@ std::array<Evaluation, 64> *queenSquareValues = new std::array<Evaluation, 64>{
         -20, -10, -10, -5, -5, -10, -10, -20
 };
 
-std::array<Evaluation, 64> *bishopSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *bishopSquareValues = new std::array<Evaluation, 64>{
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10, 0, 0, 0, 0, 0, 0, -10,
         -10, 0, 5, 10, 10, 5, 0, -10,
@@ -59,7 +59,7 @@ std::array<Evaluation, 64> *bishopSquareValues = new std::array<Evaluation, 64>{
         -20, -10, -10, -10, -10, -10, -10, -20,
 };
 
-std::array<Evaluation, 64> *knightSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *knightSquareValues = new std::array<Evaluation, 64>{
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20, 0, 0, 0, 0, -20, -40,
         -30, 0, 10, 15, 15, 10, 0, -30,
@@ -70,7 +70,7 @@ std::array<Evaluation, 64> *knightSquareValues = new std::array<Evaluation, 64>{
         -50, -40, -30, -30, -30, -30, -40, -50,
 };
 
-std::array<Evaluation, 64> *rookSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *rookSquareValues = new std::array<Evaluation, 64>{
         0, 0, 0, 0, 0, 0, 0, 0,
         5, 10, 10, 10, 10, 10, 10, 5,
         -5, 0, 0, 0, 0, 0, 0, -5,
@@ -81,7 +81,7 @@ std::array<Evaluation, 64> *rookSquareValues = new std::array<Evaluation, 64>{
         0, 0, 0, 5, 5, 0, 0, 0
 };
 
-std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
+const std::array<Evaluation, 64> *pawnSquareValues = new std::array<Evaluation, 64>{
         0, 0, 0, 0, 0, 0, 0, 0,
         50, 50, 50, 50, 50, 50, 50, 50,
         10, 10, 20, 30, 30, 20, 10, 10,
@@ -102,7 +102,7 @@ Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     return (*squareValueTable)[positionToAccess] * 10;
 }
 
-std::array<Evaluation, 64> *&MoveGenerator::getSquareValueTable(Board *board, int piece) {
+const std::array<Evaluation, 64> *MoveGenerator::getSquareValueTable(Board *board, int piece) {
     auto type = Piece::getType(piece);
 
     if (type == Piece::Pawn) return pawnSquareValues;
