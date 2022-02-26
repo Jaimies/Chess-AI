@@ -244,7 +244,6 @@ Move *_getBestMove(Board *board, int depth) {
     if (board->legalMoves.empty()) return nullptr;
 
     int64_t bestDeepEvaluation = minEvaluation;
-    int64_t bestEvaluation = minEvaluation;
 
     Move *bestMove = nullptr;
     auto moves = board->legalMoves;
@@ -257,15 +256,12 @@ Move *_getBestMove(Board *board, int depth) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
             auto deepEvaluation = -deepEvaluate(board, depth, transpositions);
-            auto evaluation = -MoveGenerator::evaluate(board, depth);
 
             board->unmakeMove(moveCopy);
 
-            if (deepEvaluation > bestDeepEvaluation ||
-                deepEvaluation == bestDeepEvaluation && evaluation > bestEvaluation) {
+            if (deepEvaluation > bestDeepEvaluation) {
                 mutex.lock();
                 bestDeepEvaluation = deepEvaluation;
-                bestEvaluation = evaluation;
                 delete bestMove;
                 bestMove = visit(GetMovePointerVisitor(), moveCopy);
                 mutex.unlock();
