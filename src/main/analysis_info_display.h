@@ -11,8 +11,8 @@ public:
     void updateInfo(unsigned long long positionCount, unsigned long long millisElapsed, int depth, Move *machineMove);
 
 private:
-    QLabel *positionCount;
-    QLabel *timeElapsed;
-    QLabel *depth;
-    QLabel *machineMove;
+    QLabel *positionCount = new QLabel(this);
+    QLabel *timeElapsed = new QLabel(this);
+    QLabel *depth = new QLabel(this);
+    QLabel *machineMove = new QLabel(this);
 };

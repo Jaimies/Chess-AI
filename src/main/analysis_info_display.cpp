@@ -4,15 +4,14 @@
 #include <string>
 
 AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent) : QWidget(parent) {
-    positionCount = new QLabel(this);
     positionCount->setFixedSize(400, 80);
-    timeElapsed = new QLabel(this);
+
     timeElapsed->setFixedSize(400, 80);
     timeElapsed->move(0, 80);
-    depth = new QLabel(this);
+
     depth->setFixedSize(400, 80);
     depth->move(0, 160);
-    machineMove = new QLabel(this);
+
     machineMove->setFixedSize(400, 80);
     machineMove->move(0, 240);
 }
