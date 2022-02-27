@@ -9,7 +9,6 @@
 #include <unordered_set>
 #include "Piece.h"
 #include "Move.h"
-#include "move_generation_strategy.h"
 #include "move_processor.h"
 
 class Board {
@@ -109,6 +108,7 @@ private:
     GetEnPassantMoveVisitor getEnPassantMoveVisitor = GetEnPassantMoveVisitor();
 
     MoveGenerationProcessor *moveGenerationProcessor = new MoveGenerationProcessor(this);
+    CaptureGenerationProcessor *captureGenerationProcessor = new CaptureGenerationProcessor(this);
     AttackedSquaresGenerationProcessor *attackedSquaresGenerationProcessor = new AttackedSquaresGenerationProcessor(this);
     LegalMoveSearchProcessor *legalMoveSearchProcessor = new LegalMoveSearchProcessor(this);
 
@@ -135,7 +135,7 @@ private:
     bool allSquaresAreClearBetween(int firstSquare, int secondSquare);
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
-    void generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
+    void generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor);
     void generatePawnMoves(int startSquare, int piece, MoveProcessor *processor);
     void generateForwardPawnMoves(
         int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote
@@ -144,7 +144,7 @@ private:
     void generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote,
                                   bool canCaptureFriendly);
     void generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor);
-    void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy);
+    void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor);
     void generateEnPassantMoves(int square, int piece, MoveProcessor *processor);
 
     void updateCastlingPieceMovement(MoveVariant &move);

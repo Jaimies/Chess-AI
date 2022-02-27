@@ -7,7 +7,6 @@
 #include "Move.h"
 #include "Board.h"
 #include "zobrist_hash_generator.h"
-#include "move_generation_strategy.h"
 
 static bool isValidSquarePosition(int squarePosition) {
     return squarePosition >= 0 && squarePosition <= 63;
@@ -37,12 +36,12 @@ static int getCastlingPiece(int piece, int square) {
 static void generatePawnMove(int startSquare, int targetSquare, bool isPawnAboutToPromote, int pieceToCapture,
                              MoveProcessor *processor) {
     if (!isPawnAboutToPromote) {
-        processor->processMove(NormalMove(startSquare, targetSquare, pieceToCapture));
+        processor->processMove(NormalMove{startSquare, targetSquare, pieceToCapture});
         return;
     }
 
     for (auto piece: Piece::piecesToPromoteTo)
-        processor->processMove(PromotionMove(startSquare, targetSquare, piece, pieceToCapture));
+        processor->processMove(PromotionMove{startSquare, targetSquare, piece, pieceToCapture});
 }
 
 Board *Board::fromFenString(std::string fenString, int colourToMove) {
@@ -226,9 +225,9 @@ void Board::generateLegalMoves(int colour) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moveGenerationProcessor, NormalMoveGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moveGenerationProcessor);
         else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, moveGenerationProcessor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moveGenerationProcessor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moveGenerationProcessor);
     }
 
     generateCastlingMoves(moveGenerationProcessor);
@@ -239,9 +238,9 @@ void Board::generateLegalCaptures(int color) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != color) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, moveGenerationProcessor, CaptureGenerationStrategy);
-        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, moveGenerationProcessor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, moveGenerationProcessor, CaptureGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, captureGenerationProcessor);
+        else if (Piece::getType(piece) == Piece::Pawn) generateNormalPawnCaptures(startSquare, piece, captureGenerationProcessor);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, captureGenerationProcessor);
     }
 }
 
@@ -254,9 +253,9 @@ void Board::generateSquaresAttackedByOpponent(int colour) {
         attacksKing[startSquare] = false;
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece))generateSlidingMoves(startSquare, piece, attackedSquaresGenerationProcessor, AttackedSquaresGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, attackedSquaresGenerationProcessor);
         else if (Piece::getType(piece) == Piece::Pawn) generateCapturePawnMoves(startSquare, piece, attackedSquaresGenerationProcessor, false, true);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, attackedSquaresGenerationProcessor, AttackedSquaresGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, attackedSquaresGenerationProcessor);
     }
 }
 
@@ -319,9 +318,9 @@ void Board::legalMovesExist(int colour) {
         int piece = squares[startSquare];
         if (Piece::getColour(piece) != colour) continue;
 
-        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, legalMoveSearchProcessor, NormalMoveGenerationStrategy);
+        if (Piece::isSlidingPiece(piece)) generateSlidingMoves(startSquare, piece, legalMoveSearchProcessor);
         else if (Piece::getType(piece) == Piece::Pawn) generatePawnMoves(startSquare, piece, legalMoveSearchProcessor);
-        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, legalMoveSearchProcessor, NormalMoveGenerationStrategy);
+        else if (Piece::getType(piece) == Piece::Knight) generateKnightMoves(startSquare, piece, legalMoveSearchProcessor);
 
         if (hasLegalMoves) return;
     }
@@ -483,7 +482,7 @@ void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProces
     int rookTargetSquare = kingSquare + 1 * directionMultiplier;
 
     if (isCastlingPossible(kingSquare, rookSquare, kingTargetSquare))
-        processor->processMove(CastlingMove(kingSquare, kingTargetSquare, rookSquare, rookTargetSquare));
+        processor->processMove(CastlingMove{kingSquare, kingTargetSquare, rookSquare, rookTargetSquare});
 }
 
 bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
@@ -523,7 +522,7 @@ bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
     return true;
 }
 
-void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy) {
+void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor) {
     int pieceType = Piece::getType(piece);
     int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
     int endDirIndex = pieceType == Piece::Rook ? 4 : 8;
@@ -536,10 +535,10 @@ void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *proc
             auto targetSquare = startSquare + directionOffsets[directionIndex] * offset;
             auto targetPiece = squares[targetSquare];
 
-            if (strategy->shouldAddMove(targetPiece, colour))
-                processor->processMove(NormalMove(startSquare, targetSquare, targetPiece));
+            if (processor->shouldAddMove(targetPiece, colour))
+                processor->processMove(NormalMove{startSquare, targetSquare, targetPiece});
 
-            if (strategy->shouldStopGeneratingSlidingMoves(targetPiece, colour))
+            if (processor->shouldStopGeneratingSlidingMoves(targetPiece, colour))
                 break;
         }
     }
@@ -630,7 +629,7 @@ void Board::generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor
     generateEnPassantMoves(startSquare, piece, processor);
 }
 
-void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *processor, MoveGenerationStrategy *strategy) {
+void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *processor) {
     int file = startSquare % 8;
 
     for (auto offset: knightMoveOffsets) {
@@ -645,8 +644,8 @@ void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *proce
 
         int pieceInTargetSquare = squares[targetSquarePosition];
 
-        if (strategy->shouldAddMove(pieceInTargetSquare, Piece::getColour(piece)))
-            processor->processMove(NormalMove(startSquare, targetSquarePosition, pieceInTargetSquare));
+        if (processor->shouldAddMove(pieceInTargetSquare, Piece::getColour(piece)))
+            processor->processMove(NormalMove{startSquare, targetSquarePosition, pieceInTargetSquare});
     }
 }
 
@@ -685,7 +684,7 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
         int targetPositionOffset = Piece::getColour(piece) == Piece::White ? 8 : -8;
 
         processor->processMove(
-                EnPassantMove(square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition)
+                EnPassantMove{square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition}
         );
     }
 }
