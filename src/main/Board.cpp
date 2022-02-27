@@ -167,16 +167,17 @@ void Board::generatePins(int pieceType, int startSquare) {
             int targetSquare = startSquare + directionOffsets[directionIndex] * offset;
             int targetPiece = squares[targetSquare];
 
-            if (potentialPinnedPiecePosition == -1 &&
-                Piece::getColour(targetPiece) == opponentColour
-                && Piece::getType(targetPiece) != Piece::King) {
-                potentialPinnedPiecePosition = targetSquare;
+            if (Piece::getColour(targetPiece) == colour) break;
+
+            if (potentialPinnedPiecePosition == -1) {
+                if (Piece::getColour(targetPiece) == opponentColour
+                    && Piece::getType(targetPiece) != Piece::King)
+                    potentialPinnedPiecePosition = targetSquare;
+
                 continue;
             }
 
-            if (Piece::getColour(targetPiece) == colour) break;
-
-            if (potentialPinnedPiecePosition == -1 || targetPiece == Piece::None) continue;
+            if (targetPiece == Piece::None) continue;
 
             if (targetPiece == (Piece::King | opponentColour))
                 pins[potentialPinnedPiecePosition] = directionIndex;
