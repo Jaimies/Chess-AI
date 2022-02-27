@@ -536,8 +536,6 @@ void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *proc
             auto targetSquare = startSquare + directionOffsets[directionIndex] * offset;
             auto targetPiece = squares[targetSquare];
 
-            auto targetPieceColour = Piece::getColour(targetPiece);
-
             if (strategy->shouldAddMove(targetPiece, colour))
                 processor->processMove(NormalMove(startSquare, targetSquare, targetPiece));
 
