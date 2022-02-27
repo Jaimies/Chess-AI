@@ -2,7 +2,7 @@
 #include "../main/Piece.h"
 #include "../main/Move.h"
 
-TEST(MoveTest, FromString) {
+TEST(Move, FromString) {
     auto move = NormalMove::fromString("a1b1");
     EXPECT_EQ(move.startSquare, 0);
     EXPECT_EQ(move.targetSquare, 1);
@@ -16,7 +16,7 @@ TEST(MoveTest, FromString) {
     EXPECT_EQ(move3.targetSquare, 36);
 }
 
-TEST(MoveTest, ToString) {
+TEST(Move, ToString) {
     EXPECT_EQ(NormalMove::fromString("a1b1").toString(), "a1b1");
     EXPECT_EQ(NormalMove::fromString("d2d4").toString(), "d2d4");
     EXPECT_EQ(NormalMove::fromString("d7e5").toString(), "d7e5");
