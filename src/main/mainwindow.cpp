@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto manager = new GameManager();
     auto rootWidget = new QWidget(this);
-    info = new AnalysisInfoDisplay(rootWidget);
+    info = new AnalysisInfoDisplay(rootWidget, manager);
     chessBoard = new ChessBoardWidget(rootWidget, manager);
 
     manager->setup(chessBoard, info);
