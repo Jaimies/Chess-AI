@@ -49,8 +49,7 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
         }
 
         if (isMachineMove) {
-            auto moveToMake = move->toVariant();
-            board->makeMove(moveToMake);
+            board->makeMove(move);
             if (pieceToCapture) pieceToCapture->removeFromBoard();
             pieceToMove->moveToSquare(move->targetSquare);
             pieceToMove->setPiece(promotionMove->pieceToPromoteTo);
@@ -58,8 +57,7 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
         return;
     }
 
-    auto moveToMake = move->toVariant();
-    board->makeMove(moveToMake);
+    board->makeMove(move);
 
     if (move->getCapturedSquare() != -1) {
         auto piece = getPieceAtSquare(move->getCapturedSquare());

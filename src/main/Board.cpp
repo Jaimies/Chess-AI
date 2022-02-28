@@ -759,3 +759,13 @@ Board::~Board() {
     delete legalMoveSearchProcessor;
     delete attackedSquaresGenerationProcessor;
 }
+
+void Board::makeMove(Move *move) {
+    MoveVariant variant = move->toVariant();
+    makeMove(variant);
+}
+
+void Board::unmakeMove(Move *move) {
+    MoveVariant variant = move->toVariant();
+    unmakeMove(variant);
+}

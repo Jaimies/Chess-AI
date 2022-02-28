@@ -45,8 +45,10 @@ public:
     void generateCaptures();
     void checkIfLegalMovesExist();
     void makeMove(MoveVariant &move);
+    void makeMove(Move *move);
     void makeMoveWithoutGeneratingMoves(MoveVariant &move);
     void unmakeMove(MoveVariant &move);
+    void unmakeMove(Move *move);
     Board *copy();
 
     int getKingSquare() const;
