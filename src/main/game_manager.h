@@ -7,6 +7,7 @@
 #include <vector>
 
 class ChessBoardWidget;
+class AnalysisInfoDisplay;
 
 class GameManager {
 public:
@@ -15,8 +16,11 @@ public:
     explicit GameManager() {};
     void setup(ChessBoardWidget *wdg, AnalysisInfoDisplay *info);
     void makeMove(Move *move, bool isMachineMove = false);
+    void unmakeMove(Move *move);
+    void undoLastMove();
 
     AnalysisInfoDisplay *info;
+    QWidget *wdg;
 private:
     std::vector<UiPiece *> pieces;
     PromotionDialog *promotionDialog;

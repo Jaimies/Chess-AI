@@ -13,6 +13,7 @@ void GameManager::setup(ChessBoardWidget *wdg, AnalysisInfoDisplay *info) {
     }
 
     this->info = info;
+    this->wdg = wdg;
     promotionDialogBackground = new PromotionDialogOverlay(wdg);
     promotionDialog = new PromotionDialog(wdg);
     promotionDialog->setVisible(false);
@@ -83,10 +84,12 @@ void findTheBestMove(Board *board, GameManager *gameManager) {
     auto millisCount = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     gameManager->info->updateInfo(MoveGenerator::positionsAnalyzed, millisCount, MoveGenerator::depthSearchedTo, machineMove);
     delete machineMove;
+    gameManager->info->showAnalysisFinished();
 }
 
 void GameManager::makeMachineMoveIfNecessary() {
     if (board->colourToMove == Piece::Black) {
+        info->showAnalysisActive();
         new std::thread(findTheBestMove, board, this);
     }
 }
@@ -97,4 +100,21 @@ UiPiece *GameManager::getPieceAtSquare(int square) {
     }
 
     return nullptr;
+}
+
+void GameManager::undoLastMove() {
+    board->unmakeMove(board->getLastMove());
+    board->unmakeMove(board->getLastMove());
+
+    board->generateMoves();
+
+    for (auto piece: pieces) delete piece;
+    pieces.clear();
+
+    for (int square = 0; square < 64; square++) {
+        auto piece = board->squares[square];
+
+        if (piece != Piece::None)
+            pieces.push_back(new UiPiece(dynamic_cast<QWidget *>(wdg), square, piece));
+    }
 }

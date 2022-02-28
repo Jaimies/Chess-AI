@@ -769,3 +769,7 @@ void Board::unmakeMove(Move *move) {
     MoveVariant variant = move->toVariant();
     unmakeMove(variant);
 }
+
+Move *Board::getLastMove() {
+    return visit(GetMovePointerVisitor(), moveHistory.top());
+}

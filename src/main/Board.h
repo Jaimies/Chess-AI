@@ -48,6 +48,7 @@ public:
     void makeMove(Move *move);
     void makeMoveWithoutGeneratingMoves(MoveVariant &move);
     void unmakeMove(MoveVariant &move);
+    Move *getLastMove();
     void unmakeMove(Move *move);
     Board *copy();
 
