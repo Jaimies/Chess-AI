@@ -120,13 +120,15 @@ const std::array<Evaluation, 64> *MoveGenerator::getSquareValueTable(Board *boar
     throw std::invalid_argument("Expected a piece with a type, got " + std::to_string(piece));
 }
 
-long evaluateSide(Board *board, int color) {
+int64_t performEvaluation(Board *board) {
     long sum = 0;
 
     for (int square = 0; square < 64; square++) {
         auto piece = board->squares[square];
-        if (Piece::getColour(piece) != color) continue;
-        sum += Piece::getValue(piece) + getPiecePositionValue(board, piece, square);
+        if (piece == Piece::None) continue;
+        auto squareEvaluation = Piece::getValue(piece) + getPiecePositionValue(board, piece, square);
+        if (Piece::getColour(piece) == board->colourToMove) sum += squareEvaluation;
+        else sum -= squareEvaluation;
     }
 
     return sum;
@@ -142,10 +144,7 @@ long MoveGenerator::evaluate(Board *board, int depth) {
     if (!board->hasLegalMoves)
         return evaluatePositionWithoutMoves(board, depth);
 
-    auto evaluation = evaluateSide(board, board->colourToMove);
-    auto opponentEvaluation = evaluateSide(board, Piece::getOpponentColour(board->colourToMove));
-
-    return evaluation - opponentEvaluation;
+    return performEvaluation(board);
 }
 
 auto determineIfMoveCanCaptureVisitor = DetermineIfMoveCanCaptureVisitor();
