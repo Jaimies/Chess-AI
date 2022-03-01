@@ -82,7 +82,7 @@ void ChessBoardWidget::processDropEvent(QDropEvent *event) {
     }
 }
 
-int getSquare(QPointF position) {
+int getSquare(QPoint position) {
     int file = 7 - position.x() / 100;
     int rank = position.y() / 100;
 
@@ -160,10 +160,18 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
     if (square == -1) return;
 
     if (draggedIcon) {
-        hidePossibleMoveMarkers();
-
-        if (child->getSquare() == draggedIcon->getSquare()) {
+        if (square == draggedIcon->getSquare()) {
+            hidePossibleMoveMarkers();
             draggedIcon = nullptr;
+            return;
+        }
+
+        auto pieceColor = Piece::getColour(gameManager->board->squares[square]);
+
+        if (pieceColor == gameManager->board->colourToMove) {
+            hidePossibleMoveMarkers();
+        } else {
+            tryToMakeMove(square);
             return;
         }
     }
