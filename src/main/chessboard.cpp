@@ -12,6 +12,7 @@
 #include "icon.h"
 #include "piece_ui.h"
 #include "chessboard.h"
+#include <iostream>
 
 Icon *ChessBoardWidget::createPossibleMoveIcon(int square) {
     int rank = square / 8;
@@ -37,6 +38,10 @@ void ChessBoardWidget::showPossibleMoveMarkers(int startSquare) {
         moves[move->targetSquare] = move;
         possibleMoveIcons[move->targetSquare]->setVisible(true);
     }
+}
+
+void ChessBoardWidget::hidePossibleMoveMarkers() {
+    for (auto icon: possibleMoveIcons) icon->setVisible(false);
 }
 
 void ChessBoardWidget::dragEnterEvent(QDragEnterEvent *event) {
@@ -79,8 +84,6 @@ void ChessBoardWidget::processDropEvent(QDropEvent *event) {
 void ChessBoardWidget::dropEvent(QDropEvent *event) {
     processDropEvent(event);
 
-    for (auto icon: possibleMoveIcons) icon->setVisible(false);
-
     int file = 7 - event->pos().x() / 100;
     int rank = event->pos().y() / 100;
 
@@ -90,7 +93,11 @@ void ChessBoardWidget::dropEvent(QDropEvent *event) {
     draggedIcon->setVisible(true);
 
     auto move = moves[square];
-    if (move) gameManager->makeMove(move);
+    if (move) {
+        gameManager->makeMove(move);
+        hidePossibleMoveMarkers();
+        draggedIcon = nullptr;
+    }
 
     for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
@@ -141,6 +148,16 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
     auto child = (UiPiece *) childAt(event->pos());
 
     if (!shouldStartDrag(child)) return;
+
+    if (draggedIcon) {
+        hidePossibleMoveMarkers();
+
+        if (child->getSquare() == draggedIcon->getSquare()) {
+            draggedIcon = nullptr;
+            return;
+        }
+    }
+
     this->draggedIcon = child;
 
     showPossibleMoveMarkers(child->getSquare());

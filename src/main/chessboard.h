@@ -34,6 +34,7 @@ protected:
 private:
     void generatePossibleMoveMarkers();
     void showPossibleMoveMarkers(int startSquare);
+    void hidePossibleMoveMarkers();
     void processDropEvent(QDropEvent *event);
     Icon *createPossibleMoveIcon(int square);
     void startDrag(UiPiece *child, QMouseEvent *event);
