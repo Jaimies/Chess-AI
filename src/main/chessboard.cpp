@@ -18,9 +18,9 @@ void ChessBoardWidget::generatePossibleMoveMarkers() {
         int rank = square / 8;
         int file = square % 8;
         auto possibleMoveIcon = new Icon(this);
-        possibleMoveIcon->setPixmap(QIcon(":images/circle.svg").pixmap(QSize(30, 30)));
-        possibleMoveIcon->move(700 - file * 100 + 40, rank * 100 + 40);
-        possibleMoveIcon->setFixedSize(20, 20);
+        possibleMoveIcon->setPixmap(QIcon(":images/red_square.svg").pixmap(QSize(100, 100)));
+        possibleMoveIcon->move(700 - file * 100, rank * 100);
+        possibleMoveIcon->setFixedSize(100, 100);
         possibleMoveIcon->setVisible(false);
         possibleMoveIcons[square] = possibleMoveIcon;
     }
