@@ -13,20 +13,31 @@
 #include "piece_ui.h"
 #include "chessboard.h"
 
-void ChessBoardWidget::generatePossibleMoveMarkers() {
-    for (unsigned int square = 0; square < 64; square++) {
-        int rank = square / 8;
-        int file = square % 8;
-        auto possibleMoveIcon = new Icon(this);
-        possibleMoveIcon->setPixmap(QIcon(":images/red_square.svg").pixmap(QSize(100, 100)));
-        possibleMoveIcon->move(700 - file * 100, rank * 100);
-        possibleMoveIcon->setFixedSize(100, 100);
-        possibleMoveIcon->setVisible(false);
-        possibleMoveIcons[square] = possibleMoveIcon;
-    }
+Icon *ChessBoardWidget::createPossibleMoveIcon(int square) {
+    int rank = square / 8;
+    int file = square % 8;
+    auto possibleMoveIcon = new Icon(this);
+    possibleMoveIcon->setPixmap(QIcon(":images/red_square.svg").pixmap(QSize(100, 100)));
+    possibleMoveIcon->move(700 - file * 100, rank * 100);
+    possibleMoveIcon->setFixedSize(100, 100);
+    possibleMoveIcon->setVisible(false);
+    return possibleMoveIcon;
 }
 
-std::array<Move *, 64> moves{nullptr};
+void ChessBoardWidget::generatePossibleMoveMarkers() {
+    for (unsigned int square = 0; square < 64; square++)
+        possibleMoveIcons[square] = createPossibleMoveIcon(square);
+}
+
+void ChessBoardWidget::showPossibleMoveMarkers(int startSquare) {
+    auto possibleMoves = getPossibleMoves(startSquare);
+
+    for (auto move: possibleMoves) {
+        auto icons = possibleMoveIcons;
+        moves[move->targetSquare] = move;
+        possibleMoveIcons[move->targetSquare]->setVisible(true);
+    }
+}
 
 void ChessBoardWidget::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
@@ -45,7 +56,7 @@ static bool isValidCoordinate(int coordinate) {
     return coordinate >= 0 && coordinate <= 7;
 }
 
-void ChessBoardWidget::dropEvent(QDropEvent *event) {
+void ChessBoardWidget::processDropEvent(QDropEvent *event) {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
@@ -63,10 +74,12 @@ void ChessBoardWidget::dropEvent(QDropEvent *event) {
     } else {
         event->ignore();
     }
+}
 
-    for (auto icon: possibleMoveIcons) {
-        icon->setVisible(false);
-    }
+void ChessBoardWidget::dropEvent(QDropEvent *event) {
+    processDropEvent(event);
+
+    for (auto icon: possibleMoveIcons) icon->setVisible(false);
 
     int file = 7 - event->pos().x() / 100;
     int rank = event->pos().y() / 100;
@@ -74,7 +87,6 @@ void ChessBoardWidget::dropEvent(QDropEvent *event) {
     if (!draggedIcon || !isValidCoordinate(file) || !isValidCoordinate(rank)) return;
 
     int square = rank * 8 + file;
-
     draggedIcon->setVisible(true);
 
     auto move = moves[square];
@@ -83,14 +95,7 @@ void ChessBoardWidget::dropEvent(QDropEvent *event) {
     for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
 
-void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
-    UiPiece *child = static_cast<UiPiece *>(childAt(event->pos()));
-    if (!child || !child->isDraggable
-        || Piece::getColour(gameManager->board->squares[child->getSquare()]) != gameManager->board->colourToMove)
-        return;
-
-    this->draggedIcon = child;
-
+void ChessBoardWidget::startDrag(UiPiece *child, QMouseEvent *event) {
     QPixmap pixmap = child->pixmap();
 
     QByteArray itemData;
@@ -105,36 +110,63 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
 
     child->setVisible(false);
 
-    auto allMoves = VectorUtil::map<MoveVariant, Move *>(gameManager->board->legalMoves, [](MoveVariant &variant) {
+    drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
+}
+
+std::vector<Move *> toMoves(std::vector<MoveVariant> moves) {
+    return VectorUtil::map<MoveVariant, Move *>(moves, [](MoveVariant &variant) {
         return visit(GetMovePointerVisitor(), variant);
     });
+}
 
-    auto possibleMoves = VectorUtil::filter(allMoves, [child](auto move) {
-        return move->startSquare == child->getSquare();
+std::vector<Move *> ChessBoardWidget::getPossibleMoves(int startSquare) {
+    auto allMoves = toMoves(gameManager->board->legalMoves);
+
+    return VectorUtil::filter(allMoves, [startSquare](auto move) {
+        return move->startSquare == startSquare;
     });
+}
 
-    for (auto move: possibleMoves) {
-        auto icons = possibleMoveIcons;
-        moves[move->targetSquare] = move;
-        possibleMoveIcons[move->targetSquare]->setVisible(true);
-    }
-    drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
+bool ChessBoardWidget::canPieceMove(int square) {
+    auto pieceColor = Piece::getColour(gameManager->board->squares[square]);
+    return pieceColor == gameManager->board->colourToMove;
+}
+
+bool ChessBoardWidget::shouldStartDrag(UiPiece *child) {
+    return child && child->isDraggable
+           && canPieceMove(child->getSquare());
+}
+
+void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
+    auto child = (UiPiece *) childAt(event->pos());
+
+    if (!shouldStartDrag(child)) return;
+    this->draggedIcon = child;
+
+    showPossibleMoveMarkers(child->getSquare());
+    startDrag(child, event);
+}
+
+QColor getColor(int rank, int file) {
+    bool isWhiteCell = (rank + file) % 2 == 0;
+    return isWhiteCell ? QColor(244, 216, 184) : QColor(190, 134, 102);
+}
+
+QRect getRect(int rank, int file) {
+    return QRect(rank * 100, file * 100, 100, 100);
+}
+
+void drawSquare(int square, QPainter &painter) {
+    auto rank = square / 8;
+    auto file = square % 8;
+
+    painter.setBrush(getColor(rank, file));
+    painter.drawRect(getRect(rank, file));
 }
 
 void ChessBoardWidget::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
 
-    for (unsigned int square = 0; square < 64; square++) {
-        auto rank = square / 8;
-        auto file = square % 8;
-        bool isWhiteCell = (rank + file) % 2 == 0;
-        auto color = isWhiteCell
-                     ? QColor(244, 216, 184)
-                     : QColor(190, 134, 102);
-
-        painter.setBrush(color);
-
-        QRect r(rank * 100, file * 100, 100, 100);
-        painter.drawRect(r);
-    }
+    for (int square = 0; square < 64; square++)
+        drawSquare(square, painter);
 }

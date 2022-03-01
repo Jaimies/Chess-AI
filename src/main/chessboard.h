@@ -33,7 +33,15 @@ protected:
 
 private:
     void generatePossibleMoveMarkers();
+    void showPossibleMoveMarkers(int startSquare);
+    void processDropEvent(QDropEvent *event);
+    Icon *createPossibleMoveIcon(int square);
+    void startDrag(UiPiece *child, QMouseEvent *event);
+    std::vector<Move *> getPossibleMoves(int startSquare);
+    bool shouldStartDrag(UiPiece *child);
+    bool canPieceMove(int square);
 
+    std::array<Move *, 64> moves{nullptr};
     std::array<Icon *, 64> possibleMoveIcons;
     GameManager *gameManager;
 };
