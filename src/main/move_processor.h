@@ -41,13 +41,17 @@ public:
     explicit AttackedSquaresGenerationProcessor(Board *board) : board(board) {}
     void processMove(MoveVariant move) override;
 
-    [[nodiscard]] bool shouldAddMove(int targetPiece, int colour) const override { return true;
+    [[nodiscard]] bool shouldAddMove(int targetPiece, int colour) const override {
+        return true;
     };
 
+    static bool isCapturable(int piece) {
+        return piece != Piece::None && Piece::getType(piece) != Piece::King;
+    }
+
     [[nodiscard]] bool shouldStopGeneratingSlidingMoves(int targetPiece, int colour) const override {
-        return (targetPiece != Piece::None
-                && Piece::getType(targetPiece) != Piece::King)
-               || Piece::getColour(targetPiece) == colour;
+        return Piece::getColour(targetPiece) == colour
+                || isCapturable(targetPiece);
     };
 
 private:
