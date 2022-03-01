@@ -36,6 +36,8 @@ private:
     void showPossibleMoveMarkers(int startSquare);
     void hidePossibleMoveMarkers();
     void processDropEvent(QDropEvent *event);
+    void tryToMakeMove(int square);
+    void setActiveSquare(UiPiece *piece, QMouseEvent *event);
     Icon *createPossibleMoveIcon(int square);
     void startDrag(UiPiece *child, QMouseEvent *event);
     std::vector<Move *> getPossibleMoves(int startSquare);

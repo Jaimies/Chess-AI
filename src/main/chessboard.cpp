@@ -42,6 +42,7 @@ void ChessBoardWidget::showPossibleMoveMarkers(int startSquare) {
 
 void ChessBoardWidget::hidePossibleMoveMarkers() {
     for (auto icon: possibleMoveIcons) icon->setVisible(false);
+    for (int square = 0; square < 64; square++) moves[square] = nullptr;
 }
 
 void ChessBoardWidget::dragEnterEvent(QDragEnterEvent *event) {
@@ -81,25 +82,23 @@ void ChessBoardWidget::processDropEvent(QDropEvent *event) {
     }
 }
 
+int getSquare(QPointF position) {
+    int file = 7 - position.x() / 100;
+    int rank = position.y() / 100;
+
+    if (!isValidCoordinate(file) || !isValidCoordinate(rank)) return -1;
+
+    return rank * 8 + file;
+}
+
 void ChessBoardWidget::dropEvent(QDropEvent *event) {
     processDropEvent(event);
 
-    int file = 7 - event->pos().x() / 100;
-    int rank = event->pos().y() / 100;
+    auto square = getSquare(event->pos());
+    if (!draggedIcon || square == -1) return;
 
-    if (!draggedIcon || !isValidCoordinate(file) || !isValidCoordinate(rank)) return;
-
-    int square = rank * 8 + file;
     draggedIcon->setVisible(true);
-
-    auto move = moves[square];
-    if (move) {
-        gameManager->makeMove(move);
-        hidePossibleMoveMarkers();
-        draggedIcon = nullptr;
-    }
-
-    for (int square = 0; square < 64; square++) moves[square] = nullptr;
+    tryToMakeMove(square);
 }
 
 void ChessBoardWidget::startDrag(UiPiece *child, QMouseEvent *event) {
@@ -144,10 +143,21 @@ bool ChessBoardWidget::shouldStartDrag(UiPiece *child) {
            && canPieceMove(child->getSquare());
 }
 
+void ChessBoardWidget::tryToMakeMove(int square) {
+    auto move = moves[square];
+    if (move != nullptr) {
+        gameManager->makeMove(move);
+        hidePossibleMoveMarkers();
+        draggedIcon = nullptr;
+        for (int square = 0; square < 64; square++) moves[square] = nullptr;
+    }
+}
+
 void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
     auto child = (UiPiece *) childAt(event->pos());
 
-    if (!shouldStartDrag(child)) return;
+    auto square = getSquare(event->pos());
+    if (square == -1) return;
 
     if (draggedIcon) {
         hidePossibleMoveMarkers();
@@ -158,8 +168,13 @@ void ChessBoardWidget::mousePressEvent(QMouseEvent *event) {
         }
     }
 
-    this->draggedIcon = child;
+    setActiveSquare(child, event);
+}
 
+void ChessBoardWidget::setActiveSquare(UiPiece *child, QMouseEvent *event) {
+    if (!shouldStartDrag(child)) return;
+
+    this->draggedIcon = child;
     showPossibleMoveMarkers(child->getSquare());
     startDrag(child, event);
 }
