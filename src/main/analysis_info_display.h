@@ -6,6 +6,8 @@
 #include "Move.h"
 #include "game_manager.h"
 
+const int labelHeight = 50;
+
 class GameManager;
 
 class AnalysisInfoDisplay : public QWidget {

@@ -6,24 +6,23 @@
 #include <QObject>
 
 AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) : QWidget(parent) {
-    setFixedHeight(1000);
-    positionCount->setFixedSize(400, 80);
+    positionCount->setFixedSize(400, labelHeight);
 
-    timeElapsed->setFixedSize(400, 80);
-    timeElapsed->move(0, 80);
+    timeElapsed->setFixedSize(400, labelHeight);
+    timeElapsed->move(0, labelHeight);
 
-    depth->setFixedSize(400, 80);
-    depth->move(0, 160);
+    depth->setFixedSize(400, labelHeight);
+    depth->move(0, labelHeight * 2);
 
-    machineMove->setFixedSize(400, 80);
-    machineMove->move(0, 240);
+    machineMove->setFixedSize(400, labelHeight);
+    machineMove->move(0, labelHeight * 3);
 
-    analyzing->setFixedSize(400, 80);
-    analyzing->move(0, 320);
+    analyzing->setFixedSize(400, labelHeight);
+    analyzing->move(0, labelHeight * 4);
 
     undo->setText("Undo");
-    undo->move(0, 400);
-    undo->setFixedSize(400, 80);
+    undo->move(0, labelHeight * 5);
+    undo->setFixedSize(400, labelHeight);
 
     QObject::connect(undo, &QPushButton::clicked, [manager]() {
         manager->undoLastMove();

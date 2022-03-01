@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent) {
     this->setWindowTitle(tr("Chess AI"));
     this->setMinimumSize(1300, 900);
+    this->setStyleSheet("QMainWindow {background-color: #1e202a; }");
 
     auto manager = new GameManager();
     auto rootWidget = new QWidget(this);
