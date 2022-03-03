@@ -37,6 +37,7 @@ set(PROJECT_SOURCES
         src/main/board/zobrist_hash_generator.cpp src/main/board/zobrist_hash_generator.h
         src/main/ai/MoveGenerator.cpp src/main/ai/MoveGenerator.h
         src/main/board/move_processor.h src/main/board/move_processor.cpp
+        src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
 
         resources.qrc
         ${TS_FILES}
