@@ -251,7 +251,7 @@ Move *_getBestMove(Board *board, int depth) {
     std::vector<std::thread *> threads;
 
     for (auto move: moves) {
-        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestDeepEvaluation, &bestMove, &mutex, &transpositions](Board *board) {
+        threads.push_back(new std::thread([move, depth, &bestDeepEvaluation, &bestMove, &mutex, &transpositions](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
             auto deepEvaluation = -deepEvaluate(board, depth, transpositions);
