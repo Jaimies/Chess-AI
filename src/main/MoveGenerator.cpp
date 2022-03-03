@@ -258,13 +258,13 @@ Move *_getBestMove(Board *board, int depth) {
 
             board->unmakeMove(moveCopy);
 
+            mutex.lock();
             if (deepEvaluation > bestDeepEvaluation) {
-                mutex.lock();
                 bestDeepEvaluation = deepEvaluation;
                 delete bestMove;
                 bestMove = visit(GetMovePointerVisitor(), moveCopy);
-                mutex.unlock();
             }
+            mutex.unlock();
 
             delete board;
         }, board->copy()));
