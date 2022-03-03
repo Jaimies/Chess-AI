@@ -221,7 +221,7 @@ int64_t deepEvaluate(
                           : cachedEvaluation->second;
 
         if (cachedEvaluation == transpositions->end())
-            transpositions->insert(std::pair(boardHash, evaluation));
+            transpositions->assign_if_equal(boardHash, 0, evaluation);
 
         board->unmakeMove(move);
 
