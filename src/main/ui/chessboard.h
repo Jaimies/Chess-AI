@@ -2,9 +2,9 @@
 
 #include "mainwindow.h"
 
-#include "VectorUtil.h"
-#include "Piece.h"
-#include "Board.h"
+#include "../util/VectorUtil.h"
+#include "../board/Piece.h"
+#include "../board/Board.h"
 #include <QDrag>
 #include <QLabel>
 #include <QMimeData>

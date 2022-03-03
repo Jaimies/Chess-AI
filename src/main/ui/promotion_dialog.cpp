@@ -1,5 +1,5 @@
 #include "promotion_dialog.h"
-#include "Piece.h"
+#include "../board/Piece.h"
 #include "piece_ui.h"
 #include <QMouseEvent>
 #include <functional>

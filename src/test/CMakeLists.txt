@@ -18,9 +18,9 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(
-        all_tests ../main/Board.cpp ../main/Move.cpp ../main/Piece.cpp
-        ../main/zobrist_hash_generator.cpp ../main/MoveGenerator.cpp BoardTest.cpp
+        all_tests ../main/board/Board.cpp ../main/board/Move.cpp ../main/board/Piece.cpp
+        ../main/board/zobrist_hash_generator.cpp ../main/ai/MoveGenerator.cpp BoardTest.cpp
         MoveGeneratorTest.cpp MoveTest.cpp zobrist_hash_generator_test.cpp
-        ../main/move_processor.h ../main/move_processor.cpp
+        ../main/board/move_processor.h ../main/board/move_processor.cpp
 )
 target_link_libraries(all_tests gtest_main Folly::folly ${BOOST_LIBRARIES})

@@ -39,6 +39,13 @@ public:
             {'n', Piece::Knight},
     };
 
+    ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor(this);
+    UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
+    GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
+    GetBasicMoveVisitor getBasicMoveVisitor = GetBasicMoveVisitor();
+    IsCastlingMoveVisitor isCastlingMoveVisitor = IsCastlingMoveVisitor();
+    GetEnPassantMoveVisitor getEnPassantMoveVisitor = GetEnPassantMoveVisitor();
+
     ~Board();
 
     void generateMoves();
@@ -102,13 +109,6 @@ private:
     int opponentKingSquare;
     bool _isInEndgame = false;
     uint64_t zobristHash = 0;
-
-    ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor(this);
-    UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
-    GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
-    GetBasicMoveVisitor getBasicMoveVisitor = GetBasicMoveVisitor();
-    IsCastlingMoveVisitor isCastlingMoveVisitor = IsCastlingMoveVisitor();
-    GetEnPassantMoveVisitor getEnPassantMoveVisitor = GetEnPassantMoveVisitor();
 
     MoveGenerationProcessor *moveGenerationProcessor = new MoveGenerationProcessor(this);
     CaptureGenerationProcessor *captureGenerationProcessor = new CaptureGenerationProcessor(this);

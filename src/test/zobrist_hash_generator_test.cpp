@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "../main/zobrist_hash_generator.h"
-#include "../main/Board.h"
+#include "../main/board/zobrist_hash_generator.h"
+#include "../main/board/Board.h"
 
 TEST(ZobristHashGenerator, DifferentPositionsReturnDifferentHashes) {
     generateHashes();

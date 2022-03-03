@@ -22,21 +22,21 @@ find_package(Boost REQUIRED)
 set(TS_FILES Chess_en_CA.ts)
 
 set(PROJECT_SOURCES
-        src/main/Board.cpp src/main/Board.h
-        src/main/Move.cpp src/main/Move.h
-        src/main/Piece.cpp src/main/Piece.h
-        src/main/VectorUtil.h
-        src/main/analysis_info_display.cpp src/main/analysis_info_display.h
-        src/main/chessboard.cpp src/main/chessboard.h
-        src/main/game_manager.cpp src/main/game_manager.h
-        src/main/icon.cpp src/main/icon.h
+        src/main/board/Board.cpp src/main/board/Board.h
+        src/main/board/Move.cpp src/main/board/Move.h
+        src/main/board/Piece.cpp src/main/board/Piece.h
+        src/main/util/VectorUtil.h
+        src/main/ui/analysis_info_display.cpp src/main/ui/analysis_info_display.h
+        src/main/ui/chessboard.cpp src/main/ui/chessboard.h
+        src/main/ui/game_manager.cpp src/main/ui/game_manager.h
+        src/main/ui/icon.cpp src/main/ui/icon.h
         src/main/main.cpp
-        src/main/mainwindow.cpp src/main/mainwindow.h
-        src/main/promotion_dialog.cpp src/main/promotion_dialog.h
-        src/main/piece_ui.cpp src/main/piece_ui.h
-        src/main/zobrist_hash_generator.cpp src/main/zobrist_hash_generator.h
-        src/main/MoveGenerator.cpp src/main/MoveGenerator.h
-        src/main/move_processor.h src/main/move_processor.cpp
+        src/main/ui/mainwindow.cpp src/main/ui/mainwindow.h
+        src/main/ui/promotion_dialog.cpp src/main/ui/promotion_dialog.h
+        src/main/ui/piece_ui.cpp src/main/ui/piece_ui.h
+        src/main/board/zobrist_hash_generator.cpp src/main/board/zobrist_hash_generator.h
+        src/main/ai/MoveGenerator.cpp src/main/ai/MoveGenerator.h
+        src/main/board/move_processor.h src/main/board/move_processor.cpp
 
         resources.qrc
         ${TS_FILES}

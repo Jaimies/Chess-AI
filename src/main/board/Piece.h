@@ -18,11 +18,11 @@ public:
     static const int LeftRook = 32;
     static const int RightRook = 64;
 
-    static const int PawnValue = 1000;
-    static const int BishopValue = 3000;
-    static const int KnightValue = 3000;
-    static const int RookValue = 5000;
-    static const int QueenValue = 9000;
+    static const int PawnValue = 10000;
+    static const int BishopValue = 30000;
+    static const int KnightValue = 30000;
+    static const int RookValue = 50000;
+    static const int QueenValue = 90000;
 
     static int getColour(int piece);
     static int getType(int piece);

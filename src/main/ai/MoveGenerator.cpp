@@ -1,12 +1,12 @@
 #include <limits>
 #include <thread>
 #include <mutex>
-#include "Piece.h"
-#include "Move.h"
-#include "zobrist_hash_generator.h"
+#include "../board/Piece.h"
+#include "../board/Move.h"
+#include "../board/zobrist_hash_generator.h"
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include "MoveGenerator.h"
-#include "VectorUtil.h"
+#include "../util/VectorUtil.h"
 
 using Evaluation = long;
 

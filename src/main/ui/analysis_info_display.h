@@ -3,7 +3,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QWidget>
-#include "Move.h"
+#include "../board/Move.h"
 #include "game_manager.h"
 
 const int labelHeight = 50;

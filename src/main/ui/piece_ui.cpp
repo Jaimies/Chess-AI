@@ -2,7 +2,7 @@
 #include <QIcon>
 #include <QWidget>
 #include <QLayout>
-#include "Piece.h"
+#include "../board/Piece.h"
 
 std::map<int, std::string> iconNames{
         {1, "king"},
