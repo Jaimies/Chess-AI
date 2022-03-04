@@ -4,6 +4,9 @@
 #include <string>
 #include <iostream>
 #include <QObject>
+#include <QApplication>
+#include "update_analysis_info_event.h"
+#include "../ai/MoveGenerator.h"
 
 AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) : QWidget(parent) {
     positionCount->setFixedSize(400, labelHeight);
@@ -30,16 +33,7 @@ AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) 
 }
 
 void AnalysisInfoDisplay::updateInfo(AnalysisInfo *info) {
-    if (!info) return;
-
-    this->positionCount->setText(("Evaluated " + std::to_string(info->positionsAnalyzed) + " positions").c_str());
-    this->timeElapsed->setText(("Time elapsed: " + std::to_string(info->millisElapsed) + "ms").c_str());
-    this->depth->setText(("Depth: " + std::to_string(info->depthSearchedTo)).c_str());
-    this->machineMove->setText(("Last move: " + info->move->toString()).c_str());
-    showAnalysisFinished();
-
-    delete info->move;
-    delete info;
+    QApplication::postEvent(this, new UpdateAnalysisInfoEvent());
 }
 
 void AnalysisInfoDisplay::showAnalysisActive() {
@@ -53,4 +47,27 @@ void AnalysisInfoDisplay::showAnalysisActive() {
 
 void AnalysisInfoDisplay::showAnalysisFinished() {
     analyzing->setVisible(false);
+}
+
+bool AnalysisInfoDisplay::event(QEvent *event)
+{
+    if (event->type() != UpdateAnalysisInfoEvent::type) {
+        return QWidget::event(event);
+    }
+
+    auto info = MoveGenerator::analysisInfo;
+    if (!info) return true;
+
+    this->positionCount->setText(("Evaluated " + std::to_string(info->positionsAnalyzed) + " positions").c_str());
+    this->timeElapsed->setText(("Time elapsed: " + std::to_string(info->millisElapsed) + "ms").c_str());
+    this->depth->setText(("Depth: " + std::to_string(info->depthSearchedTo)).c_str());
+    this->machineMove->setText(("Last move: " + info->move->toString()).c_str());
+    showAnalysisFinished();
+
+    delete info->move;
+    delete info;
+
+    MoveGenerator::analysisInfo = nullptr;
+
+    return true;
 }

@@ -19,6 +19,9 @@ public:
     void showAnalysisActive();
     void showAnalysisFinished();
 
+protected:
+    bool event(QEvent *event);
+
 private:
     QLabel *positionCount = new QLabel(this);
     QLabel *timeElapsed = new QLabel(this);
