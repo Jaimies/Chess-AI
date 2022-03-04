@@ -1,8 +1,10 @@
 #pragma once
 
+#include "analysis_info.h"
+
 namespace MoveGenerator {
     extern unsigned long positionsAnalyzed;
-    extern int depthSearchedTo;
+    extern AnalysisInfo *analysisInfo;
 
     Move *getBestMove(Board *board);
     long evaluate(Board *board, int depth);

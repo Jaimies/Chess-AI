@@ -29,14 +29,24 @@ AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) 
     });
 }
 
-void AnalysisInfoDisplay::updateInfo(unsigned long long positionCount, unsigned long long millisElapsed, int depth, Move *machineMove) {
-    this->positionCount->setText(("Evaluated " + std::to_string(positionCount) + " positions").c_str());
-    this->timeElapsed->setText(("Time elapsed: " + std::to_string(millisElapsed) + "ms").c_str());
-    this->depth->setText(("Depth: " + std::to_string(depth)).c_str());
-    this->machineMove->setText(("Last move: " + machineMove->toString()).c_str());
+void AnalysisInfoDisplay::updateInfo(AnalysisInfo *info) {
+    if (!info) return;
+
+    this->positionCount->setText(("Evaluated " + std::to_string(info->positionsAnalyzed) + " positions").c_str());
+    this->timeElapsed->setText(("Time elapsed: " + std::to_string(info->millisElapsed) + "ms").c_str());
+    this->depth->setText(("Depth: " + std::to_string(info->depthSearchedTo)).c_str());
+    this->machineMove->setText(("Last move: " + info->move->toString()).c_str());
+    showAnalysisFinished();
+
+    delete info->move;
+    delete info;
 }
 
 void AnalysisInfoDisplay::showAnalysisActive() {
+    positionCount->setText("");
+    timeElapsed->setText("");
+    depth->setText("");
+    machineMove->setText("");
     analyzing->setVisible(true);
     analyzing->setText("Analyzing...............................................................................................");
 }

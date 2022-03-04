@@ -5,6 +5,7 @@
 #include <QWidget>
 #include "../board/Move.h"
 #include "game_manager.h"
+#include "../ai/analysis_info.h"
 
 const int labelHeight = 50;
 
@@ -14,7 +15,7 @@ class AnalysisInfoDisplay : public QWidget {
 public:
     AnalysisInfoDisplay(QWidget *parent, GameManager *manager);
 
-    void updateInfo(unsigned long long positionCount, unsigned long long millisElapsed, int depth, Move *machineMove);
+    void updateInfo(AnalysisInfo *info);
     void showAnalysisActive();
     void showAnalysisFinished();
 

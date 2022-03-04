@@ -17,7 +17,7 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 const Evaluation checkmateEvaluation = minEvaluation + 1000;
 
 unsigned long MoveGenerator::positionsAnalyzed = 0;
-int MoveGenerator::depthSearchedTo = 0;
+AnalysisInfo *MoveGenerator::analysisInfo = nullptr;
 std::vector<uint64_t> depthHashes;
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
@@ -188,6 +188,7 @@ Move *_getBestMove(Board *board, int depth) {
 Move *MoveGenerator::getBestMove(Board *board) {
     using namespace std::chrono;
 
+    analysisInfo = nullptr;
     positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
@@ -199,7 +200,7 @@ Move *MoveGenerator::getBestMove(Board *board) {
 
         if (millisCount > 2000) {
             delete boardCopy;
-            depthSearchedTo = depth;
+            analysisInfo = new AnalysisInfo(positionsAnalyzed, depth, bestMove, millisCount);
             return bestMove;
         }
 
