@@ -17,10 +17,11 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 const Evaluation checkmateEvaluation = minEvaluation + 1000;
 
 typedef tbb::concurrent_hash_map<uint64_t, int64_t> TranspositionTable;
+
 unsigned long MoveGenerator::positionsAnalyzed = 0;
 AnalysisInfo *MoveGenerator::analysisInfo = nullptr;
 std::vector<uint64_t> depthHashes;
-auto transpositions = new tbb::concurrent_hash_map<uint64_t, int64_t>();
+auto transpositions = new TranspositionTable();
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = getSquareValueTable(board, piece);
