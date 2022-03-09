@@ -159,7 +159,7 @@ Move *_getBestMove(Board *board, int depth) {
     std::mutex mutex;
     std::vector<std::thread *> threads;
 
-    for (auto move: moves) {
+    for (const auto& move: moves) {
         threads.push_back(new std::thread([move, depth, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
