@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(Chess)
 
-find_package(folly CONFIG REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
+find_package(TBB CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 file(GLOB SOURCES "*.cpp")
@@ -25,4 +25,4 @@ add_executable(
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h
 )
-target_link_libraries(all_tests gtest_main Folly::folly ${BOOST_LIBRARIES})
+target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb)

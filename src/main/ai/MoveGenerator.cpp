@@ -4,7 +4,7 @@
 #include "../board/Piece.h"
 #include "../board/Move.h"
 #include "../board/zobrist_hash_generator.h"
-#include <folly/concurrency/ConcurrentHashMap.h>
+#include <tbb/concurrent_hash_map.h>
 #include "MoveGenerator.h"
 #include "square_value_tables.h"
 #include "../util/VectorUtil.h"
@@ -16,9 +16,11 @@ const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
 
 const Evaluation checkmateEvaluation = minEvaluation + 1000;
 
+typedef tbb::concurrent_hash_map<uint64_t, int64_t> TranspositionTable;
 unsigned long MoveGenerator::positionsAnalyzed = 0;
 AnalysisInfo *MoveGenerator::analysisInfo = nullptr;
 std::vector<uint64_t> depthHashes;
+auto transpositions = new tbb::concurrent_hash_map<uint64_t, int64_t>();
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = getSquareValueTable(board, piece);
@@ -98,7 +100,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
 }
 
 int64_t deepEvaluate(
-        Board *board, int depth, folly::ConcurrentHashMap<uint64_t, int64_t> *transpositions,
+        Board *board, int depth,
         int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
@@ -113,6 +115,7 @@ int64_t deepEvaluate(
         return evaluatePositionWithoutMoves(board, depth);
     }
 
+    TranspositionTable::const_accessor accessor;
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
@@ -120,14 +123,15 @@ int64_t deepEvaluate(
         board->makeMoveWithoutGeneratingMoves(move);
 
         auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
-        auto cachedEvaluation = transpositions->find(boardHash);
 
-        auto evaluation = cachedEvaluation == transpositions->end()
-                          ? -deepEvaluate(board, depth - 1, transpositions, -beta, -alpha)
-                          : cachedEvaluation->second;
+        auto isFound = transpositions->find(accessor, boardHash);
 
-        if (cachedEvaluation == transpositions->end())
-            transpositions->assign_if_equal(boardHash, 0, evaluation);
+        auto evaluation = !isFound
+                          ? -deepEvaluate(board, depth - 1, -beta, -alpha)
+                          : accessor->second;
+
+        if (!isFound)
+            transpositions->insert(accessor, evaluation);
 
         board->unmakeMove(move);
 
@@ -140,7 +144,6 @@ int64_t deepEvaluate(
 
 Move *_getBestMove(Board *board, int depth) {
     generateHashes();
-    auto transpositions = new folly::ConcurrentHashMap<uint64_t, int64_t>();
     depthHashes.clear();
 
     for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
@@ -157,11 +160,10 @@ Move *_getBestMove(Board *board, int depth) {
     std::vector<std::thread *> threads;
 
     for (auto move: moves) {
-        threads.push_back(new std::thread([move, depth, &bestDeepEvaluation, &bestMove, &mutex, &transpositions](Board *board) {
+        threads.push_back(new std::thread([move, depth, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto deepEvaluation = -deepEvaluate(board, depth, transpositions);
-
+            auto deepEvaluation = -deepEvaluate(board, depth);
             board->unmakeMove(moveCopy);
 
             mutex.lock();
@@ -181,7 +183,6 @@ Move *_getBestMove(Board *board, int depth) {
         delete thread;
     }
 
-    delete transpositions;
     return bestMove;
 }
 

@@ -75,3 +75,13 @@ TEST(MoveGenerator, GivesCheckmateInAMoreComplexPosition) {
 
     EXPECT_EQ(move->toString(), "e3d3");
 }
+
+TEST(MoveGenerator, DoesNotDoStupidMoves) {
+    auto board = Board::fromFenString("r1b1kbnr/p1p2ppp/2p1p3/q2pP3/1P1P4/P1N5/2P2PPP/R1BQK1NR b - - 0 1", Piece::Black);
+
+    for (int i = 0; i < 20; i++) {
+        auto bestMove = MoveGenerator::getBestMove(board);
+        ASSERT_EQ(bestMove->toString(), "f8b4");
+        std::cout << i + 1 << " / 20" << std::endl;
+    }
+}
