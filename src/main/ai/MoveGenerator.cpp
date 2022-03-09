@@ -153,7 +153,7 @@ Move *_getBestMove(Board *board, int depth) {
 
     if (board->legalMoves.empty()) return nullptr;
 
-    int64_t bestDeepEvaluation = minEvaluation;
+    int64_t bestEvaluation = minEvaluation;
 
     Move *bestMove = nullptr;
     auto moves = board->legalMoves;
@@ -161,16 +161,16 @@ Move *_getBestMove(Board *board, int depth) {
     std::mutex mutex;
     std::vector<std::thread *> threads;
 
-    for (const auto& move: moves) {
-        threads.push_back(new std::thread([move, depth, &bestDeepEvaluation, &bestMove, &mutex](Board *board) {
+    for (const auto &move: moves) {
+        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestMove, &mutex](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto deepEvaluation = -deepEvaluate(board, depth);
+            auto evaluation = -deepEvaluate(board, depth);
             board->unmakeMove(moveCopy);
 
             mutex.lock();
-            if (deepEvaluation > bestDeepEvaluation) {
-                bestDeepEvaluation = deepEvaluation;
+            if (evaluation > bestEvaluation) {
+                bestEvaluation = evaluation;
                 delete bestMove;
                 bestMove = visit(GetMovePointerVisitor(), moveCopy);
             }
