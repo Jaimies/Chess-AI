@@ -203,7 +203,7 @@ Move *MoveGenerator::getBestMove(Board *board) {
 
         if (millisCount > 2000) {
             delete boardCopy;
-            analysisInfo = new AnalysisInfo(positionsAnalyzed, depth, bestMove, millisCount);
+            analysisInfo = new AnalysisInfo{positionsAnalyzed, depth, bestMove, millisCount};
             return bestMove;
         }
 
