@@ -131,7 +131,7 @@ int64_t deepEvaluate(
                           : accessor->second;
 
         if (!isFound)
-            transpositions->insert(accessor, evaluation);
+            transpositions->insert({boardHash, evaluation});
 
         board->unmakeMove(move);
 
@@ -145,6 +145,7 @@ int64_t deepEvaluate(
 Move *_getBestMove(Board *board, int depth) {
     generateHashes();
     depthHashes.clear();
+    transpositions->clear();
 
     for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
         depthHashes.push_back(get64rand());
