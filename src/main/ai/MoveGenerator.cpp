@@ -143,6 +143,23 @@ int64_t deepEvaluate(
     return alpha;
 }
 
+void evaluateMove(Board *board, MoveVariant move, int depth, int64_t &bestEvaluation, Move *&bestMove, std::mutex &mutex) {
+    auto moveCopy = move;
+    board->makeMoveWithoutGeneratingMoves(moveCopy);
+    auto evaluation = -deepEvaluate(board, depth);
+    board->unmakeMove(moveCopy);
+
+    mutex.lock();
+    if (evaluation > bestEvaluation) {
+        bestEvaluation = evaluation;
+        delete bestMove;
+        bestMove = visit(GetMovePointerVisitor(), moveCopy);
+    }
+    mutex.unlock();
+
+    delete board;
+}
+
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     generateHashes();
     depthHashes.clear();
@@ -162,22 +179,8 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     std::vector<std::thread *> threads;
 
     for (const auto &move: moves) {
-        auto thread = new std::thread([move, depth, &bestEvaluation, &bestMove, &mutex](Board *board) {
-            auto moveCopy = move;
-            board->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto evaluation = -deepEvaluate(board, depth);
-            board->unmakeMove(moveCopy);
-
-            mutex.lock();
-            if (evaluation > bestEvaluation) {
-                bestEvaluation = evaluation;
-                delete bestMove;
-                bestMove = visit(GetMovePointerVisitor(), moveCopy);
-            }
-            mutex.unlock();
-
-            delete board;
-        }, board->copy());
+        auto moveCopy = move;
+        auto thread = new std::thread(evaluateMove, board->copy(), moveCopy, depth, std::ref(bestEvaluation), std::ref(bestMove), std::ref(mutex));
 
         if (!settings.useThreading) thread->join();
         else threads.push_back(thread);
