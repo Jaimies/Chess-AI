@@ -60,7 +60,7 @@ auto determineIfMoveCanCaptureVisitor = DetermineIfMoveCanCaptureVisitor();
 auto getMoveAddedValueVisitor = GetMoveAddedValueVisitor();
 auto getBasicMoveVisitor = GetBasicMoveVisitor();
 
-int guessMoveValue(const Board *board, MoveVariant &move) {
+int64_t guessMoveValue(const Board *board, MoveVariant &move) {
     auto canCapture = visit(determineIfMoveCanCaptureVisitor, move);
     auto addedValue = visit(getMoveAddedValueVisitor, move);
     auto basicMove = visit(getBasicMoveVisitor, move);
