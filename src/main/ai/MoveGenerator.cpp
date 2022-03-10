@@ -143,7 +143,7 @@ int64_t deepEvaluate(
     return alpha;
 }
 
-Move *_getBestMove(Board *board, int depth) {
+Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     generateHashes();
     depthHashes.clear();
     transpositions->clear();
@@ -162,7 +162,7 @@ Move *_getBestMove(Board *board, int depth) {
     std::vector<std::thread *> threads;
 
     for (const auto &move: moves) {
-        threads.push_back(new std::thread([move, depth, &bestEvaluation, &bestMove, &mutex](Board *board) {
+        auto thread = new std::thread([move, depth, &bestEvaluation, &bestMove, &mutex](Board *board) {
             auto moveCopy = move;
             board->makeMoveWithoutGeneratingMoves(moveCopy);
             auto evaluation = -deepEvaluate(board, depth);
@@ -177,7 +177,10 @@ Move *_getBestMove(Board *board, int depth) {
             mutex.unlock();
 
             delete board;
-        }, board->copy()));
+        }, board->copy());
+
+        if (!settings.useThreading) thread->join();
+        else threads.push_back(thread);
     }
 
     for (auto thread: threads) {
@@ -188,7 +191,7 @@ Move *_getBestMove(Board *board, int depth) {
     return bestMove;
 }
 
-Move *MoveGenerator::getBestMove(Board *board) {
+Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     using namespace std::chrono;
 
     analysisInfo = nullptr;
@@ -198,7 +201,7 @@ Move *MoveGenerator::getBestMove(Board *board) {
     int depth = 4;
 
     while (true) {
-        auto bestMove = _getBestMove(boardCopy, depth);
+        auto bestMove = _getBestMove(boardCopy, depth, settings);
         auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
 
         if (millisCount > 2000) {

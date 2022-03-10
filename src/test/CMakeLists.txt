@@ -23,6 +23,6 @@ add_executable(
         ai/MoveGeneratorTest.cpp board/MoveTest.cpp board/zobrist_hash_generator_test.cpp
         ../main/board/move_processor.h ../main/board/move_processor.cpp
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
-        ../main/ai/analysis_info.h
+        ../main/ai/analysis_info.h ../main/ai/ai_settings.h
 )
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb)

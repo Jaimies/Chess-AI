@@ -39,7 +39,7 @@ set(PROJECT_SOURCES
         src/main/board/move_processor.h src/main/board/move_processor.cpp
         src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
         src/main/ai/analysis_info.h
-        src/main/ui/update_analysis_info_event.h
+        src/main/ui/update_analysis_info_event.h src/main/ai/ai_settings.h
 
         resources.qrc
         ${TS_FILES}
