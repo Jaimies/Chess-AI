@@ -24,5 +24,6 @@ add_executable(
         ../main/board/move_processor.h ../main/board/move_processor.cpp
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h
+        ../main/ai/move_evaluation_data.h ../main/ai/constants.h
 )
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb)

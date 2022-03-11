@@ -40,6 +40,7 @@ set(PROJECT_SOURCES
         src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
         src/main/ai/analysis_info.h
         src/main/ui/update_analysis_info_event.h src/main/ai/ai_settings.h
+        src/main/ai/move_evaluation_data.h src/main/ai/constants.h
 
         resources.qrc
         ${TS_FILES}

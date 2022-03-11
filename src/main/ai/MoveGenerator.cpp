@@ -8,13 +8,8 @@
 #include "MoveGenerator.h"
 #include "square_value_tables.h"
 #include "../util/VectorUtil.h"
-
-using Evaluation = long;
-
-const Evaluation minEvaluation = std::numeric_limits<Evaluation>::min() + 10;
-const Evaluation maxEvaluation = std::numeric_limits<Evaluation>::max() - 10;
-
-const Evaluation checkmateEvaluation = minEvaluation + 1000;
+#include "constants.h"
+#include "move_evaluation_data.h"
 
 typedef tbb::concurrent_hash_map<uint64_t, int64_t> TranspositionTable;
 
@@ -143,21 +138,20 @@ int64_t deepEvaluate(
     return alpha;
 }
 
-void evaluateMove(Board *board, MoveVariant move, int depth, int64_t &bestEvaluation, Move *&bestMove, std::mutex &mutex) {
-    auto moveCopy = move;
-    board->makeMoveWithoutGeneratingMoves(moveCopy);
-    auto evaluation = -deepEvaluate(board, depth);
-    board->unmakeMove(moveCopy);
+void evaluateMove(MoveEvaluationData *data, MoveVariant move) {
+    auto boardCopy = data->board->copy();
+    boardCopy->makeMoveWithoutGeneratingMoves(move);
+    auto evaluation = -deepEvaluate(boardCopy, data->depth);
+    boardCopy->unmakeMove(move);
 
-    mutex.lock();
-    if (evaluation > bestEvaluation) {
-        bestEvaluation = evaluation;
-        delete bestMove;
-        bestMove = visit(GetMovePointerVisitor(), moveCopy);
+    data->mutex->lock();
+    if (evaluation > *data->bestEvaluation) {
+        *data->bestEvaluation = evaluation;
+        data->bestMove = move;
     }
-    mutex.unlock();
+    data->mutex->unlock();
 
-    delete board;
+    delete boardCopy;
 }
 
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
@@ -170,17 +164,12 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
 
     if (board->legalMoves.empty()) return nullptr;
 
-    int64_t bestEvaluation = minEvaluation;
-
-    Move *bestMove = nullptr;
+    auto data = new MoveEvaluationData(board, depth);
     auto moves = board->legalMoves;
-
-    std::mutex mutex;
     std::vector<std::thread *> threads;
 
     for (const auto &move: moves) {
-        auto moveCopy = move;
-        auto thread = new std::thread(evaluateMove, board->copy(), moveCopy, depth, std::ref(bestEvaluation), std::ref(bestMove), std::ref(mutex));
+        auto thread = new std::thread(evaluateMove, data, move);
 
         if (!settings.useThreading) thread->join();
         else threads.push_back(thread);
@@ -191,7 +180,9 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
         delete thread;
     }
 
-    return bestMove;
+    auto bestMove = data->bestMove.value();
+    delete data;
+    return visit(GetMovePointerVisitor(), bestMove);
 }
 
 Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {

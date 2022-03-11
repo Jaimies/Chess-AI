@@ -39,7 +39,7 @@ public:
             {'n', Piece::Knight},
     };
 
-    ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor(this);
+    ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor{this};
     UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
     GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
     GetBasicMoveVisitor getBasicMoveVisitor = GetBasicMoveVisitor();
@@ -57,7 +57,7 @@ public:
     void unmakeMove(MoveVariant &move);
     Move *getLastMove();
     void unmakeMove(Move *move);
-    Board *copy();
+    Board *copy() const;
 
     int getKingSquare() const;
     int getOpponentKingSquare() const;

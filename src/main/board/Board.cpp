@@ -95,7 +95,7 @@ void Board::unmakeMove(MoveVariant &move) {
     zobristHash ^= visit(getZobristHashVisitor, move);
 }
 
-Board *Board::copy() {
+Board *Board::copy() const {
     auto board = new Board(colourToMove, moveHistory, castlingPieceMoved, squares);
     board->generateMoves();
     return board;
