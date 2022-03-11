@@ -97,7 +97,36 @@ long searchCaptures(Board *board, long alpha, long beta) {
 
 int64_t deepEvaluate(
         Board *board, int depth,
-        int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) {
+        int64_t alpha = minEvaluation, int64_t beta = maxEvaluation);
+
+void deepEvaluateMove(
+        Board *board, MoveVariant &move, int depth,
+        int64_t &alpha, int64_t &beta, bool &shouldExit) {
+    board->makeMoveWithoutGeneratingMoves(move);
+
+    auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
+
+    TranspositionTable::const_accessor accessor;
+    auto isFound = transpositions->find(accessor, boardHash);
+
+    auto evaluation = !isFound
+                      ? -deepEvaluate(board, depth - 1, -beta, -alpha)
+                      : accessor->second;
+
+    if (!isFound)
+        transpositions->insert({boardHash, evaluation});
+
+    board->unmakeMove(move);
+
+    if (evaluation >= beta) {
+        shouldExit = true;
+        alpha = beta;
+        return;
+    }
+    alpha = std::max(alpha, evaluation);
+}
+
+int64_t deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
         board->checkIfLegalMovesExist();
@@ -111,28 +140,15 @@ int64_t deepEvaluate(
         return evaluatePositionWithoutMoves(board, depth);
     }
 
-    TranspositionTable::const_accessor accessor;
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
+    bool shouldExit = false;
 
-    for (auto move: moves) {
-        board->makeMoveWithoutGeneratingMoves(move);
+    for (auto &move: moves) {
+        if (!shouldExit)
+            deepEvaluateMove(board, move, depth, alpha, beta, shouldExit);
 
-        auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
-
-        auto isFound = transpositions->find(accessor, boardHash);
-
-        auto evaluation = !isFound
-                          ? -deepEvaluate(board, depth - 1, -beta, -alpha)
-                          : accessor->second;
-
-        if (!isFound)
-            transpositions->insert({boardHash, evaluation});
-
-        board->unmakeMove(move);
-
-        if (evaluation >= beta) return beta;
-        alpha = std::max(alpha, evaluation);
+        else return alpha;
     }
 
     return alpha;
