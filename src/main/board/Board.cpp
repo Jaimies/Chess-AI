@@ -756,6 +756,7 @@ void Board::generateCaptures() {
 
 Board::~Board() {
     delete moveGenerationProcessor;
+    delete captureGenerationProcessor;
     delete legalMoveSearchProcessor;
     delete attackedSquaresGenerationProcessor;
 }
