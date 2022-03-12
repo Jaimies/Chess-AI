@@ -2,7 +2,7 @@
 #include "MoveGenerator.h"
 
 void deepEvaluateMove(
-        Board *board, MoveVariant move, int depth,
+        Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
         int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) {
     board->makeMoveWithoutGeneratingMoves(move);
 
@@ -12,7 +12,7 @@ void deepEvaluateMove(
     auto isFound = transpositions->find(accessor, boardHash);
 
     auto evaluation = !isFound
-                      ? -MoveGenerator::deepEvaluate(board, depth - 1, SequentialDeepEvaluationStrategy, -beta, -alpha)
+                      ? -MoveGenerator::deepEvaluate(board, depth - 1, SequentialDeepEvaluationStrategy, transpositions, -beta, -alpha)
                       : accessor->second;
 
     if (!isFound)
@@ -25,20 +25,20 @@ void deepEvaluateMove(
 _SequentialDeepEvaluationStrategy *SequentialDeepEvaluationStrategy = new _SequentialDeepEvaluationStrategy();
 _ParallelDeepEvaluationStrategy *ParallelDeepEvaluationStrategy = new _ParallelDeepEvaluationStrategy();
 
-int64_t DeepEvaluationStrategy::deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) {
+int64_t DeepEvaluationStrategy::deepEvaluate(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
     auto moves = std::vector(board->legalMoves);
     sortMoves(board, moves);
 
-    return _deepEvaluate(board, moves, depth, alpha, beta);
+    return _deepEvaluate(board, moves, depth, transpositions, alpha, beta);
 };
 
 int64_t
-_SequentialDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) {
+_SequentialDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
     bool shouldExit = false;
 
     for (auto &move: moves) {
         if (!shouldExit)
-            deepEvaluateMove(board, move, depth, alpha, beta, shouldExit, strategy);
+            deepEvaluateMove(board, move, depth, transpositions, alpha, beta, shouldExit, strategy);
 
         else return alpha;
     }
@@ -47,14 +47,14 @@ _SequentialDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveV
 }
 
 int64_t
-_ParallelDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) {
+_ParallelDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
     bool shouldExit = false;
 
-    auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit](tbb::blocked_range<size_t> range) {
+    auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit, transpositions](tbb::blocked_range<size_t> range) {
         for (size_t i = range.begin(); i < range.end(); ++i) {
             if (shouldExit) return;
             auto boardCopy = board->copy();
-            deepEvaluateMove(boardCopy, moves[i], depth, alpha, beta, shouldExit, strategy);
+            deepEvaluateMove(boardCopy, moves[i], depth, transpositions, alpha, beta, shouldExit, strategy);
             delete boardCopy;
         }
     };

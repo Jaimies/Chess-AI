@@ -38,7 +38,8 @@ long searchCaptures(Board *board, long alpha, long beta) {
     return alpha;
 }
 
-int64_t MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, int64_t alpha, int64_t beta) {
+int64_t
+MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
         board->checkIfLegalMovesExist();
@@ -52,13 +53,13 @@ int64_t MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrat
         return evaluatePositionWithoutMoves(board, depth);
     }
 
-    return strategy->deepEvaluate(board, depth, alpha, beta);
+    return strategy->deepEvaluate(board, depth, transpositions, alpha, beta);
 }
 
-void evaluateMove(MoveEvaluationData *data, MoveVariant move) {
+void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable *transpositions) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, ParallelDeepEvaluationStrategy);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, ParallelDeepEvaluationStrategy, transpositions);
     boardCopy->unmakeMove(move);
 
     data->mutex->lock();
@@ -74,7 +75,7 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move) {
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     generateHashes();
     depthHashes.clear();
-    transpositions->clear();
+    auto transpositions = new TranspositionTable();
 
     for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
         depthHashes.push_back(get64rand());
@@ -85,10 +86,13 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     auto moves = board->legalMoves;
     std::vector<std::thread *> threads;
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves](tbb::blocked_range<size_t> range) {
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves, transpositions](tbb::blocked_range<size_t> range) {
         for (size_t i = range.begin(); i < range.end(); ++i)
-            evaluateMove(data, moves[i]);
+            evaluateMove(data, moves[i], transpositions);
     });
+
+    // delete transpositions in the background to avoid delaying the analysis results
+    new std::thread([transpositions]() { delete transpositions; });
 
     auto bestMove = data->bestMove.value();
     delete data;

@@ -11,6 +11,7 @@ namespace MoveGenerator {
 
     int64_t deepEvaluate(
             Board *board, int depth, DeepEvaluationStrategy *strategy,
+            TranspositionTable *transpositions,
             int64_t alpha = minEvaluation, int64_t beta = maxEvaluation);
     Move *getBestMove(Board *board, AiSettings settings = prodAiSettings);
     long evaluate(Board *board, int depth);
