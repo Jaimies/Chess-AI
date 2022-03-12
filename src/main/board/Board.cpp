@@ -286,7 +286,7 @@ void Board::loadFenString(std::string &fenString) {
 }
 
 void Board::updateCastlingPieceMovement(MoveVariant &move) {
-    auto basicMove = visit(getBasicMoveVisitor, move);
+    auto basicMove = visit(GetBasicMoveVisitor, move);
     int piece = squares[basicMove.startSquare];
     int castlingPiece = getCastlingPiece(piece, basicMove.startSquare);
 
@@ -304,9 +304,9 @@ void Board::addMoveIfLegal(MoveVariant &potentialMove) {
 }
 
 bool Board::isMoveLegal(MoveVariant potentialMove) {
-    if (visit(isCastlingMoveVisitor, potentialMove)) return true;
+    if (visit(IsCastlingMoveVisitor, potentialMove)) return true;
 
-    auto enPassantMove = visit(getEnPassantMoveVisitor, potentialMove);
+    auto enPassantMove = visit(GetEnPassantMoveVisitor, potentialMove);
 
     return !violatesPin(potentialMove)
            && (!IsKingUnderAttack(potentialMove) || coversCheck(potentialMove) ||
@@ -332,7 +332,7 @@ bool Board::IsKingUnderAttack() {
 }
 
 bool Board::IsKingUnderAttack(MoveVariant potentialMove) {
-    auto basicMove = visit(getBasicMoveVisitor, potentialMove);
+    auto basicMove = visit(GetBasicMoveVisitor, potentialMove);
     if (basicMove.startSquare != kingSquare) return isKingUnderAttack;
     return squaresAttackedByOpponent[basicMove.targetSquare];
 }
@@ -365,7 +365,7 @@ void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
 }
 
 bool Board::violatesPin(MoveVariant &move) {
-    auto basicMove = visit(getBasicMoveVisitor, move);
+    auto basicMove = visit(GetBasicMoveVisitor, move);
     if (!pins.contains(basicMove.startSquare)) return false;
     if (Piece::getType(squares[basicMove.startSquare]) == Piece::Knight) return true;
 
@@ -381,7 +381,7 @@ bool Board::violatesPin(MoveVariant &move) {
 }
 
 bool Board::coversCheck(MoveVariant potentialMove) const {
-    auto basicMove = visit(getBasicMoveVisitor, potentialMove);
+    auto basicMove = visit(GetBasicMoveVisitor, potentialMove);
     return basicMove.startSquare != kingSquare &&
            checkSolvingMovePositions.contains(basicMove.targetSquare);
 }
@@ -675,7 +675,7 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
         if (moveHistory.empty()) continue;
 
         auto lastMove = moveHistory.top();
-        auto basicLastMove = visit(getBasicMoveVisitor, lastMove);
+        auto basicLastMove = visit(GetBasicMoveVisitor, lastMove);
 
         if (neighbourPiece != enemyPawn
             || getRank(basicLastMove.startSquare) != getPawnRank(neighbourPiece)
@@ -772,5 +772,5 @@ void Board::unmakeMove(Move *move) {
 }
 
 Move *Board::getLastMove() {
-    return visit(GetMovePointerVisitor(), moveHistory.top());
+    return visit(GetMovePointerVisitor, moveHistory.top());
 }

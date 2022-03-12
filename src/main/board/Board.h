@@ -42,9 +42,6 @@ public:
     ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor{this};
     UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
     GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
-    GetBasicMoveVisitor getBasicMoveVisitor = GetBasicMoveVisitor();
-    IsCastlingMoveVisitor isCastlingMoveVisitor = IsCastlingMoveVisitor();
-    GetEnPassantMoveVisitor getEnPassantMoveVisitor = GetEnPassantMoveVisitor();
 
     ~Board();
 

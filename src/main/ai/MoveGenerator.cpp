@@ -1,22 +1,20 @@
-#include <limits>
 #include <thread>
 #include <mutex>
 #include "../board/Piece.h"
 #include "../board/Move.h"
 #include "../board/zobrist_hash_generator.h"
-#include <tbb/concurrent_hash_map.h>
+#include <tbb/parallel_for.h>
 #include "MoveGenerator.h"
 #include "square_value_tables.h"
 #include "../util/VectorUtil.h"
 #include "constants.h"
 #include "move_evaluation_data.h"
-
-typedef tbb::concurrent_hash_map<uint64_t, int64_t> TranspositionTable;
+#include "deep_evaluation_strategy.h"
+#include "transpositions.h"
+#include "move_sorting.h"
 
 unsigned long MoveGenerator::positionsAnalyzed = 0;
 AnalysisInfo *MoveGenerator::analysisInfo = nullptr;
-std::vector<uint64_t> depthHashes;
-auto transpositions = new TranspositionTable();
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = getSquareValueTable(board, piece);
@@ -51,28 +49,6 @@ long MoveGenerator::evaluate(Board *board, int depth) {
     return performEvaluation(board);
 }
 
-auto determineIfMoveCanCaptureVisitor = DetermineIfMoveCanCaptureVisitor();
-auto getMoveAddedValueVisitor = GetMoveAddedValueVisitor();
-auto getBasicMoveVisitor = GetBasicMoveVisitor();
-
-int64_t guessMoveValue(const Board *board, MoveVariant &move) {
-    auto canCapture = visit(determineIfMoveCanCaptureVisitor, move);
-    auto addedValue = visit(getMoveAddedValueVisitor, move);
-    auto basicMove = visit(getBasicMoveVisitor, move);
-    auto movePieceType = Piece::getType(board->squares[basicMove.startSquare]);
-    auto capturePieceType = canCapture ? Piece::getType(board->squares[basicMove.targetSquare]) : Piece::None;
-
-    int moveScoreGuess = 10 * (Piece::getValue(capturePieceType) + addedValue) - Piece::getValue(movePieceType);
-
-    return moveScoreGuess;
-}
-
-void sortMoves(Board *board, std::vector<MoveVariant> &moves) {
-    std::sort(moves.begin(), moves.end(), [board](MoveVariant &move, MoveVariant otherMove) {
-        return guessMoveValue(board, move) > guessMoveValue(board, otherMove);
-    });
-}
-
 long searchCaptures(Board *board, long alpha, long beta) {
     auto evaluation = MoveGenerator::evaluate(board, 0);
     if (evaluation >= beta) return beta;
@@ -95,38 +71,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
     return alpha;
 }
 
-int64_t deepEvaluate(
-        Board *board, int depth,
-        int64_t alpha = minEvaluation, int64_t beta = maxEvaluation);
-
-void deepEvaluateMove(
-        Board *board, MoveVariant &move, int depth,
-        int64_t &alpha, int64_t &beta, bool &shouldExit) {
-    board->makeMoveWithoutGeneratingMoves(move);
-
-    auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
-
-    TranspositionTable::const_accessor accessor;
-    auto isFound = transpositions->find(accessor, boardHash);
-
-    auto evaluation = !isFound
-                      ? -deepEvaluate(board, depth - 1, -beta, -alpha)
-                      : accessor->second;
-
-    if (!isFound)
-        transpositions->insert({boardHash, evaluation});
-
-    board->unmakeMove(move);
-
-    if (evaluation >= beta) {
-        shouldExit = true;
-        alpha = beta;
-        return;
-    }
-    alpha = std::max(alpha, evaluation);
-}
-
-int64_t deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) {
+int64_t MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, int64_t alpha, int64_t beta) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
         board->checkIfLegalMovesExist();
@@ -140,24 +85,13 @@ int64_t deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) {
         return evaluatePositionWithoutMoves(board, depth);
     }
 
-    auto moves = std::vector(board->legalMoves);
-    sortMoves(board, moves);
-    bool shouldExit = false;
-
-    for (auto &move: moves) {
-        if (!shouldExit)
-            deepEvaluateMove(board, move, depth, alpha, beta, shouldExit);
-
-        else return alpha;
-    }
-
-    return alpha;
+    return strategy->deepEvaluate(board, depth, alpha, beta);
 }
 
 void evaluateMove(MoveEvaluationData *data, MoveVariant move) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -deepEvaluate(boardCopy, data->depth);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, ParallelDeepEvaluationStrategy);
     boardCopy->unmakeMove(move);
 
     data->mutex->lock();
@@ -184,21 +118,14 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     auto moves = board->legalMoves;
     std::vector<std::thread *> threads;
 
-    for (const auto &move: moves) {
-        auto thread = new std::thread(evaluateMove, data, move);
-
-        if (!settings.useThreading) thread->join();
-        else threads.push_back(thread);
-    }
-
-    for (auto thread: threads) {
-        thread->join();
-        delete thread;
-    }
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves](tbb::blocked_range<size_t> range) {
+        for (size_t i = range.begin(); i < range.end(); ++i)
+            evaluateMove(data, moves[i]);
+    });
 
     auto bestMove = data->bestMove.value();
     delete data;
-    return visit(GetMovePointerVisitor(), bestMove);
+    return visit(GetMovePointerVisitor, bestMove);
 }
 
 Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {

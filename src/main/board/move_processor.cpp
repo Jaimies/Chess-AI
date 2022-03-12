@@ -6,7 +6,7 @@ void MoveGenerationProcessor::processMove(MoveVariant move) {
 }
 
 void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {
-    auto basicMove = visit(GetBasicMoveVisitor(), move);
+    auto basicMove = visit(GetBasicMoveVisitor, move);
     if (basicMove.targetSquare == board->kingSquare)
         board->attacksKing[basicMove.startSquare] = true;
 

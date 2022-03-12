@@ -121,7 +121,7 @@ void ChessBoardWidget::startDrag(UiPiece *child, QMouseEvent *event) {
 
 std::vector<Move *> toMoves(std::vector<MoveVariant> moves) {
     return VectorUtil::map<MoveVariant, Move *>(moves, [](MoveVariant &variant) {
-        return visit(GetMovePointerVisitor(), variant);
+        return visit(GetMovePointerVisitor, variant);
     });
 }
 

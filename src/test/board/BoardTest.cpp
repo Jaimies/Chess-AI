@@ -133,7 +133,7 @@ TEST(Board, generateCaptureMoves) {
     auto board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
     board->generateCaptures();
     EXPECT_EQ(board->legalMoves.size(), 1);
-    auto expectedMove = visit(GetMovePointerVisitor(), board->legalMoves[0]);
+    auto expectedMove = visit(GetMovePointerVisitor, board->legalMoves[0]);
     EXPECT_EQ(expectedMove->startSquare, 25);
     EXPECT_EQ(expectedMove->targetSquare, 29);
 
@@ -141,7 +141,7 @@ TEST(Board, generateCaptureMoves) {
     board->makeMoveWithoutGeneratingMoves(move);
 
     board->generateCaptures();
-    auto expectedMove2 = visit(GetMovePointerVisitor(), board->legalMoves[0]);
+    auto expectedMove2 = visit(GetMovePointerVisitor, board->legalMoves[0]);
     EXPECT_EQ(board->legalMoves.size(), 1);
     EXPECT_EQ(expectedMove2->startSquare, 39);
     EXPECT_EQ(expectedMove2->targetSquare, 33);

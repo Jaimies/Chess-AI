@@ -114,12 +114,14 @@ private:
     Board *board;
 };
 
-struct GetEnPassantMoveVisitor {
+struct _GetEnPassantMoveVisitor {
     std::optional<EnPassantMove> operator()(NormalMove &move) const { return {}; }
     std::optional<EnPassantMove> operator()(PromotionMove &move) const { return {}; }
     std::optional<EnPassantMove> operator()(CastlingMove &move) const { return {}; }
     std::optional<EnPassantMove> operator()(EnPassantMove &move) const { return move; }
 };
+
+extern _GetEnPassantMoveVisitor GetEnPassantMoveVisitor;
 
 struct GetZobristHashVisitor {
     explicit GetZobristHashVisitor(Board *board) : board(board) {};
@@ -133,37 +135,47 @@ private:
     Board *board;
 };
 
-struct IsCastlingMoveVisitor {
+struct _IsCastlingMoveVisitor {
     bool operator()(NormalMove &move) const { return false; }
     bool operator()(PromotionMove &move) const { return false; }
     bool operator()(CastlingMove &move) const { return true; }
     bool operator()(EnPassantMove &move) const { return false; }
 };
 
-struct GetBasicMoveVisitor {
+extern _IsCastlingMoveVisitor IsCastlingMoveVisitor;
+
+struct _GetBasicMoveVisitor {
     Move &operator()(NormalMove &move) const { return move; }
     Move &operator()(PromotionMove &move) const { return move; }
     Move &operator()(CastlingMove &move) const { return move; }
     Move &operator()(EnPassantMove &move) const { return move; }
 };
 
-struct GetMovePointerVisitor {
+extern _GetBasicMoveVisitor GetBasicMoveVisitor;
+
+struct _GetMovePointerVisitor {
     Move *operator()(NormalMove &move) const { return new NormalMove(move); }
     Move *operator()(PromotionMove &move) const { return new PromotionMove(move); }
     Move *operator()(CastlingMove &move) const { return new CastlingMove(move); }
     Move *operator()(EnPassantMove &move) const { return new EnPassantMove(move); }
 };
 
-struct DetermineIfMoveCanCaptureVisitor {
+extern _GetMovePointerVisitor GetMovePointerVisitor;
+
+struct _DetermineIfMoveCanCaptureVisitor {
     bool operator()(NormalMove &move) const { return move.canCapture(); }
     bool operator()(PromotionMove &move) const { return move.canCapture(); }
     bool operator()(CastlingMove &move) const { return move.canCapture(); }
     bool operator()(EnPassantMove &move) const { return move.canCapture(); }
 };
 
-struct GetMoveAddedValueVisitor {
+extern _DetermineIfMoveCanCaptureVisitor DetermineIfMoveCanCaptureVisitor;
+
+struct _GetMoveAddedValueVisitor {
     int operator()(NormalMove &move) const { return move.getAddedValue(); }
     int operator()(PromotionMove &move) const { return move.getAddedValue(); }
     int operator()(CastlingMove &move) const { return move.getAddedValue(); }
     int operator()(EnPassantMove &move) const { return move.getAddedValue(); }
 };
+
+extern _GetMoveAddedValueVisitor GetMoveAddedValueVisitor;

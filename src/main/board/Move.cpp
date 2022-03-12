@@ -142,3 +142,10 @@ uint64_t GetZobristHashVisitor::operator()(EnPassantMove &move) const {
 uint64_t GetZobristHashVisitor::operator()(CastlingMove &move) const {
     return move.getZorbristHash(board->squares);
 }
+
+_GetEnPassantMoveVisitor GetEnPassantMoveVisitor;
+_IsCastlingMoveVisitor IsCastlingMoveVisitor;
+_GetBasicMoveVisitor GetBasicMoveVisitor;
+_GetMoveAddedValueVisitor GetMoveAddedValueVisitor;
+_GetMovePointerVisitor GetMovePointerVisitor;
+_DetermineIfMoveCanCaptureVisitor DetermineIfMoveCanCaptureVisitor;
