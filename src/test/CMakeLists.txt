@@ -30,5 +30,6 @@ add_executable(
         ../main/ai/move_sorting.h ../main/ai/move_sorting.cpp
         ../main/ai/transpositions.cpp ../main/ai/transpositions.h
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
+        ../main/ai/evaluation.h ../main/ai/evaluation.cpp
 )
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb)
