@@ -114,7 +114,7 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
 
         if (millisCount > 2000) {
             delete boardCopy;
-            analysisInfo = new AnalysisInfo{positionsAnalyzed, depth, bestMove, millisCount};
+            analysisInfo = new AnalysisInfo{positionsAnalyzed, depth + 1, bestMove, millisCount};
             return bestMove;
         }
 
