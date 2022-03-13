@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <thread>
 #include "../../main/board/Board.h"
 #include "../../main/ai/MoveGenerator.h"
 
@@ -13,6 +14,7 @@ TEST(MoveGenerator, FindsBestMoveInPositionWithCheckmate) {
     ASSERT_TRUE(move->startSquare == 62 && move->targetSquare == 45
                 || move->startSquare == 62 && move->targetSquare == 47
                 || move->startSquare == 52 && move->targetSquare == 44);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, FindsBestMoveInPositionWithPotentialCaptures) {
@@ -23,6 +25,7 @@ TEST(MoveGenerator, FindsBestMoveInPositionWithPotentialCaptures) {
     std::cout << MoveGenerator::positionsAnalyzed << std::endl;
 
     ASSERT_TRUE(move->startSquare == 42 && move->targetSquare == 35);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, FindsCorrectBestMoveInPosition2) {
@@ -33,6 +36,7 @@ TEST(MoveGenerator, FindsCorrectBestMoveInPosition2) {
     std::cout << MoveGenerator::positionsAnalyzed << std::endl;
 
     ASSERT_TRUE(move->startSquare == 25 && move->targetSquare == 29);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, UsesSensiblePositioning) {
@@ -41,6 +45,7 @@ TEST(MoveGenerator, UsesSensiblePositioning) {
     board->makeMove(moveToMake);
     auto move = MoveGenerator::getBestMove(board);
     std::cout << move->startSquare << " " << move->targetSquare;
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, evaluationIncludesPositioning) {
@@ -67,6 +72,7 @@ TEST(MoveGenerator, GivesCheckmate) {
     std::cout << MoveGenerator::analysisInfo->depthSearchedTo << std::endl;
 
     EXPECT_EQ(move->toString(), "c3c1");
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, GivesCheckmateInAMoreComplexPosition) {
@@ -74,6 +80,7 @@ TEST(MoveGenerator, GivesCheckmateInAMoreComplexPosition) {
     auto move = MoveGenerator::getBestMove(board);
 
     EXPECT_EQ(move->toString(), "e3d3");
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, DoesNotDoStupidMoves) {
@@ -83,5 +90,6 @@ TEST(MoveGenerator, DoesNotDoStupidMoves) {
         auto bestMove = MoveGenerator::getBestMove(board);
         ASSERT_EQ(bestMove->toString(), "f8b4");
         std::cout << i + 1 << " / 20" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

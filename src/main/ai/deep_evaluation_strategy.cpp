@@ -37,10 +37,8 @@ _SequentialDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveV
     bool shouldExit = false;
 
     for (auto &move: moves) {
-        if (!shouldExit)
-            deepEvaluateMove(board, move, depth, transpositions, alpha, beta, shouldExit, strategy);
-
-        else return alpha;
+        if (shouldExit || analysisStopped) return alpha;
+        deepEvaluateMove(board, move, depth, transpositions, alpha, beta, shouldExit, strategy);
     }
 
     return alpha;
@@ -52,7 +50,7 @@ _ParallelDeepEvaluationStrategy::_deepEvaluate(Board *board, std::vector<MoveVar
 
     auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit, transpositions](tbb::blocked_range<size_t> range) {
         for (size_t i = range.begin(); i < range.end(); ++i) {
-            if (shouldExit) return;
+            if (shouldExit || analysisStopped) return;
             auto boardCopy = board->copy();
             deepEvaluateMove(boardCopy, moves[i], depth, transpositions, alpha, beta, shouldExit, strategy);
             delete boardCopy;

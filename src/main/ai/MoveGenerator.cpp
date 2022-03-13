@@ -87,8 +87,10 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     std::vector<std::thread *> threads;
 
     tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves, transpositions](tbb::blocked_range<size_t> range) {
-        for (size_t i = range.begin(); i < range.end(); ++i)
+        for (size_t i = range.begin(); i < range.end(); ++i) {
+            if (analysisStopped) return;
             evaluateMove(data, moves[i], transpositions);
+        }
     });
 
     // delete transpositions in the background to avoid delaying the analysis results
@@ -102,22 +104,31 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
 Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     using namespace std::chrono;
 
+    analysisStopped = false;
+
     analysisInfo = nullptr;
     positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
     int depth = 4;
+    Move *bestMove;
 
-    while (true) {
-        auto bestMove = _getBestMove(boardCopy, depth, settings);
-        auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
-
-        if (millisCount > 2000) {
-            delete boardCopy;
+    new std::thread([&bestMove, boardCopy, &depth, settings, begin]() {
+        while (!analysisStopped) {
+            bestMove = _getBestMove(boardCopy, depth, settings);
+            auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
             analysisInfo = new AnalysisInfo{positionsAnalyzed, depth + 1, bestMove, millisCount};
-            return bestMove;
+            depth++;
         }
+    });
 
-        depth++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    while (!bestMove) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
+
+    analysisStopped = true;
+
+    return bestMove;
 }
