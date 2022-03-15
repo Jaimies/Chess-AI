@@ -110,10 +110,11 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
-    int depth = 4;
     Move *bestMove;
 
-    new std::thread([&bestMove, boardCopy, &depth, settings, begin]() {
+    new std::thread([&bestMove, boardCopy, settings, begin]() {
+        int depth = 4;
+
         while (!analysisStopped) {
             bestMove = _getBestMove(boardCopy, depth, settings);
             auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
