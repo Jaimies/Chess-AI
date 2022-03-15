@@ -84,7 +84,6 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
 
     auto data = new MoveEvaluationData(board, depth);
     auto moves = board->legalMoves;
-    std::vector<std::thread *> threads;
 
     tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves, transpositions](tbb::blocked_range<size_t> range) {
         for (size_t i = range.begin(); i < range.end(); ++i) {
