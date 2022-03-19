@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../../main/board/Board.h"
+#include "../string_util.h"
 
 int countMoves(Board *board, int depth) {
     if (depth == 0) return 1;
@@ -145,4 +146,14 @@ TEST(Board, generateCaptureMoves) {
     EXPECT_EQ(board->legalMoves.size(), 1);
     EXPECT_EQ(expectedMove2->startSquare, 39);
     EXPECT_EQ(expectedMove2->targetSquare, 33);
+}
+
+void assertToFenStringWorksInPosition(std::string position) {
+    EXPECT_EQ(Board::fromFenString(position)->toFenString(), takeUntil(position, ' '));
+}
+
+TEST(Board, toFenString) {
+    assertToFenStringWorksInPosition(Board::startPosition);
+    assertToFenStringWorksInPosition("r1b1kbnr/p1p2ppp/2p1p3/q2pP3/1P1P4/P1N5/2P2PPP/R1BQK1NR/ b - - 0 1");
+    assertToFenStringWorksInPosition("8/2k5/3p4/p2P1p2/P2P1P2/4K3/8/8/ b - - 0 1");
 }

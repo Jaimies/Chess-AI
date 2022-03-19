@@ -87,8 +87,9 @@ public:
     };
 
     static Board *fromFenString(std::string fenString, int colourToMove = Piece::White);
+    std::string toFenString() const;
 
-    static inline const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    static inline const std::string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w KQkq - 0 1";
 
 private:
     int numSquaresToEdge[64][8];

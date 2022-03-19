@@ -20,7 +20,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(
         all_tests ../main/board/Board.cpp ../main/board/Move.cpp ../main/board/Piece.cpp
         ../main/board/zobrist_hash_generator.cpp ../main/ai/MoveGenerator.cpp board/BoardTest.cpp
-        ai/MoveGeneratorTest.cpp board/MoveTest.cpp board/zobrist_hash_generator_test.cpp
+        ai/MoveGeneratorTest.cpp board/MoveTest.cpp board/zobrist_hash_generator_test.cpp util/string_util_test.cpp
         ../main/board/move_processor.h ../main/board/move_processor.cpp
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h
@@ -31,5 +31,6 @@ add_executable(
         ../main/ai/transpositions.cpp ../main/ai/transpositions.h
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
         ../main/ai/evaluation.h ../main/ai/evaluation.cpp
+        string_util.h string_util.cpp
 )
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb)

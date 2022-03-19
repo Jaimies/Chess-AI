@@ -774,3 +774,49 @@ void Board::unmakeMove(Move *move) {
 Move *Board::getLastMove() {
     return visit(GetMovePointerVisitor, moveHistory.top());
 }
+
+char getPieceLetter(int type) {
+    if (type == Piece::Pawn) return 'p';
+    if (type == Piece::Rook) return 'r';
+    if (type == Piece::Queen) return 'q';
+    if (type == Piece::Bishop) return 'b';
+    if (type == Piece::Knight) return 'n';
+    if (type == Piece::King) return 'k';
+    return '1';
+}
+
+std::string Board::toFenString() const {
+    std::string output;
+    uint32_t emptyPieceCount = 0;
+
+    for (int rank = 7; rank >= 0; rank--) {
+        for (int file = 0; file < 8; file++) {
+            auto square = rank * 8 + file;
+            auto piece = squares[square];
+
+            if (piece == Piece::None) {
+                emptyPieceCount++;
+            } else {
+                if (emptyPieceCount > 0) {
+                    output += std::to_string(emptyPieceCount);
+                    emptyPieceCount = 0;
+                }
+
+                auto type = Piece::getType(piece);
+                auto color = Piece::getColour(piece);
+                auto pieceLetter = getPieceLetter(type);
+                char finalChar = color == Piece::White ? toupper(pieceLetter) : pieceLetter;
+                output += finalChar;
+            }
+        }
+
+        if (emptyPieceCount > 0) {
+            output += std::to_string(emptyPieceCount);
+            emptyPieceCount = 0;
+        }
+
+        output += "/";
+    }
+
+    return output;
+}
