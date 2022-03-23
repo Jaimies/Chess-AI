@@ -44,6 +44,7 @@ set(PROJECT_SOURCES
         src/main/ai/evaluation_update_strategy.h src/main/ai/evaluation_update_strategy.cpp
         src/main/ai/move_sorting.h src/main/ai/move_sorting.cpp
         src/main/ai/transpositions.cpp src/main/ai/transpositions.h
+        src/main/ai/transposition.h
         src/main/ai/evaluation.h src/main/ai/evaluation.cpp
         resources.qrc
         ${TS_FILES}

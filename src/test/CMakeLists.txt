@@ -29,6 +29,7 @@ add_executable(
         ../main/ai/deep_evaluation_strategy.h ../main/ai/deep_evaluation_strategy.cpp
         ../main/ai/move_sorting.h ../main/ai/move_sorting.cpp
         ../main/ai/transpositions.cpp ../main/ai/transpositions.h
+        ../main/ai/transposition.h
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
         ../main/ai/evaluation.h ../main/ai/evaluation.cpp
         string_util.h string_util.cpp

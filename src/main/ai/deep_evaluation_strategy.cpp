@@ -1,23 +1,46 @@
 #include "deep_evaluation_strategy.h"
 #include "MoveGenerator.h"
+#include "transpositions.h"
+#include "../board/zobrist_hash_generator.h"
+
+int getEvaluationType(int64_t eval, int64_t &alpha, int64_t &beta) {
+    if (eval <= alpha) return Transposition::UPPER;
+    if (eval >= beta) return Transposition::LOWER;
+    return Transposition::EXACT;
+}
+
+int64_t getEvaluation(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
+    auto boardHash = hash(board);
+
+    TranspositionTable::const_accessor accessor;
+    auto isFound = transpositions->find(accessor, boardHash);
+
+    if (isFound && accessor->second.zobristKey == boardHash && accessor->second.depth >= depth) {
+        if (accessor->second.type == Transposition::EXACT)
+            return accessor->second.value;
+
+        if (accessor->second.type == Transposition::LOWER && accessor->second.value >= beta)
+            return beta;
+
+        if (accessor->second.type == Transposition::UPPER && accessor->second.value <= alpha)
+            return alpha;
+    }
+
+    auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, SequentialDeepEvaluationStrategy, transpositions, -beta, -alpha);
+
+    auto type = getEvaluationType(evaluation, alpha, beta);
+
+    if (!isFound)
+        transpositions->insert({boardHash, {boardHash, evaluation, depth, type}});
+
+    return evaluation;
+}
 
 void deepEvaluateMove(
         Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
         int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) {
     board->makeMoveWithoutGeneratingMoves(move);
-
-    auto boardHash = board->getZobristHash() ^ depthHashes[depth - 1];
-
-    TranspositionTable::const_accessor accessor;
-    auto isFound = transpositions->find(accessor, boardHash);
-
-    auto evaluation = !isFound
-                      ? -MoveGenerator::deepEvaluate(board, depth - 1, SequentialDeepEvaluationStrategy, transpositions, -beta, -alpha)
-                      : accessor->second;
-
-    if (!isFound)
-        transpositions->insert({boardHash, evaluation});
-
+    auto evaluation = getEvaluation(board, depth, transpositions, alpha, beta);
     board->unmakeMove(move);
     strategy->updateEvaluation(evaluation, shouldExit, alpha, beta);
 }
