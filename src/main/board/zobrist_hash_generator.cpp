@@ -1,12 +1,17 @@
 #include <array>
+#include <random>
 #include "Board.h"
 
+std::uniform_int_distribution<uint64_t> dis(
+        std::numeric_limits<uint64_t>::min(),
+        std::numeric_limits<uint64_t>::max()
+);
+
+std::random_device rd;
+std::mt19937_64 gen(rd());
+
 uint64_t get64rand() {
-    return
-            (((uint64_t) rand() << 0) & 0x000000000000FFFFull) |
-            (((uint64_t) rand() << 16) & 0x00000000FFFF0000ull) |
-            (((uint64_t) rand() << 32) & 0x0000FFFF00000000ull) |
-            (((uint64_t) rand() << 48) & 0xFFFF000000000000ull);
+    return dis(gen);
 }
 
 std::array<std::array<uint64_t, 12>, 64> hashTable;
