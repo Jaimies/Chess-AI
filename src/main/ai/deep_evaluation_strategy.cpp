@@ -10,7 +10,7 @@ int getEvaluationType(int64_t eval, int64_t &alpha, int64_t &beta) {
 }
 
 int64_t getEvaluation(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
-    auto boardHash = hash(board);
+    auto boardHash = board->getZobristHash();
 
     TranspositionTable::const_accessor accessor;
     auto isFound = transpositions->find(accessor, boardHash);
