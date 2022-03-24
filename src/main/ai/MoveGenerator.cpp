@@ -74,11 +74,7 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
 
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     generateHashes();
-    depthHashes.clear();
     auto transpositions = new TranspositionTable();
-
-    for (int depthHashIndex = 0; depthHashIndex < depth; depthHashIndex++)
-        depthHashes.push_back(get64rand());
 
     if (board->legalMoves.empty()) return nullptr;
 
