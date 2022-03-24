@@ -62,12 +62,12 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
     auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, ParallelDeepEvaluationStrategy, transpositions);
     boardCopy->unmakeMove(move);
 
-    data->mutex->lock();
-    if (evaluation > *data->bestEvaluation) {
-        *data->bestEvaluation = evaluation;
+    data->mutex.lock();
+    if (evaluation > data->bestEvaluation) {
+        data->bestEvaluation = evaluation;
         data->bestMove = move;
     }
-    data->mutex->unlock();
+    data->mutex.unlock();
 
     delete boardCopy;
 }
