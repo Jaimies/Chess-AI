@@ -4,7 +4,7 @@
 #include <string>
 #include <array>
 #include <boost/variant2/variant.hpp>
-#include "Piece.h"
+#include "piece.h"
 
 class Board;
 class NormalMove;

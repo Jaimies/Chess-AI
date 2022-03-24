@@ -4,7 +4,7 @@
 #include <vector>
 #include <tbb/parallel_for.h>
 #include <mutex>
-#include "../board/Move.h"
+#include "../board/move.h"
 #include "transpositions.h"
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"

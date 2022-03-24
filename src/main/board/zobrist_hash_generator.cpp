@@ -1,5 +1,5 @@
 #include <array>
-#include "Board.h"
+#include "board.h"
 #include "zobrist_hash_generator.h"
 
 _ZobristHashGenerator ZobristHashGenerator;

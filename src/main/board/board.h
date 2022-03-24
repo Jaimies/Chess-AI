@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <functional>
 #include <unordered_set>
-#include "Piece.h"
-#include "Move.h"
+#include "piece.h"
+#include "move.h"
 #include "move_processor.h"
 
 class Board {

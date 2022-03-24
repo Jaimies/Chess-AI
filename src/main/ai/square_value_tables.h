@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <array>
-#include "../board/Board.h"
+#include "../board/board.h"
 
 typedef std::array<int64_t, 64> SquareValueTable;
 

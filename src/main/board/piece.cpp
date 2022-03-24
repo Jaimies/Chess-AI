@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include "Piece.h"
+#include "piece.h"
 
 int Piece::getType(int piece) {
     return piece & 7;

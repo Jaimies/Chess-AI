@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../../main/board/Board.h"
+#include "../../main/board/board.h"
 #include "../string_util.h"
 
 int countMoves(Board *board, int depth) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mutex>
-#include "../board/Board.h"
+#include "../board/board.h"
 #include "constants.h"
 
 struct MoveEvaluationData {

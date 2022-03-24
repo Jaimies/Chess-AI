@@ -22,10 +22,10 @@ find_package(TBB CONFIG REQUIRED)
 set(TS_FILES Chess_en_CA.ts)
 
 set(PROJECT_SOURCES
-        src/main/board/Board.cpp src/main/board/Board.h
-        src/main/board/Move.cpp src/main/board/Move.h
-        src/main/board/Piece.cpp src/main/board/Piece.h
-        src/main/util/VectorUtil.h
+        src/main/board/board.cpp src/main/board/board.h
+        src/main/board/move.cpp src/main/board/move.h
+        src/main/board/piece.cpp src/main/board/piece.h
+        src/main/util/vector_util.h
         src/main/ui/analysis_info_display.cpp src/main/ui/analysis_info_display.h
         src/main/ui/chessboard.cpp src/main/ui/chessboard.h
         src/main/ui/game_manager.cpp src/main/ui/game_manager.h
@@ -35,7 +35,7 @@ set(PROJECT_SOURCES
         src/main/ui/promotion_dialog.cpp src/main/ui/promotion_dialog.h
         src/main/ui/piece_ui.cpp src/main/ui/piece_ui.h
         src/main/board/zobrist_hash_generator.cpp src/main/board/zobrist_hash_generator.h
-        src/main/ai/MoveGenerator.cpp src/main/ai/MoveGenerator.h
+        src/main/ai/move_generator.cpp src/main/ai/move_generator.h
         src/main/board/move_processor.h src/main/board/move_processor.cpp
         src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
         src/main/ai/analysis_info.h src/main/ai/ai_settings.h

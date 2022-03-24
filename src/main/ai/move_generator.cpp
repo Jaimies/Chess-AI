@@ -1,11 +1,11 @@
 #include <thread>
 #include <mutex>
-#include "../board/Piece.h"
-#include "../board/Move.h"
+#include "../board/piece.h"
+#include "../board/move.h"
 #include "../board/zobrist_hash_generator.h"
 #include <tbb/parallel_for.h>
-#include "MoveGenerator.h"
-#include "../util/VectorUtil.h"
+#include "move_generator.h"
+#include "../util/vector_util.h"
 #include "constants.h"
 #include "move_evaluation_data.h"
 #include "deep_evaluation_strategy.h"

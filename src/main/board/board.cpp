@@ -3,9 +3,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <stack>
-#include "Piece.h"
-#include "Move.h"
-#include "Board.h"
+#include "piece.h"
+#include "move.h"
+#include "board.h"
 #include "zobrist_hash_generator.h"
 
 static bool isValidSquarePosition(int squarePosition) {

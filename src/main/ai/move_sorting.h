@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../board/Board.h"
+#include "../board/board.h"
 
 void sortMoves(Board *board, std::vector<MoveVariant> &moves);

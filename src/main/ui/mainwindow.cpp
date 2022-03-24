@@ -1,9 +1,9 @@
 #include "analysis_info_display.h"
 #include "mainwindow.h"
 
-#include "../util/VectorUtil.h"
-#include "../board/Piece.h"
-#include "../board/Board.h"
+#include "../util/vector_util.h"
+#include "../board/piece.h"
+#include "../board/board.h"
 #include <QDrag>
 #include <QLabel>
 #include <QMimeData>

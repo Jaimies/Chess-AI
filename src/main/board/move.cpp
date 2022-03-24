@@ -1,5 +1,5 @@
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 #include "zobrist_hash_generator.h"
 
 Move::Move(int startSquare, int targetSquare)

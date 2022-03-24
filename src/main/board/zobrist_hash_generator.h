@@ -3,7 +3,7 @@
 #include <array>
 #include <random>
 #include <climits>
-#include "Board.h"
+#include "board.h"
 
 class _ZobristHashGenerator;
 extern _ZobristHashGenerator ZobristHashGenerator;

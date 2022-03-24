@@ -1,5 +1,5 @@
 #include "deep_evaluation_strategy.h"
-#include "MoveGenerator.h"
+#include "move_generator.h"
 #include "transpositions.h"
 #include "../board/zobrist_hash_generator.h"
 

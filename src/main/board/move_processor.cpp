@@ -1,5 +1,5 @@
 #include "move_processor.h"
-#include "Board.h"
+#include "board.h"
 
 void MoveGenerationProcessor::processMove(MoveVariant move) {
     board->addMoveIfLegal(move);

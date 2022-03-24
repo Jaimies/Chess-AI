@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../board/Board.h"
+#include "../board/board.h"
 #include "piece_ui.h"
 #include "promotion_dialog.h"
 #include "analysis_info_display.h"

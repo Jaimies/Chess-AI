@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QApplication>
 #include "update_analysis_info_event.h"
-#include "../ai/MoveGenerator.h"
+#include "../ai/move_generator.h"
 
 AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) : QWidget(parent) {
     positionCount->setFixedSize(400, labelHeight);
