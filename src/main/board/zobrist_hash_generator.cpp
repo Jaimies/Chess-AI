@@ -34,8 +34,7 @@ uint64_t hash(Board *board) {
 
     for (unsigned int square = 0; square < 64; square++) {
         auto piece = board->squares[square];
-        if (piece == 0) continue;
-        hash ^= hashTable[square][piece];
+        if (piece != 0) hash ^= hashTable[square][piece];
     }
 
     if (board->canWhiteCastleLeft())
