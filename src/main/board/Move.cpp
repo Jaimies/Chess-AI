@@ -34,7 +34,8 @@ std::string Move::toString() const {
 
 uint64_t Move::getZorbristHash(std::array<int, 64> squares) {
     auto piece = squares[startSquare];
-    return hashPiece(startSquare, piece) ^ hashPiece(targetSquare, piece);
+    return ZobristHashGenerator.hashPiece(startSquare, piece)
+           ^ ZobristHashGenerator.hashPiece(targetSquare, piece);
 }
 
 MoveVariant Move::toVariant() {
@@ -105,7 +106,8 @@ void PromotionMove::undo(Board &board) {
 }
 
 uint64_t PromotionMove::getZorbristHash(std::array<int, 64> squares) {
-    return hashPiece(startSquare, squares[startSquare]) ^ hashPiece(targetSquare, pieceToPromoteTo);
+    return ZobristHashGenerator.hashPiece(startSquare, squares[startSquare])
+           ^ ZobristHashGenerator.hashPiece(targetSquare, pieceToPromoteTo);
 }
 
 void EnPassantMove::apply(Board &board) {
@@ -124,7 +126,7 @@ void EnPassantMove::undo(Board &board) {
 
 uint64_t EnPassantMove::getZorbristHash(std::array<int, 64> squares) {
     return Move::getZorbristHash(squares)
-           ^ hashPiece(capturedPawnPosition, squares[capturedPawnPosition]);
+           ^ ZobristHashGenerator.hashPiece(capturedPawnPosition, squares[capturedPawnPosition]);
 }
 
 uint64_t GetZobristHashVisitor::operator()(NormalMove &move) const {

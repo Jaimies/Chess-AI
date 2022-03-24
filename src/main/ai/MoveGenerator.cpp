@@ -73,7 +73,6 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
 }
 
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
-    generateHashes();
     auto transpositions = new TranspositionTable();
 
     if (board->legalMoves.empty()) return nullptr;

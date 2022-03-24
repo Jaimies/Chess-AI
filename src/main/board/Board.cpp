@@ -115,7 +115,7 @@ Board::Board(int colourToMove, std::stack<MoveVariant> moveHistory, std::unorder
     updateEndgameState();
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
-    zobristHash = hash(this);
+    zobristHash = ZobristHashGenerator.hash(this);
 }
 
 void Board::computeMoveData() {
@@ -282,7 +282,7 @@ void Board::loadFenString(std::string &fenString) {
 
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
-    zobristHash = hash(this);
+    zobristHash = ZobristHashGenerator.hash(this);
 }
 
 void Board::updateCastlingPieceMovement(MoveVariant &move) {
