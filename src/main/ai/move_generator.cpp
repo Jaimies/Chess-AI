@@ -73,22 +73,22 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
 }
 
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
-    auto transpositions = new TranspositionTable();
-
     if (board->legalMoves.empty()) return nullptr;
 
     auto data = new MoveEvaluationData(board, depth);
     auto moves = board->legalMoves;
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves, transpositions](tbb::blocked_range<size_t> range) {
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves](tbb::blocked_range<size_t> range) {
         for (size_t i = range.begin(); i < range.end(); ++i) {
+            auto transpositions = new TranspositionTable();
+
             if (analysisStopped) return;
             evaluateMove(data, moves[i], transpositions);
+
+            // delete transpositions in the background to avoid delaying the analysis results
+            new std::thread([transpositions]() { delete transpositions; });
         }
     });
-
-    // delete transpositions in the background to avoid delaying the analysis results
-    new std::thread([transpositions]() { delete transpositions; });
 
     auto bestMove = data->bestMove.value();
     delete data;
