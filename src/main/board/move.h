@@ -47,6 +47,7 @@ public:
 
     bool canCapture() override { return true; }
     int getCapturedSquare() override { return targetSquare; }
+    bool operator==(const NormalMove& other) const;
 };
 
 class CastlingMove : public Move {
@@ -58,6 +59,7 @@ public:
 
     void apply(Board &board) override;
     void undo(Board &board) override;
+    bool operator==(const CastlingMove& other) const;
 };
 
 class EnPassantMove : public NormalMove {
@@ -73,6 +75,7 @@ public:
 
     bool canCapture() override { return false; }
     int getCapturedSquare() override { return capturedPawnPosition; }
+    bool operator==(const EnPassantMove& other) const;
 };
 
 class PromotionMove : public NormalMove {
@@ -88,6 +91,7 @@ public:
 
     int getCapturedSquare() override { return targetSquare; }
     int getAddedValue() override { return Piece::getValue(pieceToPromoteTo); }
+    bool operator==(const PromotionMove& other) const;
 };
 
 struct ApplyMoveVisitor {

@@ -4,6 +4,7 @@
 #include "../board/move.h"
 #include "../board/zobrist_hash_generator.h"
 #include <tbb/parallel_for.h>
+#include <iostream>
 #include "move_generator.h"
 #include "../util/vector_util.h"
 #include "constants.h"
@@ -73,7 +74,7 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
     delete boardCopy;
 }
 
-Move *_getBestMove(Board *board, int depth, AiSettings settings) {
+Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings settings) {
     if (board->legalMoves.empty()) return nullptr;
 
     auto getDeepEvaluation = [board, depth](int64_t lowerBound, int64_t upperBound) {
@@ -85,7 +86,12 @@ Move *_getBestMove(Board *board, int depth, AiSettings settings) {
 
     auto data = new MoveEvaluationData(board, depth);
     auto moves = board->legalMoves;
-    sortMoves(board, moves);
+    if (!supposedBestMove) {
+        sortMoves(board, moves);
+    } else {
+        auto supposedBestMoveIndex = VectorUtil::indexOf(moves, supposedBestMove->toVariant());
+        VectorUtil::move(moves, supposedBestMoveIndex, 0);
+    }
 
     board->makeMoveWithoutGeneratingMoves(moves[0]);
     int64_t firstMoveAlpha = getDeepEvaluation(minEvaluation, maxEvaluation);
@@ -124,12 +130,14 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     Move *bestMove = nullptr;
 
     startThreadAndForget([&bestMove, board, settings, begin]() {
-        int depth = 4;
+        int depth = 1;
 
         while (!analysisStopped) {
             Board *boardCopy = board->copy();
-            bestMove = _getBestMove(boardCopy, depth, settings);
+            auto supposedBestMove = _getBestMove(boardCopy, depth, bestMove, settings);
             delete boardCopy;
+            if (analysisStopped) break;
+            bestMove = supposedBestMove;
             auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
             analysisInfo = new AnalysisInfo{positionsAnalyzed, depth + 1, bestMove, millisCount};
             depth++;

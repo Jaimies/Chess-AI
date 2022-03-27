@@ -21,6 +21,7 @@ add_executable(
         all_tests ../main/board/board.cpp ../main/board/move.cpp ../main/board/piece.cpp
         ../main/board/zobrist_hash_generator.cpp ../main/ai/move_generator.cpp board/board_test.cpp
         ai/move_generator_test.cpp board/move_test.cpp board/zobrist_hash_generator_test.cpp util/string_util_test.cpp
+        util/vector_util_test.cpp
         ../main/board/move_processor.h ../main/board/move_processor.cpp
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h

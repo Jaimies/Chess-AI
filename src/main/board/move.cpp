@@ -71,6 +71,10 @@ void NormalMove::undo(Board &board) {
     board.squares[targetSquare] = capturedPiece;
 }
 
+bool NormalMove::operator==(const NormalMove &other) const {
+    return startSquare == other.startSquare && targetSquare == other.targetSquare;
+}
+
 void CastlingMove::apply(Board &board) {
     int king = board.squares[startSquare];
     int rook = board.squares[rookSquare];
@@ -88,6 +92,11 @@ void CastlingMove::undo(Board &board) {
 
     board.squares[targetSquare] = Piece::None;
     board.squares[rookTargetSquare] = Piece::None;
+}
+
+bool CastlingMove::operator==(const CastlingMove &other) const {
+    return startSquare == other.startSquare && targetSquare == other.targetSquare
+           && rookSquare == other.rookSquare && rookTargetSquare == other.rookTargetSquare;
 }
 
 void PromotionMove::apply(Board &board) {
@@ -110,6 +119,11 @@ uint64_t PromotionMove::getZorbristHash(std::array<int, 64> squares) {
            ^ ZobristHashGenerator.hashPiece(targetSquare, pieceToPromoteTo);
 }
 
+bool PromotionMove::operator==(const PromotionMove &other) const {
+    return startSquare == other.startSquare && targetSquare == other.targetSquare
+           && pieceToPromoteTo == other.pieceToPromoteTo;
+}
+
 void EnPassantMove::apply(Board &board) {
     int pawn = board.squares[startSquare];
 
@@ -127,6 +141,11 @@ void EnPassantMove::undo(Board &board) {
 uint64_t EnPassantMove::getZorbristHash(std::array<int, 64> squares) {
     return Move::getZorbristHash(squares)
            ^ ZobristHashGenerator.hashPiece(capturedPawnPosition, squares[capturedPawnPosition]);
+}
+
+bool EnPassantMove::operator==(const EnPassantMove &other) const {
+    return startSquare == other.startSquare && targetSquare == other.targetSquare
+           && capturedPawnPosition == other.capturedPawnPosition;
 }
 
 uint64_t GetZobristHashVisitor::operator()(NormalMove &move) const {
