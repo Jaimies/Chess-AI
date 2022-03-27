@@ -25,7 +25,7 @@ set(PROJECT_SOURCES
         src/main/board/board.cpp src/main/board/board.h
         src/main/board/move.cpp src/main/board/move.h
         src/main/board/piece.cpp src/main/board/piece.h
-        src/main/util/vector_util.h
+        src/main/util/vector_util.h src/main/util/thread_util.h
         src/main/ui/analysis_info_display.cpp src/main/ui/analysis_info_display.h
         src/main/ui/chessboard.cpp src/main/ui/chessboard.h
         src/main/ui/game_manager.cpp src/main/ui/game_manager.h

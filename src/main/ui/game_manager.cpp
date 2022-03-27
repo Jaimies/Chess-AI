@@ -2,7 +2,7 @@
 #include "chessboard.h"
 #include "promotion_dialog.h"
 #include "../ai/move_generator.h"
-#include <thread>
+#include "../util/thread_util.h"
 
 void GameManager::setup(ChessBoardWidget *wdg, AnalysisInfoDisplay *info) {
     for (int square = 0; square < 64; square++) {
@@ -85,7 +85,7 @@ void findTheBestMove(Board *board, GameManager *gameManager) {
 void GameManager::makeMachineMoveIfNecessary() {
     if (board->colourToMove == Piece::Black) {
         info->showAnalysisActive();
-        new std::thread(findTheBestMove, board, this);
+        startThreadAndForget(findTheBestMove, board, this);
     }
 }
 

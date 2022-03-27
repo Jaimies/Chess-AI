@@ -12,6 +12,7 @@
 #include "transpositions.h"
 #include "move_sorting.h"
 #include "evaluation.h"
+#include "../util/thread_util.h"
 
 unsigned long MoveGenerator::positionsAnalyzed = 0;
 AnalysisInfo *MoveGenerator::analysisInfo = nullptr;
@@ -59,7 +60,7 @@ MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *str
 void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable *transpositions) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, ParallelDeepEvaluationStrategy, transpositions);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, SequentialDeepEvaluationStrategy, transpositions);
     boardCopy->unmakeMove(move);
 
     data->mutex.lock();
@@ -75,20 +76,37 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
 Move *_getBestMove(Board *board, int depth, AiSettings settings) {
     if (board->legalMoves.empty()) return nullptr;
 
+    auto getDeepEvaluation = [board, depth](int64_t lowerBound, int64_t upperBound) {
+        auto transpositions = new TranspositionTable();
+        auto eval = -MoveGenerator::deepEvaluate(board, depth, SequentialDeepEvaluationStrategy, transpositions, -upperBound, -lowerBound);
+        deleteInTheBackground(transpositions);
+        return eval;
+    };
+
     auto data = new MoveEvaluationData(board, depth);
     auto moves = board->legalMoves;
+    sortMoves(board, moves);
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, moves.size()), [data, moves](tbb::blocked_range<size_t> range) {
-        for (size_t i = range.begin(); i < range.end(); ++i) {
+    board->makeMoveWithoutGeneratingMoves(moves[0]);
+    int64_t firstMoveAlpha = getDeepEvaluation(minEvaluation, maxEvaluation);
+    data->bestEvaluation = firstMoveAlpha;
+    data->bestMove = moves[0];
+    board->unmakeMove(moves[0]);
+
+    for (int i = 1; i < moves.size(); i++) {
+        board->makeMoveWithoutGeneratingMoves(moves[i]);
+        auto eval = getDeepEvaluation(firstMoveAlpha, firstMoveAlpha + 1);
+        board->unmakeMove(moves[i]);
+
+        if (eval != firstMoveAlpha) {
             auto transpositions = new TranspositionTable();
-
-            if (analysisStopped) return;
             evaluateMove(data, moves[i], transpositions);
-
-            // delete transpositions in the background to avoid delaying the analysis results
-            new std::thread([transpositions]() { delete transpositions; });
+            firstMoveAlpha = data->bestEvaluation;
+            deleteInTheBackground(transpositions);
         }
-    });
+
+        if (analysisStopped) break;
+    }
 
     auto bestMove = data->bestMove.value();
     delete data;
@@ -105,7 +123,7 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     steady_clock::time_point begin = steady_clock::now();
     Move *bestMove = nullptr;
 
-    new std::thread([&bestMove, board, settings, begin]() {
+    startThreadAndForget([&bestMove, board, settings, begin]() {
         int depth = 4;
 
         while (!analysisStopped) {
