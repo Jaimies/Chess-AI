@@ -104,7 +104,7 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     positionsAnalyzed = 0;
     Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
-    Move *bestMove;
+    Move *bestMove = nullptr;
 
     new std::thread([&bestMove, boardCopy, settings, begin]() {
         int depth = 4;
