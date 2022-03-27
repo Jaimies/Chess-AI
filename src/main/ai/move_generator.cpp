@@ -102,15 +102,16 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
 
     analysisInfo = nullptr;
     positionsAnalyzed = 0;
-    Board *boardCopy = board->copy();
     steady_clock::time_point begin = steady_clock::now();
     Move *bestMove = nullptr;
 
-    new std::thread([&bestMove, boardCopy, settings, begin]() {
+    new std::thread([&bestMove, board, settings, begin]() {
         int depth = 4;
 
         while (!analysisStopped) {
+            Board *boardCopy = board->copy();
             bestMove = _getBestMove(boardCopy, depth, settings);
+            delete boardCopy;
             auto millisCount = duration_cast<milliseconds>(steady_clock::now() - begin).count();
             analysisInfo = new AnalysisInfo{positionsAnalyzed, depth + 1, bestMove, millisCount};
             depth++;
