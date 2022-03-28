@@ -9,30 +9,47 @@
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"
 
-void deepEvaluateMove(
-        Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
-        int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy);
-
 class DeepEvaluationStrategy {
 public:
-    int64_t deepEvaluate(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta);
+    int64_t deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta);
+
+protected:
+    void deepEvaluateMove(
+            Board *board, MoveVariant move, int depth,
+            int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy);
+
+    virtual int64_t getEvaluation(Board *board, int depth, int64_t alpha, int64_t beta) = 0;
+
+protected:
+    DeepEvaluationStrategy *sequentialDeepEvaluationStrategy;
 
 private:
-    virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) = 0;
+    virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) = 0;
 };
 
-class _SequentialDeepEvaluationStrategy : public DeepEvaluationStrategy {
+class DeepEvaluationStrategyWithTranspositions : public DeepEvaluationStrategy {
+protected:
+    explicit DeepEvaluationStrategyWithTranspositions(TranspositionTable *transpositions) : transpositions(transpositions) {}
+
+    int64_t getEvaluation(Board *board, int depth, int64_t alpha, int64_t beta) override;
+
+    TranspositionTable *transpositions;
+};
+
+class SequentialDeepEvaluationStrategy : public DeepEvaluationStrategyWithTranspositions {
+public:
+    explicit SequentialDeepEvaluationStrategy(TranspositionTable *transpositions);
+
+protected:
     NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
-
-    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) override;
+    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) override;
 };
 
+class ParallelDeepEvaluationStrategy : public DeepEvaluationStrategyWithTranspositions {
+public:
+    explicit ParallelDeepEvaluationStrategy(TranspositionTable *transpositions);
 
-class _ParallelDeepEvaluationStrategy : public DeepEvaluationStrategy {
+protected:
     ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
-
-    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) override;
+    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) override;
 };
-
-extern _SequentialDeepEvaluationStrategy *SequentialDeepEvaluationStrategy;
-extern _ParallelDeepEvaluationStrategy *ParallelDeepEvaluationStrategy;

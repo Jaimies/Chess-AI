@@ -41,7 +41,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
 }
 
 int64_t
-MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
+MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, int64_t alpha, int64_t beta) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
         board->checkIfLegalMovesExist();
@@ -55,13 +55,13 @@ MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *str
         return evaluatePositionWithoutMoves(board, depth);
     }
 
-    return strategy->deepEvaluate(board, depth, transpositions, alpha, beta);
+    return strategy->deepEvaluate(board, depth, alpha, beta);
 }
 
-void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable *transpositions) {
+void evaluateMove(MoveEvaluationData *data, MoveVariant move, DeepEvaluationStrategy *strategy) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, SequentialDeepEvaluationStrategy, transpositions);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, strategy);
     boardCopy->unmakeMove(move);
 
     data->mutex.lock();
@@ -88,8 +88,10 @@ std::vector<MoveVariant> getSortedMoves(Board *board, Move *supposedBestMove) {
 
 int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound) {
     auto transpositions = new TranspositionTable();
-    auto eval = -MoveGenerator::deepEvaluate(board, depth, SequentialDeepEvaluationStrategy, transpositions, -upperBound, -lowerBound);
+    auto strategy = new SequentialDeepEvaluationStrategy(transpositions);
+    auto eval = -MoveGenerator::deepEvaluate(board, depth, strategy, -upperBound, -lowerBound);
     deleteInTheBackground(transpositions);
+    deleteInTheBackground(strategy);
     return eval;
 }
 
@@ -117,9 +119,11 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
 
         if (eval != firstMoveAlpha) {
             auto transpositions = new TranspositionTable();
-            evaluateMove(data, moves[i], transpositions);
+            auto strategy = new SequentialDeepEvaluationStrategy(transpositions);
+            evaluateMove(data, moves[i], strategy);
             firstMoveAlpha = data->bestEvaluation;
             deleteInTheBackground(transpositions);
+            deleteInTheBackground(strategy);
         }
 
         if (analysisStopped) break;
