@@ -74,17 +74,7 @@ void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable
     delete boardCopy;
 }
 
-Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings settings) {
-    if (board->legalMoves.empty()) return nullptr;
-
-    auto getDeepEvaluation = [board, depth](int64_t lowerBound, int64_t upperBound) {
-        auto transpositions = new TranspositionTable();
-        auto eval = -MoveGenerator::deepEvaluate(board, depth, SequentialDeepEvaluationStrategy, transpositions, -upperBound, -lowerBound);
-        deleteInTheBackground(transpositions);
-        return eval;
-    };
-
-    auto data = new MoveEvaluationData(board, depth);
+std::vector<MoveVariant> getSortedMoves(Board *board, Move *supposedBestMove) {
     auto moves = board->legalMoves;
     if (!supposedBestMove) {
         sortMoves(board, moves);
@@ -93,15 +83,36 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
         VectorUtil::move(moves, supposedBestMoveIndex, 0);
     }
 
+    return moves;
+}
+
+int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound) {
+    auto transpositions = new TranspositionTable();
+    auto eval = -MoveGenerator::deepEvaluate(board, depth, SequentialDeepEvaluationStrategy, transpositions, -upperBound, -lowerBound);
+    deleteInTheBackground(transpositions);
+    return eval;
+}
+
+int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves) {
     board->makeMoveWithoutGeneratingMoves(moves[0]);
-    int64_t firstMoveAlpha = getDeepEvaluation(minEvaluation, maxEvaluation);
+    int64_t firstMoveAlpha = getDeepEvaluation(board, depth, minEvaluation, maxEvaluation);
+    board->unmakeMove(moves[0]);
+    return firstMoveAlpha;
+}
+
+Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings settings) {
+    if (board->legalMoves.empty()) return nullptr;
+
+    auto data = new MoveEvaluationData(board, depth);
+    auto moves = getSortedMoves(board, supposedBestMove);
+
+    int64_t firstMoveAlpha = getFirstMoveAlpha(board, depth, moves);
     data->bestEvaluation = firstMoveAlpha;
     data->bestMove = moves[0];
-    board->unmakeMove(moves[0]);
 
     for (int i = 1; i < moves.size(); i++) {
         board->makeMoveWithoutGeneratingMoves(moves[i]);
-        auto eval = getDeepEvaluation(firstMoveAlpha, firstMoveAlpha + 1);
+        auto eval = getDeepEvaluation(board, depth, firstMoveAlpha, firstMoveAlpha + 1);
         board->unmakeMove(moves[i]);
 
         if (eval != firstMoveAlpha) {
@@ -144,7 +155,7 @@ Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
         }
     });
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
     while (!bestMove) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
