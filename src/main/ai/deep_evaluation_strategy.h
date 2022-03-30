@@ -9,30 +9,34 @@
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"
 
-void deepEvaluateMove(
-        Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
-        int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy);
+namespace DeepEvaluationStrategy {
+    class Base {
+    public:
+        int64_t deepEvaluate(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const;
 
-class DeepEvaluationStrategy {
-public:
-    int64_t deepEvaluate(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta);
+    protected:
+        void deepEvaluateMove(
+                Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
+                int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) const;
+    private:
+        virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const = 0;
+    };
 
-private:
-    virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) = 0;
-};
+    class Sequential : public Base {
+    public:
+        static const Sequential *const Instance;
+    private:
+        NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
 
-class _SequentialDeepEvaluationStrategy : public DeepEvaluationStrategy {
-    NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+    };
 
-    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) override;
-};
+    class Parallel : public Base {
+    public:
+        static const Parallel *const Instance;
 
+        ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
 
-class _ParallelDeepEvaluationStrategy : public DeepEvaluationStrategy {
-    ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
-
-    int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) override;
-};
-
-extern _SequentialDeepEvaluationStrategy *SequentialDeepEvaluationStrategy;
-extern _ParallelDeepEvaluationStrategy *ParallelDeepEvaluationStrategy;
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+    };
+}

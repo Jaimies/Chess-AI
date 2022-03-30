@@ -41,7 +41,7 @@ long searchCaptures(Board *board, long alpha, long beta) {
 }
 
 int64_t
-MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *strategy, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
+MoveGenerator::deepEvaluate(Board *board, int depth, const DeepEvaluationStrategy::Base *strategy, TranspositionTable *transpositions, int64_t alpha, int64_t beta) {
     if (depth == 0) {
         MoveGenerator::positionsAnalyzed++;
         board->checkIfLegalMovesExist();
@@ -61,7 +61,7 @@ MoveGenerator::deepEvaluate(Board *board, int depth, DeepEvaluationStrategy *str
 void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable *transpositions) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, SequentialDeepEvaluationStrategy, transpositions);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, DeepEvaluationStrategy::Sequential::Instance, transpositions);
     boardCopy->unmakeMove(move);
 
     data->mutex.lock();
@@ -88,7 +88,7 @@ std::vector<MoveVariant> getSortedMoves(Board *board, Move *supposedBestMove) {
 
 int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound) {
     auto transpositions = new TranspositionTable();
-    auto eval = -MoveGenerator::deepEvaluate(board, depth, SequentialDeepEvaluationStrategy, transpositions, -upperBound, -lowerBound);
+    auto eval = -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Sequential::Instance, transpositions, -upperBound, -lowerBound);
     deleteInTheBackground(transpositions);
     return eval;
 }
