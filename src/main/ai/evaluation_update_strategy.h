@@ -14,9 +14,11 @@ protected:
 class ParallelizedUpdateStrategy : public EvaluationUpdateStrategy {
     std::mutex mutex = std::mutex();
 
+public:
     void updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta) override;
 };
 
 class NonParallelizedUpdateStrategy : public EvaluationUpdateStrategy {
+public:
     void updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta) override;
 };

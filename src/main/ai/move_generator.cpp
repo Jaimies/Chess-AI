@@ -61,7 +61,7 @@ MoveGenerator::deepEvaluate(Board *board, int depth, const DeepEvaluationStrateg
 void evaluateMove(MoveEvaluationData *data, MoveVariant move, TranspositionTable *transpositions) {
     auto boardCopy = data->board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, DeepEvaluationStrategy::Sequential::Instance, transpositions);
+    auto evaluation = -MoveGenerator::deepEvaluate(boardCopy, data->depth, DeepEvaluationStrategy::Pvs::Instance, transpositions);
     boardCopy->unmakeMove(move);
 
     data->mutex.lock();

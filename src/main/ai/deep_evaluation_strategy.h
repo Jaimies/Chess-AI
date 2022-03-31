@@ -25,9 +25,9 @@ namespace DeepEvaluationStrategy {
     class Sequential : public Base {
     public:
         static const Sequential *const Instance;
-    private:
+    protected:
         NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
-
+    private:
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
     };
 
@@ -37,6 +37,13 @@ namespace DeepEvaluationStrategy {
 
         ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
 
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+    };
+
+    class Pvs: public Sequential {
+    public:
+        static const Pvs *const Instance;
+    protected:
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
     };
 }
