@@ -86,16 +86,13 @@ std::vector<MoveVariant> getSortedMoves(Board *board, Move *supposedBestMove) {
     return moves;
 }
 
-int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound) {
-    auto transpositions = new TranspositionTable();
-    auto eval = -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Sequential::Instance, transpositions, -upperBound, -lowerBound);
-    deleteInTheBackground(transpositions);
-    return eval;
+int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound, TranspositionTable *transpositions) {
+    return -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Sequential::Instance, transpositions, -upperBound, -lowerBound);
 }
 
-int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves) {
+int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves, TranspositionTable *transpositions) {
     board->makeMoveWithoutGeneratingMoves(moves[0]);
-    int64_t firstMoveAlpha = getDeepEvaluation(board, depth, minEvaluation, maxEvaluation);
+    int64_t firstMoveAlpha = getDeepEvaluation(board, depth, minEvaluation, maxEvaluation, transpositions);
     board->unmakeMove(moves[0]);
     return firstMoveAlpha;
 }
@@ -106,24 +103,24 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
     auto data = new MoveEvaluationData(board, depth);
     auto moves = getSortedMoves(board, supposedBestMove);
 
-    int64_t firstMoveAlpha = getFirstMoveAlpha(board, depth, moves);
+    auto transpositions = new TranspositionTable();
+    int64_t firstMoveAlpha = getFirstMoveAlpha(board, depth, moves, transpositions);
     data->bestEvaluation = firstMoveAlpha;
     data->bestMove = moves[0];
 
     for (int i = 1; i < moves.size(); i++) {
         board->makeMoveWithoutGeneratingMoves(moves[i]);
-        auto eval = getDeepEvaluation(board, depth, firstMoveAlpha, firstMoveAlpha + 1);
+        auto eval = getDeepEvaluation(board, depth, firstMoveAlpha, firstMoveAlpha + 1, transpositions);
         board->unmakeMove(moves[i]);
 
         if (eval != firstMoveAlpha) {
-            auto transpositions = new TranspositionTable();
             evaluateMove(data, moves[i], transpositions);
             firstMoveAlpha = data->bestEvaluation;
-            deleteInTheBackground(transpositions);
         }
 
         if (analysisStopped) break;
     }
+    deleteInTheBackground(transpositions);
 
     auto bestMove = data->bestMove.value();
     delete data;
