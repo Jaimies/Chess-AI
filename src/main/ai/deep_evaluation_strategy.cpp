@@ -105,14 +105,15 @@ namespace DeepEvaluationStrategy {
         for (int i = 1; i < moves.size(); i++) {
             board->makeMoveWithoutGeneratingMoves(moves[i]);
             auto nullWindowEval = getNullWindowEval(board, depth, transpositions, alpha);
+            board->unmakeMove(moves[i]);
 
             if (nullWindowEval != alpha) {
                 // this move is better than the current option
+                board->makeMoveWithoutGeneratingMoves(moves[i]);
                 auto fullWindowEval = getEvaluation(board, depth, transpositions, alpha, beta, DeepEvaluationStrategy::Pvs::Instance);
                 strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta);
+                board->unmakeMove(moves[i]);
             }
-
-            board->unmakeMove(moves[i]);
 
             if (shouldExit || analysisStopped) return alpha;
         }
