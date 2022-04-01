@@ -92,7 +92,7 @@ int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t u
 
 int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves, TranspositionTable *transpositions) {
     board->makeMoveWithoutGeneratingMoves(moves[0]);
-    int64_t firstMoveAlpha = getDeepEvaluation(board, depth, minEvaluation, maxEvaluation, transpositions);
+    int64_t firstMoveAlpha = -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Pvs::Instance, transpositions, minEvaluation, maxEvaluation);
     board->unmakeMove(moves[0]);
     return firstMoveAlpha;
 }
