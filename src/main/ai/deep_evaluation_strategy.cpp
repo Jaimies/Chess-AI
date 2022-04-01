@@ -98,7 +98,7 @@ namespace DeepEvaluationStrategy {
                                int64_t beta) const {
         bool shouldExit = false;
 
-        board->makeMove(moves[0]);
+        board->makeMoveWithoutGeneratingMoves(moves[0]);
         alpha = getEvaluation(board, depth, transpositions, alpha, beta, DeepEvaluationStrategy::Pvs::Instance);
         board->unmakeMove(moves[0]);
 
