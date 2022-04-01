@@ -91,7 +91,7 @@ namespace DeepEvaluationStrategy {
     const Pvs *const Pvs::Instance = new Pvs();
 
     int64_t getNullWindowEval(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha) {
-        return getEvaluation(board, depth, transpositions, alpha, alpha + 1, DeepEvaluationStrategy::Sequential::Instance);
+        return getEvaluation(board, depth, transpositions, alpha, alpha + 1, Sequential::Instance);
     };
 
     int64_t Pvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha,
@@ -99,7 +99,7 @@ namespace DeepEvaluationStrategy {
         bool shouldExit = false;
 
         board->makeMoveWithoutGeneratingMoves(moves[0]);
-        alpha = getEvaluation(board, depth, transpositions, alpha, beta, DeepEvaluationStrategy::Pvs::Instance);
+        alpha = getEvaluation(board, depth, transpositions, alpha, beta, Pvs::Instance);
         board->unmakeMove(moves[0]);
 
         for (int i = 1; i < moves.size(); i++) {
@@ -110,7 +110,7 @@ namespace DeepEvaluationStrategy {
             if (nullWindowEval != alpha) {
                 // this move is better than the current option
                 board->makeMoveWithoutGeneratingMoves(moves[i]);
-                auto fullWindowEval = getEvaluation(board, depth, transpositions, alpha, beta, DeepEvaluationStrategy::Pvs::Instance);
+                auto fullWindowEval = getEvaluation(board, depth, transpositions, alpha, beta, Pvs::Instance);
                 strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta);
                 board->unmakeMove(moves[i]);
             }
