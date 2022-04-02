@@ -86,10 +86,6 @@ namespace DeepEvaluationStrategy {
         return alpha;
     }
 
-    const Sequential *const Sequential::Instance = new Sequential();
-    const Parallel *const Parallel::Instance = new Parallel();
-    const Pvs *const Pvs::Instance = new Pvs();
-
     int64_t getNullWindowEval(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha) {
         return getEvaluation(board, depth, transpositions, alpha, alpha + 1, Sequential::Instance);
     };
@@ -120,4 +116,42 @@ namespace DeepEvaluationStrategy {
 
         return alpha;
     }
+
+    int64_t
+    ParallelPvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha,
+                               int64_t beta) const {
+        bool shouldExit = false;
+
+        board->makeMoveWithoutGeneratingMoves(moves[0]);
+        alpha = getEvaluation(board, depth, transpositions, alpha, beta, Pvs::Instance);
+        board->unmakeMove(moves[0]);
+
+        tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, board, depth, transpositions, &shouldExit, this, &alpha, &beta](tbb::blocked_range<size_t> range) {
+            for (int i = range.begin(); i < range.end(); i++) {
+                auto initialAlpha = alpha;
+                auto boardCopy = board->copy();
+                auto moveCopy = moves[i];
+                boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
+                auto nullWindowEval = getNullWindowEval(boardCopy, depth, transpositions, initialAlpha);
+                boardCopy->unmakeMove(moveCopy);
+
+                if (nullWindowEval != initialAlpha) {
+                    // this move is better than the current option
+                    boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
+                    auto fullWindowEval = getEvaluation(boardCopy, depth, transpositions, alpha, beta, Pvs::Instance);
+                    strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta);
+                    boardCopy->unmakeMove(moveCopy);
+                }
+
+                if (shouldExit || analysisStopped) return;
+            }
+        });
+
+        return alpha;
+    }
+
+    const Sequential *const Sequential::Instance = new Sequential();
+    const Parallel *const Parallel::Instance = new Parallel();
+    const Pvs *const Pvs::Instance = new Pvs();
+    const ParallelPvs *const ParallelPvs::Instance = new ParallelPvs();
 }

@@ -46,4 +46,11 @@ namespace DeepEvaluationStrategy {
     protected:
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
     };
+
+    class ParallelPvs : public Parallel {
+    public:
+        static const ParallelPvs *const Instance;
+    protected:
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+    };
 }
