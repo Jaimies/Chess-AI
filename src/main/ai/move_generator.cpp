@@ -87,7 +87,7 @@ std::vector<MoveVariant> getSortedMoves(Board *board, Move *supposedBestMove) {
 }
 
 int64_t getDeepEvaluation(Board *board, int depth, int64_t lowerBound, int64_t upperBound, TranspositionTable *transpositions) {
-    return -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Sequential::Instance, transpositions, -upperBound, -lowerBound);
+    return -MoveGenerator::deepEvaluate(board, depth, DeepEvaluationStrategy::Parallel::Instance, transpositions, -upperBound, -lowerBound);
 }
 
 int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves, TranspositionTable *transpositions) {
@@ -108,18 +108,31 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
     data->bestEvaluation = firstMoveAlpha;
     data->bestMove = moves[0];
 
-    for (int i = 1; i < moves.size(); i++) {
-        board->makeMoveWithoutGeneratingMoves(moves[i]);
-        auto eval = getDeepEvaluation(board, depth, firstMoveAlpha, firstMoveAlpha + 1, transpositions);
-        board->unmakeMove(moves[i]);
+    std::vector<bool> isWorthyOfFullEval(moves.size(), false);
 
-        if (eval != firstMoveAlpha) {
-            evaluateMove(data, moves[i], transpositions);
-            firstMoveAlpha = data->bestEvaluation;
+    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [&isWorthyOfFullEval, moves, depth, transpositions, board, firstMoveAlpha](tbb::blocked_range<size_t> range) {
+        Board * boardCopy = board->copy();
+        for (size_t i = range.begin(); i < range.end(); i++) {
+            auto moveCopy = moves[i];
+            boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
+            auto eval = getDeepEvaluation(boardCopy, depth, firstMoveAlpha, firstMoveAlpha + 1, transpositions);
+            boardCopy->unmakeMove(moveCopy);
+            if (eval != firstMoveAlpha) isWorthyOfFullEval[i] = true;
+            if (analysisStopped) return;
         }
+        delete boardCopy;
+    });
 
-        if (analysisStopped) break;
-    }
+    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [data, moves, transpositions, &firstMoveAlpha, isWorthyOfFullEval](tbb::blocked_range<size_t> range) {
+        for (size_t i = range.begin(); i < range.end(); i++) {
+            if (isWorthyOfFullEval[i]) {
+                evaluateMove(data, moves[i], transpositions);
+                firstMoveAlpha = data->bestEvaluation;
+                if (analysisStopped) return;
+            }
+        }
+    });
+
     deleteInTheBackground(transpositions);
 
     auto bestMove = data->bestMove.value();
