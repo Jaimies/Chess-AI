@@ -104,33 +104,28 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
     auto moves = getSortedMoves(board, supposedBestMove);
 
     auto transpositions = new TranspositionTable();
-    int64_t firstMoveAlpha = getFirstMoveAlpha(board, depth, moves, transpositions);
-    data->bestEvaluation = firstMoveAlpha;
+    int64_t alpha = getFirstMoveAlpha(board, depth, moves, transpositions);
+    data->bestEvaluation = alpha;
     data->bestMove = moves[0];
 
     std::vector<bool> isWorthyOfFullEval(moves.size(), false);
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [&isWorthyOfFullEval, moves, depth, transpositions, board, firstMoveAlpha](tbb::blocked_range<size_t> range) {
+    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [data, moves, depth, transpositions, board, &alpha](tbb::blocked_range<size_t> range) {
         Board * boardCopy = board->copy();
         for (size_t i = range.begin(); i < range.end(); i++) {
+            auto initialAlpha = alpha;
             auto moveCopy = moves[i];
             boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto eval = getDeepEvaluation(boardCopy, depth, firstMoveAlpha, firstMoveAlpha + 1, transpositions);
+            auto eval = getDeepEvaluation(boardCopy, depth, initialAlpha, alpha + 1, transpositions);
             boardCopy->unmakeMove(moveCopy);
-            if (eval != firstMoveAlpha) isWorthyOfFullEval[i] = true;
+            if (eval != initialAlpha)  {
+                evaluateMove(data, moves[i], transpositions);
+                alpha = data->bestEvaluation;
+                if (analysisStopped) return;
+            };
             if (analysisStopped) return;
         }
         delete boardCopy;
-    });
-
-    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [data, moves, transpositions, &firstMoveAlpha, isWorthyOfFullEval](tbb::blocked_range<size_t> range) {
-        for (size_t i = range.begin(); i < range.end(); i++) {
-            if (isWorthyOfFullEval[i]) {
-                evaluateMove(data, moves[i], transpositions);
-                firstMoveAlpha = data->bestEvaluation;
-                if (analysisStopped) return;
-            }
-        }
     });
 
     deleteInTheBackground(transpositions);
