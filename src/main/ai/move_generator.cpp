@@ -108,8 +108,6 @@ Move *_getBestMove(Board *board, int depth, Move *supposedBestMove, AiSettings s
     data->bestEvaluation = alpha;
     data->bestMove = moves[0];
 
-    std::vector<bool> isWorthyOfFullEval(moves.size(), false);
-
     tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [data, moves, depth, transpositions, board, &alpha](tbb::blocked_range<size_t> range) {
         Board * boardCopy = board->copy();
         for (size_t i = range.begin(); i < range.end(); i++) {
