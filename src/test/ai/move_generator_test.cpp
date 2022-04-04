@@ -90,6 +90,39 @@ TEST(MoveGenerator, DoesNotDoStupidMoves) {
         auto bestMove = MoveGenerator::getBestMove(board);
         ASSERT_EQ(bestMove->toString(), "f8b4");
         std::cout << i + 1 << " / 20" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+TEST(MoveGenerator, DoesNotDoStupidMoves_2) {
+    auto board = Board::fromFenString("r1b1kr2/ppp2ppp/1b2p3/P2pP3/1P1P4/2q2N2/2PN1PPP/R2QK2R b KQq - 0 1", Piece::Black);
+
+    for (int i = 0; i < 50; i++) {
+        auto bestMove = MoveGenerator::getBestMove(board);
+        ASSERT_EQ(bestMove->toString(), "b6d4");
+        std::cout << i + 1 << " / 50" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+TEST(MoveGenerator, DoesNotDoStupidMoves_3) {
+    auto board = Board::fromFenString("r1bqkb1r/pppppppp/2n5/8/2B1N3/8/PPPP1PPP/R1BQK2R b KQkq - 0 1", Piece::Black);
+
+    for (int i = 0; i < 20; i++) {
+        auto bestMove = MoveGenerator::getBestMove(board);
+        ASSERT_EQ(bestMove->toString(), "d7d5");
+        std::cout << i + 1 << " / 20" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+TEST(MoveGenerator, DoesNotDoStupidMoves_4) {
+    auto board = Board::fromFenString("r3kbnr/pppqpppp/2n5/1B3b2/3P4/2N2N2/PPP2PPP/R1BQK2R b KQk - 0 1", Piece::Black);
+
+    for (int i = 0; i < 50; i++) {
+        auto bestMove = MoveGenerator::getBestMove(board);
+        ASSERT_TRUE(bestMove->toString() == "d7e6" || bestMove->toString() == "a7a6" || bestMove->toString() == "e7e6");
+        std::cout << i + 1 << " / 50" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
