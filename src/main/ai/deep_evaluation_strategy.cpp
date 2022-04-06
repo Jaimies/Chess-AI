@@ -24,9 +24,6 @@ int64_t getEvaluation(
 
         if (accessor->second.type == Transposition::LOWER && accessor->second.value >= beta)
             return beta;
-
-        if (accessor->second.type == Transposition::UPPER && accessor->second.value <= alpha)
-            return alpha;
     }
 
     auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
