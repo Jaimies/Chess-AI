@@ -120,7 +120,7 @@ namespace DeepEvaluationStrategy {
         bool shouldExit = false;
 
         board->makeMoveWithoutGeneratingMoves(moves[0]);
-        alpha = getEvaluation(board, depth, transpositions, alpha, beta, Pvs::Instance);
+        alpha = getEvaluation(board, depth, transpositions, alpha, beta, getFirstMoveEvaluationStrategy());
         board->unmakeMove(moves[0]);
 
         tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, board, depth, transpositions, &shouldExit, this, &alpha, &beta](tbb::blocked_range<size_t> range) {
@@ -147,8 +147,17 @@ namespace DeepEvaluationStrategy {
         return alpha;
     }
 
+    const Base *const ParallelPvs::getFirstMoveEvaluationStrategy() const {
+        return ParallelPvsWithSequentialChildren::Instance;
+    }
+
+    const Base *const ParallelPvsWithSequentialChildren::getFirstMoveEvaluationStrategy() const {
+        return Pvs::Instance;
+    }
+
     const Sequential *const Sequential::Instance = new Sequential();
     const Parallel *const Parallel::Instance = new Parallel();
     const Pvs *const Pvs::Instance = new Pvs();
     const ParallelPvs *const ParallelPvs::Instance = new ParallelPvs();
+    const ParallelPvsWithSequentialChildren *const ParallelPvsWithSequentialChildren::Instance = new ParallelPvsWithSequentialChildren();
 }
