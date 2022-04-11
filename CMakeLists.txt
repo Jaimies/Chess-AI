@@ -19,13 +19,37 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
 find_package(TBB CONFIG REQUIRED)
 
+FIND_LIBRARY(GCCLIBATOMIC_LIBRARY NAMES atomic atomic.so.1 libatomic.so.1
+        HINTS
+        $ENV{HOME}/local/lib64
+        $ENV{HOME}/local/lib
+        /usr/local/lib64
+        /usr/local/lib
+        /opt/local/lib64
+        /opt/local/lib
+        /usr/lib64
+        /usr/lib
+        /lib64
+        /lib
+        )
+
+IF (GCCLIBATOMIC_LIBRARY)
+    SET(GCCLIBATOMIC_FOUND TRUE)
+    MESSAGE(STATUS "Found GCC's libatomic.so: lib=${GCCLIBATOMIC_LIBRARY}")
+ELSE ()
+    SET(GCCLIBATOMIC_FOUND FALSE)
+    MESSAGE(STATUS "GCC's libatomic.so not found. This library is essential in AArch64 (if you are on x86, this doesn't matter)")
+    MESSAGE(STATUS "Try: 'sudo yum install libatomic' (or sudo apt-get install libatomic1)")
+ENDIF ()
+
+
 set(TS_FILES Chess_en_CA.ts)
 
 set(PROJECT_SOURCES
         src/main/board/board.cpp src/main/board/board.h
         src/main/board/move.cpp src/main/board/move.h
         src/main/board/piece.cpp src/main/board/piece.h
-        src/main/util/vector_util.h src/main/util/thread_util.h
+        src/main/util/vector_util.h
         src/main/ui/analysis_info_display.cpp src/main/ui/analysis_info_display.h
         src/main/ui/chessboard.cpp src/main/ui/chessboard.h
         src/main/ui/game_manager.cpp src/main/ui/game_manager.h
@@ -48,42 +72,42 @@ set(PROJECT_SOURCES
         src/main/ai/evaluation.h src/main/ai/evaluation.cpp
         resources.qrc
         ${TS_FILES}
-)
+        )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Chess
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET Chess APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
+            )
+    # Define target properties for Android with Qt 6 as:
+    #    set_property(TARGET Chess APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
     if(ANDROID)
         add_library(Chess SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+                ${PROJECT_SOURCES}
+                )
+        # Define properties for Android with Qt 5 after find_package() calls as:
+        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(Chess
-            ${PROJECT_SOURCES}
-        )
+                ${PROJECT_SOURCES}
+                )
     endif()
 
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(Chess PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${BOOST_LIBRARIES} TBB::tbb)
+target_link_libraries(Chess PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${BOOST_LIBRARIES} TBB::tbb atomic)
 
 set_target_properties(Chess PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-)
+        MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        )
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Chess)

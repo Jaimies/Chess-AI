@@ -4,6 +4,10 @@
 #include "../board/zobrist_hash_generator.h"
 #include <iostream>
 
+bool shouldUpdateTransposition(int depth, int type, const Transposition &transposition) {
+    return depth > transposition.depth && transposition.type == type;
+}
+
 int64_t getEvaluation(
         Board *board, int depth, TranspositionTable *transpositions,int &nodeType,  int64_t alpha, int64_t beta,
         const DeepEvaluationStrategy::Base *const furtherEvaluationStrategy = DeepEvaluationStrategy::Sequential::Instance
@@ -13,21 +17,32 @@ int64_t getEvaluation(
     TranspositionTable::const_accessor accessor;
     auto isFound = transpositions->find(accessor, boardHash);
 
-    if (isFound && accessor->second.zobristKey == boardHash && accessor->second.depth >= depth) {
-        if (accessor->second.type == Transposition::EXACT)
-            return accessor->second.value;
+    if (isFound) {
+        auto transposition = (Transposition) *accessor->second;
 
-        if (accessor->second.type == Transposition::LOWER && accessor->second.value >= beta)
-            return beta;
+        if (transposition.depth >= depth) {
+            if (transposition.type == Transposition::EXACT)
+                return transposition.value;
 
-        if (accessor->second.type == Transposition::UPPER && accessor->second.value <= alpha)
-            return alpha;
+            if (transposition.type == Transposition::LOWER && transposition.value >= beta)
+                return beta;
+
+            if (transposition.type == Transposition::UPPER && transposition.value <= alpha)
+                return alpha;
+        }
     }
 
     auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
 
-    if (!isFound)
-        transpositions->insert({boardHash, {boardHash, evaluation, depth, nodeType}});
+    if (isFound) {
+        auto transposition = (Transposition) *accessor->second;
+
+        if (shouldUpdateTransposition(depth, nodeType, transposition))
+            accessor->second->exchange({boardHash, evaluation, depth, nodeType});
+    } else {
+        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
+        transpositions->insert({{boardHash, ptr}});
+    }
 
     return evaluation;
 }
