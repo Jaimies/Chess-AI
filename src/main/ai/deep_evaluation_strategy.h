@@ -16,10 +16,10 @@ namespace DeepEvaluationStrategy {
 
     protected:
         void deepEvaluateMove(
-                Board *board, MoveVariant move, int depth, TranspositionTable *transpositions,
+                Board *board, MoveVariant move, int depth, TranspositionTable *transpositions, int &nodeType,
                 int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) const;
     private:
-        virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const = 0;
+        virtual int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const = 0;
     };
 
     class Sequential : public Base {
@@ -28,7 +28,7 @@ namespace DeepEvaluationStrategy {
     protected:
         NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
     private:
-        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
     class Parallel : public Base {
@@ -37,14 +37,14 @@ namespace DeepEvaluationStrategy {
 
         ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
 
-        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
     class Pvs: public Sequential {
     public:
         static const Pvs *const Instance;
     protected:
-        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
     class ParallelPvs : public Parallel {
@@ -52,7 +52,7 @@ namespace DeepEvaluationStrategy {
         static const ParallelPvs *const Instance;
     protected:
         virtual const Base *const getFirstMoveEvaluationStrategy() const;
-        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const override;
+        int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
     class ParallelPvsWithSequentialChildren: public ParallelPvs {

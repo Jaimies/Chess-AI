@@ -1,20 +1,26 @@
 #include "evaluation_update_strategy.h"
+#include "transposition.h"
 
-void EvaluationUpdateStrategy::_updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta) {
+void EvaluationUpdateStrategy::_updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta, int &nodeType) {
     if (evaluation >= beta) {
         shouldExit = true;
+        nodeType = Transposition::LOWER;
         alpha = beta;
         return;
     }
-    alpha = std::max(alpha, evaluation);
+    if (evaluation > alpha) {
+        alpha = evaluation;
+        if (nodeType == Transposition::UPPER)
+            nodeType = Transposition::EXACT;
+    }
 }
 
-void ParallelizedUpdateStrategy::updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta) {
+void ParallelizedUpdateStrategy::updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta, int &nodeType) {
     mutex.lock();
-    _updateEvaluation(evaluation, shouldExit, alpha, beta);
+    _updateEvaluation(evaluation, shouldExit, alpha, beta, nodeType);
     mutex.unlock();
 }
 
-void NonParallelizedUpdateStrategy::updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta) {
-    _updateEvaluation(evaluation, shouldExit, alpha, beta);
+void NonParallelizedUpdateStrategy::updateEvaluation(int64_t evaluation, bool &shouldExit, int64_t &alpha, int64_t &beta, int &nodeType) {
+    _updateEvaluation(evaluation, shouldExit, alpha, beta, nodeType);
 }
