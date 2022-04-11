@@ -9,7 +9,7 @@ bool shouldUpdateTransposition(int depth, int type, const Transposition &transpo
 }
 
 int64_t getEvaluation(
-        Board *board, int depth, TranspositionTable *transpositions,int &nodeType,  int64_t alpha, int64_t beta,
+        Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta,
         const DeepEvaluationStrategy::Base *const furtherEvaluationStrategy = DeepEvaluationStrategy::Sequential::Instance
 ) {
     auto boardHash = board->getZobristHash();
@@ -30,19 +30,19 @@ int64_t getEvaluation(
             if (transposition.type == Transposition::UPPER && transposition.value <= alpha)
                 return alpha;
         }
+
+        auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
+
+        if (shouldUpdateTransposition(depth, nodeType, transposition))
+            accessor->second->exchange({boardHash, evaluation, depth, nodeType});
+
+        return evaluation;
     }
 
     auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
 
-    if (isFound) {
-        auto transposition = (Transposition) *accessor->second;
-
-        if (shouldUpdateTransposition(depth, nodeType, transposition))
-            accessor->second->exchange({boardHash, evaluation, depth, nodeType});
-    } else {
-        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
-        transpositions->insert({{boardHash, ptr}});
-    }
+    AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
+    transpositions->insert({{boardHash, ptr}});
 
     return evaluation;
 }
