@@ -8,51 +8,51 @@ bool shouldUpdateTransposition(int depth, int type, const Transposition &transpo
     return depth > transposition.depth && transposition.type == type;
 }
 
-int64_t getEvaluation(
-        Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta,
-        const DeepEvaluationStrategy::Base *const furtherEvaluationStrategy = DeepEvaluationStrategy::Sequential::Instance
-) {
-    auto boardHash = board->getZobristHash();
 
-    TranspositionTable::const_accessor accessor;
-    auto isFound = transpositions->find(accessor, boardHash);
+namespace DeepEvaluationStrategy {
+    int64_t Base::getEvaluation(
+            Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta,
+            const DeepEvaluationStrategy::Base *const furtherEvaluationStrategy
+    ) const {
+        auto boardHash = board->getZobristHash();
 
-    if (isFound) {
-        auto transposition = (Transposition) *accessor->second;
+        TranspositionTable::const_accessor accessor;
+        auto isFound = transpositions->find(accessor, boardHash);
 
-        if (transposition.depth >= depth) {
-            if (transposition.type == Transposition::EXACT)
-                return transposition.value;
+        if (isFound) {
+            auto transposition = (Transposition) *accessor->second;
 
-            if (transposition.type == Transposition::LOWER && transposition.value >= beta)
-                return beta;
+            if (transposition.depth >= depth) {
+                if (transposition.type == Transposition::EXACT)
+                    return transposition.value;
 
-            if (transposition.type == Transposition::UPPER && transposition.value <= alpha)
-                return alpha;
+                if (transposition.type == Transposition::LOWER && transposition.value >= beta)
+                    return beta;
+
+                if (transposition.type == Transposition::UPPER && transposition.value <= alpha)
+                    return alpha;
+            }
+
+            auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
+
+            if (shouldUpdateTransposition(depth, nodeType, transposition))
+                accessor->second->exchange({boardHash, evaluation, depth, nodeType});
+
+            return evaluation;
         }
 
-        auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
+        auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
 
-        if (shouldUpdateTransposition(depth, nodeType, transposition))
-            accessor->second->exchange({boardHash, evaluation, depth, nodeType});
+        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
+        transpositions->insert({{boardHash, ptr}});
 
         return evaluation;
     }
-
-    auto evaluation = -MoveGenerator::deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
-
-    AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
-    transpositions->insert({{boardHash, ptr}});
-
-    return evaluation;
-}
-
-namespace DeepEvaluationStrategy {
     void Base::deepEvaluateMove(
             Board *board, MoveVariant move, int depth, TranspositionTable *transpositions, int &nodeType,
             int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) const {
         board->makeMoveWithoutGeneratingMoves(move);
-        auto evaluation = getEvaluation(board, depth, transpositions, nodeType, alpha, beta);
+        auto evaluation = getEvaluation(board, depth, transpositions, nodeType, alpha, beta, generator->sequentialStrategy);
         board->unmakeMove(move);
         strategy->updateEvaluation(evaluation, shouldExit, alpha, beta, nodeType);
     }
@@ -70,7 +70,7 @@ namespace DeepEvaluationStrategy {
         bool shouldExit = false;
 
         for (auto &move: moves) {
-            if (shouldExit || analysisStopped) return alpha;
+            if (shouldExit || generator->analysisFinished) return alpha;
             deepEvaluateMove(board, move, depth, transpositions, nodeType, alpha, beta, shouldExit, strategy);
         }
 
@@ -83,7 +83,7 @@ namespace DeepEvaluationStrategy {
 
         auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit, transpositions, &nodeType](tbb::blocked_range<size_t> range) {
             for (size_t i = range.begin(); i < range.end(); ++i) {
-                if (shouldExit || analysisStopped) return;
+                if (shouldExit || generator->analysisFinished) return;
                 auto boardCopy = board->copy();
                 deepEvaluateMove(boardCopy, moves[i], depth, transpositions, nodeType, alpha, beta, shouldExit, strategy);
                 delete boardCopy;
@@ -95,8 +95,8 @@ namespace DeepEvaluationStrategy {
         return alpha;
     }
 
-    int64_t getNullWindowEval(Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha) {
-        return getEvaluation(board, depth, transpositions, nodeType, alpha, alpha + 1, Sequential::Instance);
+    int64_t Base::getNullWindowEval(Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha) const {
+        return getEvaluation(board, depth, transpositions, nodeType, alpha, alpha + 1, generator->sequentialStrategy);
     };
 
     int64_t Pvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha,
@@ -104,7 +104,7 @@ namespace DeepEvaluationStrategy {
         bool shouldExit = false;
 
         board->makeMoveWithoutGeneratingMoves(moves[0]);
-        alpha = getEvaluation(board, depth, transpositions, nodeType, alpha, beta, Pvs::Instance);
+        alpha = getEvaluation(board, depth, transpositions, nodeType, alpha, beta, generator->pvsStrategy);
         board->unmakeMove(moves[0]);
 
         for (int i = 1; i < moves.size(); i++) {
@@ -115,12 +115,12 @@ namespace DeepEvaluationStrategy {
             if (nullWindowEval != alpha) {
                 // this move is better than the current option
                 board->makeMoveWithoutGeneratingMoves(moves[i]);
-                auto fullWindowEval = getEvaluation(board, depth, transpositions, nodeType, alpha, beta, Pvs::Instance);
+                auto fullWindowEval = getEvaluation(board, depth, transpositions, nodeType, alpha, beta, generator->pvsStrategy);
                 strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta, nodeType);
                 board->unmakeMove(moves[i]);
             }
 
-            if (shouldExit || analysisStopped) return alpha;
+            if (shouldExit || generator->analysisFinished) return alpha;
         }
 
         return alpha;
@@ -147,12 +147,12 @@ namespace DeepEvaluationStrategy {
                 if (nullWindowEval != initialAlpha) {
                     // this move is better than the current option
                     boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
-                    auto fullWindowEval = getEvaluation(boardCopy, depth, transpositions, nodeType, alpha, beta, Pvs::Instance);
+                    auto fullWindowEval = getEvaluation(boardCopy, depth, transpositions, nodeType, alpha, beta, generator->pvsStrategy);
                     strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta, nodeType);
                     boardCopy->unmakeMove(moveCopy);
                 }
 
-                if (shouldExit || analysisStopped) return;
+                if (shouldExit || generator->analysisFinished) return;
             }
         });
 
@@ -160,16 +160,10 @@ namespace DeepEvaluationStrategy {
     }
 
     const Base *const ParallelPvs::getFirstMoveEvaluationStrategy() const {
-        return Pvs::Instance;
+        return generator->pvsStrategy;
     }
 
     const Base *const ParallelPvsWithSequentialChildren::getFirstMoveEvaluationStrategy() const {
-        return Pvs::Instance;
+        return generator->sequentialStrategy;
     }
-
-    const Sequential *const Sequential::Instance = new Sequential();
-    const Parallel *const Parallel::Instance = new Parallel();
-    const Pvs *const Pvs::Instance = new Pvs();
-    const ParallelPvs *const ParallelPvs::Instance = new ParallelPvs();
-    const ParallelPvsWithSequentialChildren *const ParallelPvsWithSequentialChildren::Instance = new ParallelPvsWithSequentialChildren();
 }

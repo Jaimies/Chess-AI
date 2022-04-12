@@ -33,7 +33,7 @@ AnalysisInfoDisplay::AnalysisInfoDisplay(QWidget *parent, GameManager *manager) 
 }
 
 void AnalysisInfoDisplay::updateInfo(AnalysisInfo *info) {
-    QApplication::postEvent(this, new UpdateAnalysisInfoEvent());
+    QApplication::postEvent(this, new UpdateAnalysisInfoEvent(info));
 }
 
 void AnalysisInfoDisplay::showAnalysisActive() {
@@ -55,7 +55,8 @@ bool AnalysisInfoDisplay::event(QEvent *event)
         return QWidget::event(event);
     }
 
-    auto info = MoveGenerator::analysisInfo;
+    auto updateEvent = (UpdateAnalysisInfoEvent *) event;
+    auto info = updateEvent->info;
     if (!info) return true;
 
     this->positionCount->setText(("Evaluated " + std::to_string(info->positionsAnalyzed) + " positions").c_str());
@@ -64,10 +65,7 @@ bool AnalysisInfoDisplay::event(QEvent *event)
     this->machineMove->setText(("Last move: " + info->move->toString()).c_str());
     showAnalysisFinished();
 
-    delete info->move;
     delete info;
-
-    MoveGenerator::analysisInfo = nullptr;
 
     return true;
 }

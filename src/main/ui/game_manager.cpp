@@ -77,9 +77,10 @@ void GameManager::makeMove(Move *move, bool isMachineMove) {
 }
 
 void findTheBestMove(Board *board, GameManager *gameManager) {
-    auto machineMove = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto machineMove = generator->getBestMove(board);
     gameManager->makeMove(machineMove, true);
-    gameManager->info->updateInfo(MoveGenerator::analysisInfo);
+    gameManager->info->updateInfo(generator->analysisInfo);
 }
 
 void GameManager::makeMachineMoveIfNecessary() {

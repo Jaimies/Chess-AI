@@ -7,4 +7,8 @@ struct AnalysisInfo {
     const int depthSearchedTo;
     const Move *move;
     long millisElapsed;
+
+    ~AnalysisInfo() {
+        delete move;
+    }
 };
