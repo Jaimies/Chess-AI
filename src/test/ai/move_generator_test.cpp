@@ -5,47 +5,47 @@
 
 TEST(MoveGenerator, FindsBestMoveInPositionWithCheckmate) {
     auto board = Board::fromFenString("rnbqkbnr/pppppppp/8/8/2B5/5Q2/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Piece::Black);
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
 
-    std::cout << MoveGenerator::analysisInfo->depthSearchedTo << std::endl;
-    std::cout << MoveGenerator::positionsAnalyzed << std::endl;
+    std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
+    std::cout << generator->positionsAnalyzed << std::endl;
     std::cout << move->toString() << std::endl;
 
     ASSERT_TRUE(move->startSquare == 62 && move->targetSquare == 45
                 || move->startSquare == 62 && move->targetSquare == 47
                 || move->startSquare == 52 && move->targetSquare == 44);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, FindsBestMoveInPositionWithPotentialCaptures) {
     auto board = Board::fromFenString("rnbqkbnr/pp1ppppp/2p5/3B4/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Piece::Black);
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
 
-    std::cout << MoveGenerator::analysisInfo->depthSearchedTo << std::endl;
-    std::cout << MoveGenerator::positionsAnalyzed << std::endl;
+    std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
+    std::cout << generator->positionsAnalyzed << std::endl;
 
     ASSERT_TRUE(move->startSquare == 42 && move->targetSquare == 35);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, FindsCorrectBestMoveInPosition2) {
     Board *board = Board::fromFenString("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
 
-    std::cout << MoveGenerator::analysisInfo->depthSearchedTo << std::endl;
-    std::cout << MoveGenerator::positionsAnalyzed << std::endl;
+    std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
+    std::cout << generator->positionsAnalyzed << std::endl;
 
     ASSERT_TRUE(move->startSquare == 25 && move->targetSquare == 29);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, UsesSensiblePositioning) {
     Board *board = Board::fromFenString(Board::startPosition);
     MoveVariant moveToMake = NormalMove::fromString("e2e4");
     board->makeMove(moveToMake);
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
     std::cout << move->startSquare << " " << move->targetSquare;
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, evaluationIncludesPositioning) {
@@ -66,31 +66,31 @@ TEST(MoveGenerator, evaluationIncludesPositioning) {
 
 TEST(MoveGenerator, GivesCheckmate) {
     auto board = Board::fromFenString("8/8/8/8/8/1kr5/8/K7 w - - 0 1", Piece::Black);
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
 
-    std::cout << MoveGenerator::positionsAnalyzed << std::endl;
-    std::cout << MoveGenerator::analysisInfo->depthSearchedTo << std::endl;
+    std::cout << generator->positionsAnalyzed << std::endl;
+    std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
 
     EXPECT_EQ(move->toString(), "c3c1");
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, GivesCheckmateInAMoreComplexPosition) {
     auto board = Board::fromFenString("8/8/8/8/8/1k2r3/8/2K5 w - - 0 1", Piece::Black);
-    auto move = MoveGenerator::getBestMove(board);
+    auto generator = new MoveGenerator();
+    auto move = generator->getBestMove(board);
 
     EXPECT_EQ(move->toString(), "e3d3");
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 TEST(MoveGenerator, DoesNotDoStupidMoves) {
     auto board = Board::fromFenString("r1b1kbnr/p1p2ppp/2p1p3/q2pP3/1P1P4/P1N5/2P2PPP/R1BQK1NR b - - 0 1", Piece::Black);
 
     for (int i = 0; i < 20; i++) {
-        auto bestMove = MoveGenerator::getBestMove(board);
+        auto generator = new MoveGenerator();
+        auto bestMove = generator->getBestMove(board);
         ASSERT_EQ(bestMove->toString(), "f8b4");
         std::cout << i + 1 << " / 20" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -98,10 +98,10 @@ TEST(MoveGenerator, DoesNotDoStupidMoves_2) {
     auto board = Board::fromFenString("r1b1kr2/ppp2ppp/1b2p3/P2pP3/1P1P4/2q2N2/2PN1PPP/R2QK2R b KQq - 0 1", Piece::Black);
 
     for (int i = 0; i < 50; i++) {
-        auto bestMove = MoveGenerator::getBestMove(board);
+        auto generator = new MoveGenerator();
+        auto bestMove = generator->getBestMove(board);
         ASSERT_EQ(bestMove->toString(), "b6d4");
         std::cout << i + 1 << " / 50" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -109,10 +109,10 @@ TEST(MoveGenerator, DoesNotDoStupidMoves_3) {
     auto board = Board::fromFenString("r1bqkb1r/pppppppp/2n5/8/2B1N3/8/PPPP1PPP/R1BQK2R b KQkq - 0 1", Piece::Black);
 
     for (int i = 0; i < 20; i++) {
-        auto bestMove = MoveGenerator::getBestMove(board);
+        auto generator = new MoveGenerator();
+        auto bestMove = generator->getBestMove(board);
         ASSERT_EQ(bestMove->toString(), "d7d5");
         std::cout << i + 1 << " / 20" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -120,9 +120,10 @@ TEST(MoveGenerator, DoesNotDoStupidMoves_4) {
     auto board = Board::fromFenString("r3kbnr/pppqpppp/2n5/1B3b2/3P4/2N2N2/PPP2PPP/R1BQK2R b KQk - 0 1", Piece::Black);
 
     for (int i = 0; i < 50; i++) {
-        auto bestMove = MoveGenerator::getBestMove(board);
+        auto generator = new MoveGenerator();
+        auto bestMove = generator->getBestMove(board);
         ASSERT_TRUE(bestMove->toString() == "d7e6" || bestMove->toString() == "a7a6" || bestMove->toString() == "e7e6");
         std::cout << i + 1 << " / 50" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
