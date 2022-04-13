@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <stack>
 #include "piece.h"
-#include "move.h"
+#include "../move/move.h"
 #include "board.h"
 #include "zobrist_hash_generator.h"
 

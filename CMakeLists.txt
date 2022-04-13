@@ -47,7 +47,7 @@ set(TS_FILES Chess_en_CA.ts)
 
 set(PROJECT_SOURCES
         src/main/board/board.cpp src/main/board/board.h
-        src/main/board/move.cpp src/main/board/move.h
+        src/main/move/move.cpp src/main/move/move.h
         src/main/board/piece.cpp src/main/board/piece.h
         src/main/util/vector_util.h
         src/main/ui/analysis_info_display.cpp src/main/ui/analysis_info_display.h
@@ -69,6 +69,7 @@ set(PROJECT_SOURCES
         src/main/ai/move_sorting.h src/main/ai/move_sorting.cpp
         src/main/ai/transpositions.h src/main/ai/transposition.h
         src/main/ai/evaluation.h src/main/ai/evaluation.cpp
+        src/main/move/visitors.cpp src/main/move/visitors.h
         resources.qrc
         ${TS_FILES}
         )

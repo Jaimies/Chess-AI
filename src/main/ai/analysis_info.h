@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../board/move.h"
+#include "../move/move.h"
 
 struct AnalysisInfo {
     const unsigned long positionsAnalyzed;

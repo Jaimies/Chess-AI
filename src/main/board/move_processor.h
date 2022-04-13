@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "move.h"
+#include "../move/move.h"
 
 class MoveProcessor {
 public:

@@ -1,6 +1,6 @@
-#include "board.h"
 #include "move.h"
-#include "zobrist_hash_generator.h"
+#include "../board/board.h"
+#include "../board/zobrist_hash_generator.h"
 
 Move::Move(int startSquare, int targetSquare)
         : startSquare(startSquare), targetSquare(targetSquare) {};
@@ -147,26 +147,3 @@ bool EnPassantMove::operator==(const EnPassantMove &other) const {
     return startSquare == other.startSquare && targetSquare == other.targetSquare
            && capturedPawnPosition == other.capturedPawnPosition;
 }
-
-uint64_t GetZobristHashVisitor::operator()(NormalMove &move) const {
-    return move.getZorbristHash(board->squares);
-}
-
-uint64_t GetZobristHashVisitor::operator()(PromotionMove &move) const {
-    return move.getZorbristHash(board->squares);
-}
-
-uint64_t GetZobristHashVisitor::operator()(EnPassantMove &move) const {
-    return move.getZorbristHash(board->squares);
-}
-
-uint64_t GetZobristHashVisitor::operator()(CastlingMove &move) const {
-    return move.getZorbristHash(board->squares);
-}
-
-_GetEnPassantMoveVisitor GetEnPassantMoveVisitor;
-_IsCastlingMoveVisitor IsCastlingMoveVisitor;
-_GetBasicMoveVisitor GetBasicMoveVisitor;
-_GetMoveAddedValueVisitor GetMoveAddedValueVisitor;
-_GetMovePointerVisitor GetMovePointerVisitor;
-_DetermineIfMoveCanCaptureVisitor DetermineIfMoveCanCaptureVisitor;

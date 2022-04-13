@@ -1,7 +1,7 @@
 #include <thread>
 #include <mutex>
 #include "../board/piece.h"
-#include "../board/move.h"
+#include "../move/move.h"
 #include "../board/zobrist_hash_generator.h"
 #include <tbb/parallel_for.h>
 #include <iostream>

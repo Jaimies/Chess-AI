@@ -8,7 +8,8 @@
 #include <functional>
 #include <unordered_set>
 #include "piece.h"
-#include "move.h"
+#include "../move/move.h"
+#include "../move/visitors.h"
 #include "move_processor.h"
 
 class Board {

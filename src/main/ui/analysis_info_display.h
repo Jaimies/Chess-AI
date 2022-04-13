@@ -3,7 +3,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QWidget>
-#include "../board/move.h"
+#include "../move/move.h"
 #include "game_manager.h"
 #include "../ai/analysis_info.h"
 
