@@ -67,7 +67,7 @@ set(PROJECT_SOURCES
         src/main/ai/deep_evaluation_strategy.h src/main/ai/deep_evaluation_strategy.cpp
         src/main/ai/evaluation_update_strategy.h src/main/ai/evaluation_update_strategy.cpp
         src/main/ai/move_sorting.h src/main/ai/move_sorting.cpp
-        src/main/ai/transpositions.h src/main/ai/transposition.h
+        src/main/ai/transposition_table.h src/main/ai/transposition.h
         src/main/ai/evaluation.h src/main/ai/evaluation.cpp
         src/main/move/visitors.cpp src/main/move/visitors.h
         resources.qrc

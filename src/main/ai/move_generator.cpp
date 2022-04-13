@@ -10,7 +10,7 @@
 #include "constants.h"
 #include "move_evaluation_data.h"
 #include "deep_evaluation_strategy.h"
-#include "transpositions.h"
+#include "transposition_table.h"
 #include "move_sorting.h"
 #include "evaluation.h"
 #include "../util/thread_util.h"

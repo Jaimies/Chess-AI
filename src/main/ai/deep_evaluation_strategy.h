@@ -5,7 +5,7 @@
 #include <tbb/parallel_for.h>
 #include <mutex>
 #include "../move/move.h"
-#include "transpositions.h"
+#include "transposition_table.h"
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"
 
