@@ -133,7 +133,7 @@ Move *MoveGenerator::_getBestMove(Board *board, int depth, Move *supposedBestMov
 Move *MoveGenerator::getBestMove(Board *board, AiSettings settings) {
     using namespace std::chrono;
 
-    startThreadAndForget([board, settings, this]() {
+    thread = new std::thread([board, settings, this]() {
         int depth = 1;
 
         while (!analysisFinished) {

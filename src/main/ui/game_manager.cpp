@@ -81,6 +81,7 @@ void findTheBestMove(Board *board, GameManager *gameManager) {
     auto machineMove = generator->getBestMove(board);
     gameManager->makeMove(machineMove, true);
     gameManager->info->updateInfo(generator->analysisInfo);
+    deleteInTheBackground(generator);
 }
 
 void GameManager::makeMachineMoveIfNecessary() {

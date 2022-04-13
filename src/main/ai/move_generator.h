@@ -5,6 +5,7 @@
 #include "deep_evaluation_strategy.h"
 #include "constants.h"
 #include "move_evaluation_data.h"
+#include <thread>
 
 using namespace DeepEvaluationStrategy;
 using namespace std::chrono;
@@ -29,6 +30,9 @@ public:
     const ParallelPvsWithSequentialChildren * const parallelPvsWithSequentialChildrenStrategy = new ParallelPvsWithSequentialChildren(this);
 
     ~MoveGenerator() {
+        thread->join();
+
+        delete thread;
         delete sequentialStrategy;
         delete parallelStrategy;
         delete pvsStrategy;
@@ -37,6 +41,7 @@ public:
     }
 private:
     steady_clock::time_point begin = steady_clock::now();
+    std::thread *thread = nullptr;
     Move *bestMove = nullptr;
 
     int64_t getFirstMoveAlpha(Board *board, int depth, std::vector<MoveVariant> moves, TranspositionTable *transpositions);
