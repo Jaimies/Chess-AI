@@ -63,7 +63,7 @@ set(PROJECT_SOURCES
         src/main/board/move_processor.h src/main/board/move_processor.cpp
         src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
         src/main/ai/analysis_info.h src/main/ai/ai_settings.h
-        src/main/ai/move_evaluation_data.h src/main/ai/constants.h src/main/ai/constants.cpp
+        src/main/ai/constants.h src/main/ai/constants.cpp
         src/main/ai/deep_evaluation_strategy.h src/main/ai/deep_evaluation_strategy.cpp
         src/main/ai/evaluation_update_strategy.h src/main/ai/evaluation_update_strategy.cpp
         src/main/ai/move_sorting.h src/main/ai/move_sorting.cpp

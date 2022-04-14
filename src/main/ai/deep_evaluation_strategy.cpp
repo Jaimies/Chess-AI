@@ -2,12 +2,12 @@
 #include "move_generator.h"
 #include "transposition_table.h"
 #include "../board/zobrist_hash_generator.h"
+#include "single_depth_move_generator.h"
 #include <iostream>
 
 bool shouldUpdateTransposition(int depth, int type, const Transposition &transposition) {
     return depth > transposition.depth && transposition.type == type;
 }
-
 
 namespace DeepEvaluationStrategy {
     int64_t Base::getEvaluation(
@@ -33,7 +33,7 @@ namespace DeepEvaluationStrategy {
                     return alpha;
             }
 
-            auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
+            auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, -beta, -alpha);
 
             if (shouldUpdateTransposition(depth, nodeType, transposition))
                 accessor->second->exchange({evaluation, depth, nodeType});
@@ -41,7 +41,7 @@ namespace DeepEvaluationStrategy {
             return evaluation;
         }
 
-        auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
+        auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, -beta, -alpha);
 
         AtomicTranspositionPtr ptr(new std::atomic<Transposition>({evaluation, depth, nodeType}));
         transpositions->insert({{boardHash, ptr}});
@@ -70,7 +70,7 @@ namespace DeepEvaluationStrategy {
         bool shouldExit = false;
 
         for (auto &move: moves) {
-            if (shouldExit || generator->analysisFinished) return alpha;
+            if (shouldExit || generator->parent->analysisFinished) return alpha;
             deepEvaluateMove(board, move, depth, transpositions, nodeType, alpha, beta, shouldExit, strategy);
         }
 
@@ -83,7 +83,7 @@ namespace DeepEvaluationStrategy {
 
         auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit, transpositions, &nodeType](tbb::blocked_range<size_t> range) {
             for (size_t i = range.begin(); i < range.end(); ++i) {
-                if (shouldExit || generator->analysisFinished) return;
+                if (shouldExit || generator->parent->analysisFinished) return;
                 auto boardCopy = board->copy();
                 deepEvaluateMove(boardCopy, moves[i], depth, transpositions, nodeType, alpha, beta, shouldExit, strategy);
                 delete boardCopy;
@@ -120,7 +120,7 @@ namespace DeepEvaluationStrategy {
                 board->unmakeMove(moves[i]);
             }
 
-            if (shouldExit || generator->analysisFinished) return alpha;
+            if (shouldExit || generator->parent->analysisFinished) return alpha;
         }
 
         return alpha;
@@ -152,7 +152,7 @@ namespace DeepEvaluationStrategy {
                     boardCopy->unmakeMove(moveCopy);
                 }
 
-                if (shouldExit || generator->analysisFinished) return;
+                if (shouldExit || generator->parent->analysisFinished) return;
             }
         });
 

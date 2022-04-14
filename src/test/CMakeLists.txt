@@ -48,7 +48,6 @@ add_executable(
         ../main/board/move_processor.h ../main/board/move_processor.cpp
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h
-        ../main/ai/move_evaluation_data.h
         ../main/util/vector_util.h ../main/util/thread_util.h
         ../main/ai/constants.h ../main/ai/constants.cpp
         ../main/ai/deep_evaluation_strategy.h ../main/ai/deep_evaluation_strategy.cpp
@@ -57,5 +56,5 @@ add_executable(
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
         ../main/ai/evaluation.h ../main/ai/evaluation.cpp
         string_util.h string_util.cpp
-        ../main/move/visitors.cpp ../main/move/visitors.h)
+        ../main/move/visitors.cpp ../main/move/visitors.h ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h)
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb atomic)

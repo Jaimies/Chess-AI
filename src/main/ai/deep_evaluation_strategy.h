@@ -9,7 +9,7 @@
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"
 
-class MoveGenerator;
+class SingleDepthMoveGenerator;
 
 namespace DeepEvaluationStrategy {
     class Base {
@@ -17,9 +17,9 @@ namespace DeepEvaluationStrategy {
         int64_t deepEvaluate(Board *board, int depth, TranspositionTable *transpositions, int64_t alpha, int64_t beta) const;
 
     protected:
-        MoveGenerator *generator;
+        SingleDepthMoveGenerator *generator;
 
-        explicit Base(MoveGenerator *generator): generator(generator) {}
+        explicit Base(SingleDepthMoveGenerator *generator): generator(generator) {}
 
         int64_t getEvaluation(
                 Board *board, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta,
@@ -37,7 +37,7 @@ namespace DeepEvaluationStrategy {
 
     class Sequential : public Base {
     public:
-        explicit Sequential(MoveGenerator *generator): Base(generator) {}
+        explicit Sequential(SingleDepthMoveGenerator *generator): Base(generator) {}
     protected:
         NonParallelizedUpdateStrategy *strategy = new NonParallelizedUpdateStrategy();
     private:
@@ -46,7 +46,7 @@ namespace DeepEvaluationStrategy {
 
     class Parallel : public Base {
     public:
-        explicit Parallel(MoveGenerator *generator): Base(generator) {}
+        explicit Parallel(SingleDepthMoveGenerator *generator): Base(generator) {}
 
         ParallelizedUpdateStrategy *strategy = new ParallelizedUpdateStrategy();
 
@@ -55,14 +55,14 @@ namespace DeepEvaluationStrategy {
 
     class Pvs: public Sequential {
     public:
-        explicit Pvs(MoveGenerator *generator): Sequential(generator) {}
+        explicit Pvs(SingleDepthMoveGenerator *generator): Sequential(generator) {}
     protected:
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
     class ParallelPvs : public Parallel {
     public:
-        explicit ParallelPvs(MoveGenerator *generator): Parallel(generator) {}
+        explicit ParallelPvs(SingleDepthMoveGenerator *generator): Parallel(generator) {}
     protected:
         virtual const Base *const getFirstMoveEvaluationStrategy() const;
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, TranspositionTable *transpositions, int &nodeType, int64_t alpha, int64_t beta) const override;
@@ -70,7 +70,7 @@ namespace DeepEvaluationStrategy {
 
     class ParallelPvsWithSequentialChildren: public ParallelPvs {
     public:
-        explicit ParallelPvsWithSequentialChildren(MoveGenerator *generator): ParallelPvs(generator) {}
+        explicit ParallelPvsWithSequentialChildren(SingleDepthMoveGenerator *generator): ParallelPvs(generator) {}
     protected:
         const Base *const getFirstMoveEvaluationStrategy() const override;
     };
