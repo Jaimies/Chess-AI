@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <array>
-#include <boost/variant2/variant.hpp>
+#include <variant>
 #include "../board/piece.h"
 
 class Board;
@@ -12,7 +12,7 @@ class CastlingMove;
 class EnPassantMove;
 class PromotionMove;
 
-typedef boost::variant2::variant<NormalMove, CastlingMove, EnPassantMove, PromotionMove> MoveVariant;
+typedef std::variant<NormalMove, CastlingMove, EnPassantMove, PromotionMove> MoveVariant;
 
 class Move {
 public:
