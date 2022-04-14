@@ -29,8 +29,6 @@ public:
     virtual int getAddedValue() { return 0; };
     std::string toString() const;
     MoveVariant toVariant();
-
-    virtual ~Move() = default;
 protected:
     Move(int startSquare, int targetSquare);
 };
