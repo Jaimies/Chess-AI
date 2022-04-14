@@ -5,7 +5,6 @@
 #include <memory>
 
 struct Transposition {
-    uint64_t zobristKey;
     int64_t value;
     int depth;
     int type;

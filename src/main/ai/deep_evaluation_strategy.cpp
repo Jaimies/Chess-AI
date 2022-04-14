@@ -36,14 +36,14 @@ namespace DeepEvaluationStrategy {
             auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
 
             if (shouldUpdateTransposition(depth, nodeType, transposition))
-                accessor->second->exchange({boardHash, evaluation, depth, nodeType});
+                accessor->second->exchange({evaluation, depth, nodeType});
 
             return evaluation;
         }
 
         auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, transpositions, -beta, -alpha);
 
-        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({boardHash, evaluation, depth, nodeType}));
+        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({evaluation, depth, nodeType}));
         transpositions->insert({{boardHash, ptr}});
 
         return evaluation;
