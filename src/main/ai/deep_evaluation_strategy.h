@@ -24,7 +24,7 @@ namespace DeepEvaluationStrategy {
 
         int64_t getEvaluation(
                 Board *board, int depth, int &nodeType, int64_t alpha, int64_t beta,
-                const Base *const furtherEvaluationStrategy
+                const Base *furtherEvaluationStrategy
         ) const;
 
         int64_t getNullWindowEval(Board *board, int depth, int &nodeType, int64_t alpha) const;
@@ -65,7 +65,7 @@ namespace DeepEvaluationStrategy {
     public:
         explicit ParallelPvs(SingleDepthMoveGenerator *generator): Parallel(generator) {}
     protected:
-        virtual const Base *const getFirstMoveEvaluationStrategy() const;
+        virtual const Base *getFirstMoveEvaluationStrategy() const;
         int64_t _deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType, int64_t alpha, int64_t beta) const override;
     };
 
@@ -73,6 +73,6 @@ namespace DeepEvaluationStrategy {
     public:
         explicit ParallelPvsWithSequentialChildren(SingleDepthMoveGenerator *generator): ParallelPvs(generator) {}
     protected:
-        const Base *const getFirstMoveEvaluationStrategy() const override;
+        const Base *getFirstMoveEvaluationStrategy() const override;
     };
 }

@@ -13,7 +13,7 @@ bool shouldUpdateTransposition(int depth, int type, const Transposition &transpo
 namespace DeepEvaluationStrategy {
     int64_t Base::getEvaluation(
             Board *board, int depth, int &nodeType, int64_t alpha, int64_t beta,
-            const DeepEvaluationStrategy::Base *const furtherEvaluationStrategy
+            const DeepEvaluationStrategy::Base *furtherEvaluationStrategy
     ) const {
         auto boardHash = board->getZobristHash();
 
@@ -49,6 +49,7 @@ namespace DeepEvaluationStrategy {
 
         return evaluation;
     }
+
     void Base::deepEvaluateMove(
             Board *board, MoveVariant move, int depth, int &nodeType,
             int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) const {
@@ -173,11 +174,11 @@ namespace DeepEvaluationStrategy {
         return alpha;
     }
 
-    const Base *const ParallelPvs::getFirstMoveEvaluationStrategy() const {
+    const Base *ParallelPvs::getFirstMoveEvaluationStrategy() const {
         return generator->pvsStrategy;
     }
 
-    const Base *const ParallelPvsWithSequentialChildren::getFirstMoveEvaluationStrategy() const {
+    const Base *ParallelPvsWithSequentialChildren::getFirstMoveEvaluationStrategy() const {
         return generator->sequentialStrategy;
     }
 }
