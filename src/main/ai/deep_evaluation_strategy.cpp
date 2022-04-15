@@ -107,7 +107,7 @@ namespace DeepEvaluationStrategy {
         alpha = getEvaluation(board, depth, nodeType, alpha, beta, generator->pvsStrategy);
         board->unmakeMove(moves[0]);
 
-        for (int i = 1; i < moves.size(); i++) {
+        for (size_t i = 1; i < moves.size(); i++) {
             board->makeMoveWithoutGeneratingMoves(moves[i]);
             auto nullWindowEval = getNullWindowEval(board, depth, nodeType, alpha);
             board->unmakeMove(moves[i]);
@@ -136,7 +136,7 @@ namespace DeepEvaluationStrategy {
         board->unmakeMove(moves[0]);
 
         tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, &nodeType, board, depth, &shouldExit, this, &alpha, &beta](tbb::blocked_range<size_t> range) {
-            for (int i = range.begin(); i < range.end(); i++) {
+            for (size_t i = range.begin(); i < range.end(); i++) {
                 auto initialAlpha = alpha;
                 auto boardCopy = board->copy();
                 auto moveCopy = moves[i];
