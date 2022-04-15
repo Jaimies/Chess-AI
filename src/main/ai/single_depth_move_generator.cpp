@@ -112,5 +112,5 @@ SingleDepthMoveGenerator::deepEvaluate(Board *board, int depth, const DeepEvalua
         return evaluatePositionWithoutMoves(board, depth);
     }
 
-    return strategy->deepEvaluate(board, depth, transpositions, alpha, beta);
+    return strategy->deepEvaluate(board, depth, alpha, beta);
 }
