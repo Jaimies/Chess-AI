@@ -128,39 +128,39 @@ private:
     void generateLegalCaptures(int color);
     void generateCheckSolvingMovePositions();
     void generateCheckSolvingMovePosition(int pieceType, int startSquare);
-    void generateCastlingMoves(MoveProcessor *processor);
-    void addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor);
-    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor);
-    bool isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition);
-    bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition);
+    void generateCastlingMoves(MoveProcessor *processor) const;
+    void addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor) const;
+    void addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor) const;
+    bool isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) const;
+    bool allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition) const;
     bool isSquareUnderAttack(int square) const;
-    bool allSquaresAreClearBetween(int firstSquare, int secondSquare);
+    bool allSquaresAreClearBetween(int firstSquare, int secondSquare) const;
     bool isSideInEndgamePosition(int colour) const;
     bool determineIfIsInEndgame() const;
-    void generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor);
-    void generatePawnMoves(int startSquare, int piece, MoveProcessor *processor);
+    void generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor) const;
+    void generatePawnMoves(int startSquare, int piece, MoveProcessor *processor) const ;
     void generateForwardPawnMoves(
         int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote
-    );
-    bool isSquareInFrontClear(int startSquare, int piece);
+    ) const;
+    bool isSquareInFrontClear(int startSquare, int piece) const;
     void generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote,
-                                  bool canCaptureFriendly);
-    void generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor);
-    void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor);
-    void generateEnPassantMoves(int square, int piece, MoveProcessor *processor);
+                                  bool canCaptureFriendly) const;
+    void generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor) const;
+    void generateKnightMoves(int startSquare, int piece, MoveProcessor *processor) const;
+    void generateEnPassantMoves(int square, int piece, MoveProcessor *processor) const;
 
     void updateCastlingPieceMovement(MoveVariant &move);
     void undoCastlingPieceMovementUpdate();
 
-    bool isMoveLegal(MoveVariant potentialMove);
-    bool violatesPin(MoveVariant &move);
+    bool isMoveLegal(MoveVariant potentialMove) const;
+    bool violatesPin(MoveVariant &move) const;
     bool coversCheck(MoveVariant potentialMove) const;
     bool isValidEnPassantMove(EnPassantMove move) const;
     void addMoveIfLegal(MoveVariant &move);
     void legalMovesExist(int colour);
 
-    bool IsKingUnderAttack();
-    bool IsKingUnderAttack(MoveVariant potentialMove);
+    bool IsKingUnderAttack() const;
+    bool IsKingUnderAttack(MoveVariant potentialMove) const;
 
     void changeColourToMove();
     void updateGameState();

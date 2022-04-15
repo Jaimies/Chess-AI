@@ -303,7 +303,7 @@ void Board::addMoveIfLegal(MoveVariant &potentialMove) {
         legalMoves.push_back(potentialMove);
 }
 
-bool Board::isMoveLegal(MoveVariant potentialMove) {
+bool Board::isMoveLegal(MoveVariant potentialMove) const {
     if (visit(IsCastlingMoveVisitor, potentialMove)) return true;
 
     auto enPassantMove = visit(GetEnPassantMoveVisitor, potentialMove);
@@ -327,11 +327,11 @@ void Board::legalMovesExist(int colour) {
     }
 }
 
-bool Board::IsKingUnderAttack() {
+bool Board::IsKingUnderAttack() const {
     return squaresAttackedByOpponent[kingSquare];
 }
 
-bool Board::IsKingUnderAttack(MoveVariant potentialMove) {
+bool Board::IsKingUnderAttack(MoveVariant potentialMove) const {
     auto basicMove = visit(GetBasicMoveVisitor, potentialMove);
     if (basicMove.startSquare != kingSquare) return isKingUnderAttack;
     return squaresAttackedByOpponent[basicMove.targetSquare];
@@ -364,12 +364,12 @@ void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
     opponentKingSquare = _getOpponentKingSquare();
 }
 
-bool Board::violatesPin(MoveVariant &move) {
+bool Board::violatesPin(MoveVariant &move) const {
     auto basicMove = visit(GetBasicMoveVisitor, move);
     if (!pins.contains(basicMove.startSquare)) return false;
     if (Piece::getType(squares[basicMove.startSquare]) == Piece::Knight) return true;
 
-    auto directionIndex = pins[basicMove.startSquare];
+    auto directionIndex = pins.at(basicMove.startSquare);
     auto directionOffset = directionOffsets[directionIndex];
 
     auto squareDifference = basicMove.targetSquare - basicMove.startSquare;
@@ -459,25 +459,25 @@ void Board::generateCheckSolvingMovePosition(int pieceType, int startSquare) {
     }
 }
 
-void Board::generateCastlingMoves(MoveProcessor *processor) {
+void Board::generateCastlingMoves(MoveProcessor *processor) const {
     if (colourToMove == Piece::White)
         addCastlingMovesIfAvailable(4, Piece::White, processor);
     else
         addCastlingMovesIfAvailable(60, Piece::Black, processor);
 }
 
-void Board::addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor) {
+void Board::addCastlingMovesIfAvailable(int kingSquare, int colour, MoveProcessor *processor) const {
     int king = squares[kingSquare];
 
     if (king != (Piece::King | colour)) return;
 
-    if (!castlingPieceMoved[king] && !isKingUnderAttack) {
+    if (!castlingPieceMoved.at(king) && !isKingUnderAttack) {
         addCastlingMoveIfPossible(kingSquare, kingSquare - 4, processor);
         addCastlingMoveIfPossible(kingSquare, kingSquare + 3, processor);
     }
 }
 
-void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor) {
+void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProcessor *processor) const {
     int directionMultiplier = rookSquare > kingSquare ? 1 : -1;
     int kingTargetSquare = kingSquare + 2 * directionMultiplier;
     int rookTargetSquare = kingSquare + 1 * directionMultiplier;
@@ -486,7 +486,7 @@ void Board::addCastlingMoveIfPossible(int kingSquare, int rookSquare, MoveProces
         processor->processMove(CastlingMove{kingSquare, kingTargetSquare, rookSquare, rookTargetSquare});
 }
 
-bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) {
+bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlingPosition) const {
     int king = squares[kingSquare];
     int rook = squares[rookSquare];
 
@@ -494,12 +494,12 @@ bool Board::isCastlingPossible(int kingSquare, int rookSquare, int targetCastlin
     int rookType = rookSquare < kingSquare ? Piece::LeftRook : Piece::RightRook;
 
     return rook == (Piece::Rook | colour) &&
-           !castlingPieceMoved[rookType | colour] &&
+           !castlingPieceMoved.at(rookType | colour) &&
            allSquaresAreClearBetween(kingSquare, rookSquare) &&
            allSquaresAreNotUnderAttackBetween(kingSquare, targetCastlingPosition);
 }
 
-bool Board::allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition) {
+bool Board::allSquaresAreNotUnderAttackBetween(int kingSquare, int targetKingPosition) const {
     auto startSquare = std::min(kingSquare, targetKingPosition);
     for (int square = startSquare; square < startSquare + 3; square++) {
         if (isSquareUnderAttack(square)) return false;
@@ -512,7 +512,7 @@ bool Board::isSquareUnderAttack(int square) const {
     return squaresAttackedByOpponent[square];
 }
 
-bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
+bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) const {
     int startSquare = std::min(firstSquare, secondSquare);
     int endSquare = std::max(firstSquare, secondSquare);
 
@@ -523,7 +523,7 @@ bool Board::allSquaresAreClearBetween(int firstSquare, int secondSquare) {
     return true;
 }
 
-void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor) {
+void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *processor) const {
     int pieceType = Piece::getType(piece);
     int startDirIndex = pieceType == Piece::Bishop ? 4 : 0;
     int endDirIndex = pieceType == Piece::Rook ? 4 : 8;
@@ -553,7 +553,7 @@ static bool isPawnAboutToPromote(int position, int piece) {
            || rank == 1 && colour == Piece::Black;
 }
 
-void Board::generatePawnMoves(int startSquare, int piece, MoveProcessor *processor) {
+void Board::generatePawnMoves(int startSquare, int piece, MoveProcessor *processor) const {
     auto isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
 
     generateForwardPawnMoves(startSquare, piece, processor, isAboutToPromote);
@@ -574,7 +574,7 @@ static bool isPawnAtStartSquare(int square, int piece) {
     return rank == getPawnRank(piece);
 }
 
-void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote) {
+void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote) const {
     int possibleOffsets[]{8, 16};
 
     if (!isSquareInFrontClear(startSquare, piece)) return;
@@ -599,13 +599,13 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *
     }
 }
 
-bool Board::isSquareInFrontClear(int startSquare, int piece) {
+bool Board::isSquareInFrontClear(int startSquare, int piece) const {
     int positionOfPieceInFront = startSquare + (Piece::getColour(piece) == Piece::White ? 8 : -8);
     return squares[positionOfPieceInFront] == Piece::None;
 }
 
 void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote,
-                                     bool canCaptureFriendly) {
+                                     bool canCaptureFriendly) const {
     int file = startSquare % 8;
 
     for (int captureOffset: pawnCaptureOffsets) {
@@ -624,13 +624,13 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *
     }
 }
 
-void Board::generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor) {
+void Board::generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor) const {
     bool isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
     generateCapturePawnMoves(startSquare, piece, processor, isAboutToPromote, false);
     generateEnPassantMoves(startSquare, piece, processor);
 }
 
-void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *processor) {
+void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *processor) const {
     int file = startSquare % 8;
 
     for (auto offset: knightMoveOffsets) {
@@ -654,7 +654,7 @@ static int getRank(int square) {
     return square / 8;
 }
 
-void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *processor) {
+void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *processor) const {
     auto file = square % 8;
     auto rank = square / 8;
 
