@@ -1,8 +1,9 @@
 #include "deep_evaluation_strategy.h"
-#include "move_generator.h"
 #include "transposition_table.h"
 #include "../board/zobrist_hash_generator.h"
 #include "single_depth_move_generator.h"
+#include "evaluation.h"
+#include "search_captures.h"
 #include <iostream>
 
 bool shouldUpdateTransposition(int depth, int type, const Transposition &transposition) {
@@ -33,7 +34,7 @@ namespace DeepEvaluationStrategy {
                     return alpha;
             }
 
-            auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, -beta, -alpha);
+            auto evaluation = -furtherEvaluationStrategy->deepEvaluate(board, depth - 1, -beta, -alpha);
 
             if (shouldUpdateTransposition(depth, nodeType, transposition))
                 accessor->second->exchange({evaluation, depth, nodeType});
@@ -41,7 +42,7 @@ namespace DeepEvaluationStrategy {
             return evaluation;
         }
 
-        auto evaluation = -generator->deepEvaluate(board, depth - 1, furtherEvaluationStrategy, -beta, -alpha);
+        auto evaluation = -furtherEvaluationStrategy->deepEvaluate(board, depth - 1, -beta, -alpha);
 
         AtomicTranspositionPtr ptr(new std::atomic<Transposition>({evaluation, depth, nodeType}));
         generator->transpositions->insert({{boardHash, ptr}});
@@ -58,6 +59,19 @@ namespace DeepEvaluationStrategy {
     }
 
     int64_t Base::deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) const {
+        if (depth == 0) {
+            generator->parent->positionsAnalyzed++;
+            board->checkIfLegalMovesExist();
+            return searchCaptures(board, alpha, beta);
+        }
+
+        board->generateMoves();
+
+        if (board->legalMoves.empty()) {
+            generator->parent->positionsAnalyzed++;
+            return evaluatePositionWithoutMoves(board, depth);
+        }
+
         auto moves = std::vector(board->legalMoves);
         sortMoves(board, moves);
         auto nodeType = Transposition::UPPER;
@@ -97,7 +111,7 @@ namespace DeepEvaluationStrategy {
 
     int64_t Base::getNullWindowEval(Board *board, int depth, int &nodeType, int64_t alpha) const {
         return getEvaluation(board, depth, nodeType, alpha, alpha + 1, generator->sequentialStrategy);
-    };
+    }
 
     int64_t Pvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType, int64_t alpha,
                                int64_t beta) const {

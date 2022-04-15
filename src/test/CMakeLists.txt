@@ -56,5 +56,8 @@ add_executable(
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
         ../main/ai/evaluation.h ../main/ai/evaluation.cpp
         string_util.h string_util.cpp
-        ../main/move/visitors.cpp ../main/move/visitors.h ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h)
+        ../main/move/visitors.cpp ../main/move/visitors.h
+        ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h
+        ../main/ai/search_captures.cpp ../main/ai/search_captures.h
+)
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb atomic)

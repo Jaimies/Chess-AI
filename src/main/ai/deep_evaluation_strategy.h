@@ -8,13 +8,14 @@
 #include "transposition_table.h"
 #include "move_sorting.h"
 #include "evaluation_update_strategy.h"
+#include "constants.h"
 
 class SingleDepthMoveGenerator;
 
 namespace DeepEvaluationStrategy {
     class Base {
     public:
-        int64_t deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) const;
+        int64_t deepEvaluate(Board *board, int depth, int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) const;
 
     protected:
         SingleDepthMoveGenerator *generator;

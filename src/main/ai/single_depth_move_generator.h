@@ -30,15 +30,10 @@ public:
     const ParallelPvsWithSequentialChildren * const parallelPvsWithSequentialChildrenStrategy = new ParallelPvsWithSequentialChildren(this);
 
     Move *getBestMove(Move *supposedBestMove, AiSettings settings);
-    int64_t getFirstMoveAlpha(std::vector<MoveVariant> moves);
-    int64_t getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound);
+    int64_t getFirstMoveAlpha(std::vector<MoveVariant> moves) const;
+    int64_t getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) const;
     void evaluateMove(MoveVariant move);
-    long searchCaptures(Board *board, long alpha, long beta);
-    std::vector<MoveVariant> getSortedMoves(Move *supposedBestMove);
-
-    int64_t deepEvaluate(
-            Board *board, int depth, const DeepEvaluationStrategy::Base *strategy,
-            int64_t alpha = minEvaluation, int64_t beta = maxEvaluation);
+    std::vector<MoveVariant> getSortedMoves(Move *supposedBestMove) const;
 
     ~SingleDepthMoveGenerator() {
         delete sequentialStrategy;

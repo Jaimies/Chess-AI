@@ -70,6 +70,7 @@ set(PROJECT_SOURCES
         src/main/ai/transposition_table.h src/main/ai/transposition.h
         src/main/ai/evaluation.h src/main/ai/evaluation.cpp
         src/main/move/visitors.cpp src/main/move/visitors.h
+        src/main/ai/search_captures.cpp src/main/ai/search_captures.h
         resources.qrc
         ${TS_FILES}
         )

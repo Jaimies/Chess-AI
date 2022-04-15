@@ -1,7 +1,7 @@
 #include "single_depth_move_generator.h"
 #include "../util/thread_util.h"
 #include "../util/vector_util.h"
-#include "evaluation.h"
+#include "move_generator.h"
 
 Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings settings) {
     if (board->legalMoves.empty()) return nullptr;
@@ -39,7 +39,7 @@ Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings s
 void SingleDepthMoveGenerator::evaluateMove(MoveVariant move) {
     auto boardCopy = board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -deepEvaluate(boardCopy, depth, parallelPvsStrategy);
+    auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth);
     boardCopy->unmakeMove(move);
 
     mutex.lock();
@@ -52,7 +52,7 @@ void SingleDepthMoveGenerator::evaluateMove(MoveVariant move) {
     delete boardCopy;
 }
 
-std::vector<MoveVariant> SingleDepthMoveGenerator::getSortedMoves(Move *supposedBestMove) {
+std::vector<MoveVariant> SingleDepthMoveGenerator::getSortedMoves(Move *supposedBestMove) const {
     auto moves = board->legalMoves;
     if (!supposedBestMove) {
         sortMoves(board, moves);
@@ -64,53 +64,13 @@ std::vector<MoveVariant> SingleDepthMoveGenerator::getSortedMoves(Move *supposed
     return moves;
 }
 
-int64_t SingleDepthMoveGenerator::getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) {
-    return -deepEvaluate(board, depth, parallelStrategy, -upperBound, -lowerBound);
+int64_t SingleDepthMoveGenerator::getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) const {
+    return -parallelStrategy->deepEvaluate(board, depth, -upperBound, -lowerBound);
 }
 
-int64_t SingleDepthMoveGenerator::getFirstMoveAlpha(std::vector<MoveVariant> moves) {
+int64_t SingleDepthMoveGenerator::getFirstMoveAlpha(std::vector<MoveVariant> moves) const {
     board->makeMoveWithoutGeneratingMoves(moves[0]);
-    int64_t firstMoveAlpha = -deepEvaluate(board, depth, parallelPvsStrategy, minEvaluation, maxEvaluation);
+    int64_t firstMoveAlpha = -parallelPvsStrategy->deepEvaluate(board, depth, minEvaluation, maxEvaluation);
     board->unmakeMove(moves[0]);
     return firstMoveAlpha;
-}
-
-long SingleDepthMoveGenerator::searchCaptures(Board *board, long alpha, long beta) {
-    auto evaluation = MoveGenerator::evaluate(board, 0);
-    if (evaluation >= beta) return beta;
-
-    alpha = std::max(alpha, evaluation);
-
-    board->generateCaptures();
-    auto moves = std::vector(board->legalMoves);
-    sortMoves(board, moves);
-
-    for (auto move: moves) {
-        board->makeMoveWithoutGeneratingMoves(move);
-        auto evaluation = -searchCaptures(board, -beta, -alpha);
-        board->unmakeMove(move);
-
-        if (evaluation >= beta) return beta;
-        alpha = std::max(alpha, evaluation);
-    }
-
-    return alpha;
-}
-
-int64_t
-SingleDepthMoveGenerator::deepEvaluate(Board *board, int depth, const DeepEvaluationStrategy::Base *strategy, int64_t alpha, int64_t beta) {
-    if (depth == 0) {
-        parent->positionsAnalyzed++;
-        board->checkIfLegalMovesExist();
-        return searchCaptures(board, alpha, beta);
-    }
-
-    board->generateMoves();
-
-    if (board->legalMoves.empty()) {
-        parent->positionsAnalyzed++;
-        return evaluatePositionWithoutMoves(board, depth);
-    }
-
-    return strategy->deepEvaluate(board, depth, alpha, beta);
 }
