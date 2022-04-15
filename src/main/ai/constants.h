@@ -5,6 +5,6 @@
 
 typedef int64_t Evaluation;
 
-extern Evaluation minEvaluation;
-extern Evaluation maxEvaluation;
-extern Evaluation checkmateEvaluation;
+extern const Evaluation minEvaluation;
+extern const Evaluation maxEvaluation;
+extern const Evaluation checkmateEvaluation;
