@@ -119,11 +119,13 @@ TEST(MoveGenerator, DoesNotDoStupidMoves_3) {
 TEST(MoveGenerator, DoesNotDoStupidMoves_4) {
     auto board = Board::fromFenString("r3kbnr/pppqpppp/2n5/1B3b2/3P4/2N2N2/PPP2PPP/R1BQK2R b KQk - 0 1", Piece::Black);
 
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 100; i++) {
         auto generator = new MoveGenerator();
         auto bestMove = generator->getBestMove(board);
-        ASSERT_TRUE(bestMove->toString() == "d7e6" || bestMove->toString() == "a7a6" || bestMove->toString() == "e7e6");
-        std::cout << i + 1 << " / 50" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::cout << bestMove->toString() << std::endl;
+        ASSERT_TRUE(bestMove->toString() == "d7e6" || bestMove->toString() == "a7a6"
+                    || bestMove->toString() == "e7e6" || bestMove->toString() == "a8d8"
+                    || bestMove->toString() == "e8c8");
+        std::cout << i + 1 << " / 100" << std::endl;
     }
 }
