@@ -8,35 +8,26 @@ Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings s
 
     auto moves = getSortedMoves(supposedBestMove);
 
-    int64_t alpha = getFirstMoveAlpha(moves);
-    bestEvaluation = alpha;
+    bestEvaluation = getFirstMoveAlpha(moves);
     bestMove = moves[0];
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, &alpha, this](tbb::blocked_range<size_t> range) {
-        Board * boardCopy = this->board->copy();
+    tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, this](tbb::blocked_range<size_t> range) {
+        Board *boardCopy = this->board->copy();
+
         for (size_t i = range.begin(); i < range.end(); i++) {
-            auto initialAlpha = alpha;
-            auto moveCopy = moves[i];
-            boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
-            auto eval = getDeepEvaluation(boardCopy, initialAlpha, alpha + 1);
-            boardCopy->unmakeMove(moveCopy);
-            if (eval != initialAlpha)  {
-                evaluateMove(moves[i]);
-                alpha = bestEvaluation;
-                if (parent->analysisFinished) return;
-            };
-            if (parent->analysisFinished) return;
+            doFullEvalIfNeeded(boardCopy, moves[i]);
+            if (parent->analysisFinished) break;
         }
+
         delete boardCopy;
     });
 
     deleteInTheBackground(transpositions);
 
-    auto bestMove = this->bestMove.value();
-    return visit(GetMovePointerVisitor, bestMove);
+    return visit(GetMovePointerVisitor, bestMove.value());
 }
 
-void SingleDepthMoveGenerator::evaluateMove(MoveVariant move) {
+void SingleDepthMoveGenerator::fullEval(MoveVariant move) {
     auto boardCopy = board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
     auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth, minEvaluation, -bestEvaluation);
@@ -66,6 +57,25 @@ std::vector<MoveVariant> SingleDepthMoveGenerator::getSortedMoves(Move *supposed
 
 int64_t SingleDepthMoveGenerator::getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) const {
     return -parallelStrategy->deepEvaluate(board, depth, -upperBound, -lowerBound);
+}
+
+int64_t SingleDepthMoveGenerator::nullWindowEval(Board *board, int64_t lowerBound) const {
+    return getDeepEvaluation(board, lowerBound, lowerBound + 1);
+}
+
+bool SingleDepthMoveGenerator::needsFullEval(Board *board, MoveVariant &move) const {
+    auto initialAlpha = this->bestEvaluation;
+    board->makeMoveWithoutGeneratingMoves(move);
+    auto eval = nullWindowEval(board, initialAlpha);
+    board->unmakeMove(move);
+
+    return eval != initialAlpha;
+}
+
+void SingleDepthMoveGenerator::doFullEvalIfNeeded(Board *board, MoveVariant move) {
+    if (needsFullEval(board, move)) {
+        fullEval(move);
+    };
 }
 
 int64_t SingleDepthMoveGenerator::getFirstMoveAlpha(std::vector<MoveVariant> moves) const {

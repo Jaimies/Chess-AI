@@ -32,7 +32,11 @@ public:
     Move *getBestMove(Move *supposedBestMove, AiSettings settings);
     int64_t getFirstMoveAlpha(std::vector<MoveVariant> moves) const;
     int64_t getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) const;
-    void evaluateMove(MoveVariant move);
+    int64_t nullWindowEval(Board *board, int64_t lowerBound) const;
+    bool needsFullEval(Board *board, MoveVariant &move) const;
+
+    void doFullEvalIfNeeded(Board *board, MoveVariant move);
+    void fullEval(MoveVariant move);
     std::vector<MoveVariant> getSortedMoves(Move *supposedBestMove) const;
 
     ~SingleDepthMoveGenerator() {
