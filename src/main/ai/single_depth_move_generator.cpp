@@ -39,7 +39,7 @@ Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings s
 void SingleDepthMoveGenerator::evaluateMove(MoveVariant move) {
     auto boardCopy = board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth);
+    auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth, minEvaluation, -bestEvaluation);
     boardCopy->unmakeMove(move);
 
     mutex.lock();
