@@ -91,6 +91,7 @@ void Board::unmakeMove(MoveVariant &move) {
     visit(undoMoveVisitor, move);
 
     changeColourToMove();
+    kingSquare = _getKingSquare();
     moveHistory.pop();
     zobristHash ^= visit(getZobristHashVisitor, move);
 }
