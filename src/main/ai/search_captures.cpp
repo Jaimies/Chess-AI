@@ -2,6 +2,7 @@
 #include "move_generator.h"
 
 int64_t searchCaptures(Board *board, long alpha, long beta) {
+    board->checkIfLegalMovesExist();
     auto evaluation = MoveGenerator::evaluate(board, 0);
     if (evaluation >= beta) return beta;
 

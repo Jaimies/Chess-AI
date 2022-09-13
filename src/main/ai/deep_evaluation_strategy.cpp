@@ -62,7 +62,6 @@ namespace DeepEvaluationStrategy {
     int64_t Base::deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) const {
         if (depth == 0) {
             generator->parent->positionsAnalyzed++;
-            board->checkIfLegalMovesExist();
             return searchCaptures(board, alpha, beta);
         }
 
