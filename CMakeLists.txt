@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Chess VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_PREFIX_PATH /home/max/Qt/6.2.2/gcc_64/)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
