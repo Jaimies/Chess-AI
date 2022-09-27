@@ -122,6 +122,25 @@ TEST(Board, MoveCountIsCorrectInPositionWithPins) {
     ASSERT_EQ(18010, countMoves(board, 4));
 }
 
+void assertZobristHashIsTheSameAsFromZobristHashGenerator(Board *board, int depth) {
+    board->generateMoves();
+    std::vector<MoveVariant> moves = board->legalMoves;
+
+    ASSERT_EQ(board->getZobristHash(), ZobristHashGenerator.hash(board));
+    if (depth == 0) return;
+
+    for (auto move: moves) {
+        board->makeMoveWithoutGeneratingMoves(move);
+        assertZobristHashIsTheSameAsFromZobristHashGenerator(board, depth - 1);
+        board->unmakeMove(move);
+    }
+}
+
+TEST(Board, getZobristHash_isTheSameAs_ZobristHashGenerator_hash) {
+    auto board = Board::fromFenString("r3kbnr/ppp1pppp/2n1q3/1B3b2/3P4/2N2N2/PPP2PPP/R1BQK2R b KQk - 0 1");
+    assertZobristHashIsTheSameAsFromZobristHashGenerator(board, 5);
+}
+
 TEST(Board, IsInEndgame) {
     ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/8/1Q2K3 w - - 0 1")->isInEndgame());
     ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/2B5/1Q2K3 w - - 0 1")->isInEndgame());
