@@ -6,6 +6,7 @@
 class MoveProcessor {
 public:
     virtual void processMove(MoveVariant move) = 0;
+    virtual void processEnPassantMove(EnPassantMove move) { processMove(move); };
     [[nodiscard]] virtual bool shouldAddMove(int targetPiece, int colour) const = 0;
     [[nodiscard]] virtual bool shouldStopGeneratingSlidingMoves(int targetPiece, int colour) const = 0;
 };
@@ -14,6 +15,7 @@ class MoveGenerationProcessor : public MoveProcessor {
 public:
     explicit MoveGenerationProcessor(Board *board) :board(board) {}
     void processMove(MoveVariant move) override;
+    void processEnPassantMove(EnPassantMove move) override;
 
     [[nodiscard]] bool shouldAddMove(int targetPiece, int colour) const override {
         return Piece::getColour(targetPiece) != colour;
@@ -30,6 +32,7 @@ class CaptureGenerationProcessor: public MoveGenerationProcessor {
 public:
     explicit CaptureGenerationProcessor(Board *board) : MoveGenerationProcessor(board) {}
 
+    void processEnPassantMove(EnPassantMove move) override;
 
     [[nodiscard]] bool shouldAddMove(int targetPiece, int colour) const override {
         return Piece::getColour(targetPiece) == Piece::getOpponentColour(colour);

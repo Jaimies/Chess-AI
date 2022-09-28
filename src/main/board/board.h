@@ -20,6 +20,7 @@ public:
     int colourToMove = Piece::White;
 
     bool hasLegalMoves = true;
+    int enPassantCapablePawnSquare = -1;
     bool isKingUnderAttack = false;
 
     std::unordered_map<int, bool> castlingPieceMoved{

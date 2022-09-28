@@ -5,6 +5,11 @@ void MoveGenerationProcessor::processMove(MoveVariant move) {
     board->addMoveIfLegal(move);
 }
 
+void MoveGenerationProcessor::processEnPassantMove(EnPassantMove move) {
+    MoveProcessor::processEnPassantMove(move);
+    board->enPassantCapablePawnSquare = move.startSquare;
+}
+
 void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {
     auto basicMove = visit(GetBasicMoveVisitor, move);
     if (basicMove.targetSquare == board->kingSquare)
@@ -16,4 +21,8 @@ void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {
 void LegalMoveSearchProcessor::processMove(MoveVariant move) {
     auto isLegal = board->isMoveLegal(move);
     if (isLegal) board->hasLegalMoves = true;
+}
+
+void CaptureGenerationProcessor::processEnPassantMove(EnPassantMove move) {
+    MoveProcessor::processEnPassantMove(move);
 }

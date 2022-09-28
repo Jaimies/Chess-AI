@@ -363,6 +363,7 @@ void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
     moveHistory.push(move);
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
+    enPassantCapablePawnSquare = -1;
 }
 
 bool Board::violatesPin(MoveVariant &move) const {
@@ -685,8 +686,8 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
 
         int targetPositionOffset = Piece::getColour(piece) == Piece::White ? 8 : -8;
 
-        processor->processMove(
-                EnPassantMove{square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition}
+        processor->processEnPassantMove(
+                {square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition}
         );
     }
 }
