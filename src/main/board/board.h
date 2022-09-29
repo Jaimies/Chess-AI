@@ -67,26 +67,10 @@ public:
     bool isInEndgame() const;
     uint64_t getZobristHash() const { return zobristHash; };
 
-    bool canWhiteCastleLeft() {
-        return !castlingPieceMoved[Piece::King | Piece::White]
-               && !castlingPieceMoved[Piece::LeftRook | Piece::White];
-    };
-
-    bool canWhiteCastleRight() {
-        return !castlingPieceMoved[Piece::King | Piece::White]
-               && !castlingPieceMoved[Piece::RightRook | Piece::White];
-    };
-
-    bool canBlackCastleLeft() {
-        return !castlingPieceMoved[Piece::King | Piece::Black]
-               && !castlingPieceMoved[Piece::LeftRook | Piece::Black];
-
-    };
-
-    bool canBlackCastleRight() {
-        return !castlingPieceMoved[Piece::King | Piece::Black]
-               && !castlingPieceMoved[Piece::RightRook | Piece::Black];
-    };
+    bool canWhiteCastleLeft() const;
+    bool canWhiteCastleRight() const;
+    bool canBlackCastleLeft() const;
+    bool canBlackCastleRight() const;
 
     static Board *fromFenString(std::string fenString, int colourToMove = Piece::White);
     std::string toFenString() const;

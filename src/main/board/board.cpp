@@ -822,3 +822,23 @@ std::string Board::toFenString() const {
 
     return output;
 }
+
+bool Board::canWhiteCastleLeft() const {
+    return !castlingPieceMoved.at(Piece::King | Piece::White)
+           && !castlingPieceMoved.at(Piece::LeftRook | Piece::White);
+}
+
+bool Board::canWhiteCastleRight() const {
+    return !castlingPieceMoved.at(Piece::King | Piece::White)
+           && !castlingPieceMoved.at(Piece::RightRook | Piece::White);
+}
+
+bool Board::canBlackCastleLeft() const {
+    return !castlingPieceMoved.at(Piece::King | Piece::Black)
+           && !castlingPieceMoved.at(Piece::LeftRook | Piece::Black);
+}
+
+bool Board::canBlackCastleRight() const {
+    return !castlingPieceMoved.at(Piece::King | Piece::Black)
+           && !castlingPieceMoved.at(Piece::RightRook | Piece::Black);
+}
