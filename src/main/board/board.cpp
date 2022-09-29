@@ -563,19 +563,6 @@ void Board::generatePawnMoves(int startSquare, int piece, MoveProcessor *process
     generateEnPassantMoves(startSquare, piece, processor);
 }
 
-static int getPawnRank(int pawnPiece) {
-    int colour = Piece::getColour(pawnPiece);
-
-    if (colour == Piece::None) throw std::invalid_argument("Expected a pawn with a colour, got one with Piece::None");
-
-    return Piece::getColour(pawnPiece) == Piece::White ? 1 : 6;
-}
-
-static bool isPawnAtStartSquare(int square, int piece) {
-    int rank = square / 8;
-    return rank == getPawnRank(piece);
-}
-
 void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *processor, bool isPawnAboutToPromote) const {
     int possibleOffsets[]{8, 16};
 
@@ -585,7 +572,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *
         int offset = Piece::getColour(piece) == Piece::White ? pawnOffset : -pawnOffset;
 
         if (pawnOffset == 16) {
-            if (!isPawnAtStartSquare(startSquare, piece)) continue;
+            if (!BoardUtil::isPawnAtStartSquare(startSquare, piece)) continue;
             int pieceInFront = squares[startSquare + offset / 2];
             if (pieceInFront != Piece::None) continue;
         }
@@ -652,10 +639,6 @@ void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *proce
     }
 }
 
-static int getRank(int square) {
-    return square / 8;
-}
-
 void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *processor) const {
     auto file = square % 8;
     auto rank = square / 8;
@@ -680,7 +663,7 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
         auto basicLastMove = visit(GetBasicMoveVisitor, lastMove);
 
         if (neighbourPiece != enemyPawn
-            || getRank(basicLastMove.startSquare) != getPawnRank(neighbourPiece)
+            || BoardUtil::rank(basicLastMove.startSquare) != BoardUtil::initialRankOfPawn(neighbourPiece)
             || basicLastMove.targetSquare != neighbourPosition)
             continue;
 
