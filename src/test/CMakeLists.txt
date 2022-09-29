@@ -42,7 +42,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
         all_tests ../main/board/board.cpp ../main/move/move.cpp ../main/board/piece.cpp
-        ../main/board/zobrist_hash_generator.cpp ../main/ai/move_generator.cpp board/board_test.cpp
+        ../main/board/zobrist_hash_generator.cpp ../main/ai/move_generator.cpp board/move_count_test.cpp
         ai/move_generator_test.cpp board/move_test.cpp board/zobrist_hash_generator_test.cpp util/string_util_test.cpp
         util/vector_util_test.cpp ai/deep_evaluation_strategy_test.cpp
         ../main/board/move_processor.h ../main/board/move_processor.cpp
@@ -60,5 +60,5 @@ add_executable(
         ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h
         ../main/ai/search_captures.cpp ../main/ai/search_captures.h
         ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.cpp ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.h
-        ../main/ai/transposition_table.cpp ../main/board/board_util.cpp ../main/board/board_util.h board/board_util_test.cpp)
+        ../main/ai/transposition_table.cpp ../main/board/board_util.cpp ../main/board/board_util.h board/board_util_test.cpp board/board_unit_test.cpp board/board_integrated_test.cpp)
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb atomic)
