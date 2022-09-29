@@ -199,3 +199,74 @@ TEST(Board, enPassantCapablePawnSquare_resetsToNegativeOneAfterAnotherMoveIsMade
     board->makeMove(move2);
     ASSERT_EQ(board->enPassantCapablePawnSquare, -1);
 }
+
+TEST(Board, allCastlesArePossibleBeforeAnyCastlingPiecesMove) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1");
+
+    ASSERT_TRUE(board->canWhiteCastleLeft());
+    ASSERT_TRUE(board->canWhiteCastleRight());
+    ASSERT_TRUE(board->canBlackCastleLeft());
+    ASSERT_TRUE(board->canBlackCastleRight());
+}
+
+TEST(Board, whiteCanNoLongerCastleInAnyDirectionIfTheirKingMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1");
+
+    MoveVariant move = NormalMove::fromString("e1d1");
+    board->makeMove(move);
+
+    ASSERT_FALSE(board->canWhiteCastleLeft());
+    ASSERT_FALSE(board->canWhiteCastleRight());
+}
+
+TEST(Board, whiteCanNoLongerCastleLeftIfTheirLeftRookMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1");
+
+    MoveVariant move = NormalMove::fromString("a1c1");
+    board->makeMove(move);
+
+    ASSERT_FALSE(board->canWhiteCastleLeft());
+    ASSERT_TRUE(board->canWhiteCastleRight());
+
+}
+
+TEST(Board, whiteCanNoLongerCastleRightIfTheirRightRookMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1");
+
+    MoveVariant move = NormalMove::fromString("h1f1");
+    board->makeMove(move);
+
+    ASSERT_TRUE(board->canWhiteCastleLeft());
+    ASSERT_FALSE(board->canWhiteCastleRight());
+}
+
+TEST(Board, blackCanNoLongerCastleInAnyDirectionIfTheirKingMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1", Piece::Black);
+
+    MoveVariant move = NormalMove::fromString("e8d8");
+    board->makeMove(move);
+
+    ASSERT_FALSE(board->canBlackCastleLeft());
+    ASSERT_FALSE(board->canBlackCastleRight());
+}
+
+TEST(Board, blackCanNoLongerCastleLeftIfTheirLeftRookMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1", Piece::Black);
+
+    MoveVariant move = NormalMove::fromString("a8c8");
+    board->makeMove(move);
+
+    ASSERT_FALSE(board->canBlackCastleLeft());
+    ASSERT_TRUE(board->canBlackCastleRight());
+
+}
+
+TEST(Board, blackCanNoLongerCastleRightIfTheirRightRookMoves) {
+    auto board = Board::fromFenString("r3k2r/ppp1qppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP1QPPP/R3K2R w KQkq - 0 1", Piece::Black);
+
+    MoveVariant move = NormalMove::fromString("h8f8");
+    board->makeMove(move);
+
+    ASSERT_TRUE(board->canBlackCastleLeft());
+    ASSERT_FALSE(board->canBlackCastleRight());
+}
