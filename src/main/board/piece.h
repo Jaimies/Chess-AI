@@ -24,11 +24,18 @@ namespace Piece {
     const int QueenValue = 90000;
 
     int getColour(int piece);
-    int getType(int piece);
-    bool isSlidingPiece(int piece);
-    bool isLongRangeSlidingPiece(int piece);
     int getOpponentColour(int colour);
     int getOpponentColourFromPiece(int piece);
+
+    bool isOfColour(int piece, int colour);
+    bool isWhite(int piece);
+    bool isBlack(int piece);
+
+    int getType(int piece);
+
+    bool isSlidingPiece(int piece);
+    bool isLongRangeSlidingPiece(int piece);
+
     int getValue(int piece);
 
     constexpr const int piecesToPromoteTo[]{Queen, Rook, Bishop, Knight};

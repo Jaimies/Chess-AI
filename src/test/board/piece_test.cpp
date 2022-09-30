@@ -38,6 +38,54 @@ TEST(Piece, getOpponentColourFromPiece) {
     ASSERT_EQ(Piece::getOpponentColourFromPiece(Piece::Black | Piece::King), Piece::White);
 }
 
+TEST(Piece, isOfColour) {
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::Pawn, Piece::White));
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::Rook, Piece::White));
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::Knight, Piece::White));
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::Bishop, Piece::White));
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::Queen, Piece::White));
+    ASSERT_TRUE(Piece::isOfColour(Piece::White | Piece::King, Piece::White));
+
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::Pawn, Piece::White));
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::Rook, Piece::White));
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::Knight, Piece::White));
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::Bishop, Piece::White));
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::Queen, Piece::White));
+    ASSERT_FALSE(Piece::isOfColour(Piece::Black | Piece::King, Piece::White));
+}
+
+TEST(Piece, isWhite) {
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::Pawn));
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::Rook));
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::Knight));
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::Bishop));
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::Queen));
+    ASSERT_TRUE(Piece::isWhite(Piece::White | Piece::King));
+
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::Pawn));
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::Rook));
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::Knight));
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::Bishop));
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::Queen));
+    ASSERT_FALSE(Piece::isWhite(Piece::Black | Piece::King));
+}
+
+TEST(Piece, isBlack) {
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::Pawn));
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::Rook));
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::Knight));
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::Bishop));
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::Queen));
+    ASSERT_FALSE(Piece::isBlack(Piece::White | Piece::King));
+
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::Pawn));
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::Rook));
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::Knight));
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::Bishop));
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::Queen));
+    ASSERT_TRUE(Piece::isBlack(Piece::Black | Piece::King));
+}
+
 TEST(Piece, getType) {
     ASSERT_EQ(Piece::getType(Piece::White | Piece::Pawn), Piece::Pawn);
     ASSERT_EQ(Piece::getType(Piece::White | Piece::Rook), Piece::Rook);

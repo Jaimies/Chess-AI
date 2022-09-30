@@ -10,6 +10,27 @@ namespace Piece {
         return piece & 24;
     }
 
+    int getOpponentColour(int colour) {
+        if (colour == None) throw std::invalid_argument("expected a colour, got None");
+        return colour == White ? Black : White;
+    }
+
+    int getOpponentColourFromPiece(int piece) {
+        return getOpponentColour(getColour(piece));
+    }
+
+    bool isOfColour(int piece, int colour) {
+        return getColour(piece) == colour;
+    }
+
+    bool isWhite(int piece) {
+        return isOfColour(piece, Piece::White);
+    }
+
+    bool isBlack(int piece) {
+        return isOfColour(piece, Piece::Black);
+    }
+
     bool isSlidingPiece(int piece) {
         auto type = getType(piece);
         return type == Queen || type == Bishop || type == Rook || type == King;
@@ -18,15 +39,6 @@ namespace Piece {
     bool isLongRangeSlidingPiece(int piece) {
         auto type = getType(piece);
         return type == Queen || type == Bishop || type == Rook;
-    }
-
-    int getOpponentColour(int colour) {
-        if (colour == None) throw std::invalid_argument("expected a colour, got None");
-        return colour == White ? Black : White;
-    }
-
-    int getOpponentColourFromPiece(int piece) {
-        return getOpponentColour(getColour(piece));
     }
 
     int getValue(int piece) {
