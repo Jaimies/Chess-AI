@@ -9,11 +9,6 @@
 #include "board_util.h"
 #include "zobrist_hash_generator.h"
 
-static bool isRookAtStartRank(int colour, int square) {
-    int rank = square / 8;
-    return colour == Piece::White && rank == 0 || colour == Piece::Black && rank == 7;
-}
-
 static int getCastlingPiece(int piece, int square) {
     auto type = Piece::getType(piece);
     if (type == Piece::King) return piece;
@@ -22,7 +17,7 @@ static int getCastlingPiece(int piece, int square) {
     int file = square % 8;
     int colour = Piece::getColour(piece);
 
-    if (!isRookAtStartRank(colour, square)) return Piece::None;
+    if (!BoardUtil::isRookAtStartRank(square, colour)) return Piece::None;
 
     if (file == 0) return Piece::LeftRook | colour;
     if (file == 7) return Piece::RightRook | colour;

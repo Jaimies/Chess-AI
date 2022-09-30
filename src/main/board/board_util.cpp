@@ -3,7 +3,9 @@
 
 namespace BoardUtil {
     int WhitePawnRank = 1;
+    int WhitePieceRank = 0;
     int BlackPawnRank = 6;
+    int BlackPieceRank = 7;
 
     bool isValidSquare(int square) {
         return square >= 0 && square <= 63;
@@ -31,7 +33,15 @@ namespace BoardUtil {
         return colour == Piece::White ? WhitePawnRank : BlackPawnRank;
     }
 
+    int initialRankOfRook(int colour) {
+        return colour == Piece::White ? WhitePieceRank : BlackPieceRank;
+    }
+
     bool isPawnAtStartSquare(int square, int piece) {
         return rank(square) == initialRankOfPawn(piece);
+    }
+
+    bool isRookAtStartRank(int square, int colour) {
+        return rank(square) == initialRankOfRook(colour);
     }
 }

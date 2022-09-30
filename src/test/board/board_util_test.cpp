@@ -61,3 +61,23 @@ TEST(BoardUtil, isValidSquare) {
     ASSERT_FALSE(BoardUtil::isValidSquare(65));
     ASSERT_FALSE(BoardUtil::isValidSquare(66));
 }
+
+TEST(BoardUtil, initialRankOfRook) {
+    ASSERT_EQ(BoardUtil::initialRankOfRook(Piece::White), 0);
+    ASSERT_EQ(BoardUtil::initialRankOfRook(Piece::Black), 7);
+}
+
+TEST(BoardUtil, isRookAtStartRank) {
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(1, Piece::White));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(3, Piece::White));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(4, Piece::White));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(6, Piece::White));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(7, Piece::White));
+    ASSERT_FALSE(BoardUtil::isRookAtStartRank(8, Piece::White));
+    ASSERT_FALSE(BoardUtil::isRookAtStartRank(25, Piece::White));
+
+    ASSERT_FALSE(BoardUtil::isRookAtStartRank(1, Piece::Black));
+    ASSERT_FALSE(BoardUtil::isRookAtStartRank(20, Piece::Black));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(56, Piece::Black));
+    ASSERT_TRUE(BoardUtil::isRookAtStartRank(59, Piece::Black));
+}
