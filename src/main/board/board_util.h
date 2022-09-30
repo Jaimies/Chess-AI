@@ -3,10 +3,10 @@
 #include <string>
 
 namespace BoardUtil {
-    extern int WhitePawnRank;
-    extern int WhitePieceRank;
-    extern int BlackPawnRank;
-    extern int BlackPieceRank;
+    const int WhitePawnRank = 1;
+    const int WhitePieceRank = 0;
+    const  int BlackPawnRank = 6;
+    const int BlackPieceRank = 7;
 
     bool isValidSquare(int square);
 

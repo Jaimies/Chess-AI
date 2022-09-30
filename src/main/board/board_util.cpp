@@ -2,11 +2,6 @@
 #include "piece.h"
 
 namespace BoardUtil {
-    int WhitePawnRank = 1;
-    int WhitePieceRank = 0;
-    int BlackPawnRank = 6;
-    int BlackPieceRank = 7;
-
     bool isValidSquare(int square) {
         return square >= 0 && square <= 63;
     }
