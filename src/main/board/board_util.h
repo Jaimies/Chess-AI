@@ -6,6 +6,8 @@ namespace BoardUtil {
     extern int WhitePawnRank;
     extern int BlackPawnRank;
 
+    bool isValidSquare(int square);
+
     int rank(int square);
     int file(int square);
 

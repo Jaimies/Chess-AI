@@ -51,3 +51,13 @@ TEST(BoardUtil, isPawnAtStartSquare) {
     ASSERT_TRUE(BoardUtil::isPawnAtStartSquare(48, Piece::Black | Piece::Pawn));
     ASSERT_TRUE(BoardUtil::isPawnAtStartSquare(55, Piece::Black | Piece::Pawn));
 }
+
+TEST(BoardUtil, isValidSquare) {
+    ASSERT_FALSE(BoardUtil::isValidSquare(-1));
+    ASSERT_FALSE(BoardUtil::isValidSquare(-3));
+    ASSERT_TRUE(BoardUtil::isValidSquare(0));
+    ASSERT_TRUE(BoardUtil::isValidSquare(6));
+    ASSERT_FALSE(BoardUtil::isValidSquare(64));
+    ASSERT_FALSE(BoardUtil::isValidSquare(65));
+    ASSERT_FALSE(BoardUtil::isValidSquare(66));
+}

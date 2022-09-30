@@ -5,6 +5,10 @@ namespace BoardUtil {
     int WhitePawnRank = 1;
     int BlackPawnRank = 6;
 
+    bool isValidSquare(int square) {
+        return square >= 0 && square <= 63;
+    }
+
     int rank(int square) {
         return square / 8;
     }

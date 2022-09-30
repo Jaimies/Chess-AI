@@ -6,11 +6,8 @@
 #include "piece.h"
 #include "../move/move.h"
 #include "board.h"
+#include "board_util.h"
 #include "zobrist_hash_generator.h"
-
-static bool isValidSquarePosition(int squarePosition) {
-    return squarePosition >= 0 && squarePosition <= 63;
-}
 
 static bool isRookAtStartRank(int colour, int square) {
     int rank = square / 8;
@@ -579,7 +576,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *
 
         int targetSquarePosition = startSquare + offset;
 
-        if (!isValidSquarePosition(targetSquarePosition)) continue;
+        if (!BoardUtil::isValidSquare(targetSquarePosition)) continue;
 
         int targetPiece = squares[targetSquarePosition];
 
@@ -605,7 +602,7 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *
             continue;
         int targetSquarePosition = startSquare + offset;
 
-        if (!isValidSquarePosition(targetSquarePosition)) continue;
+        if (!BoardUtil::isValidSquare(targetSquarePosition)) continue;
         int targetPiece = squares[targetSquarePosition];
 
         if (Piece::getColour(targetPiece) == Piece::getOpponentColourFromPiece(piece) || canCaptureFriendly)
@@ -630,7 +627,7 @@ void Board::generateKnightMoves(int startSquare, int piece, MoveProcessor *proce
             continue;
 
         int targetSquarePosition = startSquare + offset;
-        if (!isValidSquarePosition(targetSquarePosition)) continue;
+        if (!BoardUtil::isValidSquare(targetSquarePosition)) continue;
 
         int pieceInTargetSquare = squares[targetSquarePosition];
 
@@ -652,7 +649,7 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
 
         int neighbourPosition = square + offset;
 
-        if (!isValidSquarePosition(neighbourPosition)) return;
+        if (!BoardUtil::isValidSquare(neighbourPosition)) return;
 
         int neighbourPiece = squares[neighbourPosition];
         int enemyPawn = Piece::Pawn | Piece::getOpponentColourFromPiece(piece);
