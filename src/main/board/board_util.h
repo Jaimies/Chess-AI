@@ -20,4 +20,6 @@ namespace BoardUtil {
 
     bool isPawnAtStartSquare(int square, int piece);
     bool isRookAtStartRank(int square, int colour);
+
+    bool isPawnAboutToPromote(int square, int piece);
 }

@@ -44,4 +44,8 @@ namespace BoardUtil {
     bool isRookAtStartRank(int square, int colour) {
         return rank(square) == initialRankOfRook(colour);
     }
+
+    bool isPawnAboutToPromote(int square, int piece) {
+        return rank(square) == initialRankOfPawn(Piece::getOpponentColourFromPiece(piece));
+    }
 }

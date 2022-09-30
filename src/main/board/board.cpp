@@ -539,16 +539,8 @@ void Board::generateSlidingMoves(int startSquare, int piece, MoveProcessor *proc
     }
 }
 
-static bool isPawnAboutToPromote(int position, int piece) {
-    int colour = Piece::getColour(piece);
-    int rank = position / 8;
-
-    return (rank == 6 && colour == Piece::White)
-           || rank == 1 && colour == Piece::Black;
-}
-
 void Board::generatePawnMoves(int startSquare, int piece, MoveProcessor *processor) const {
-    auto isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
+    auto isAboutToPromote = BoardUtil::isPawnAboutToPromote(startSquare, piece);
 
     generateForwardPawnMoves(startSquare, piece, processor, isAboutToPromote);
     generateCapturePawnMoves(startSquare, piece, processor, isAboutToPromote, false);
@@ -606,7 +598,7 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *
 }
 
 void Board::generateNormalPawnCaptures(int startSquare, int piece, MoveProcessor *processor) const {
-    bool isAboutToPromote = isPawnAboutToPromote(startSquare, piece);
+    bool isAboutToPromote = BoardUtil::isPawnAboutToPromote(startSquare, piece);
     generateCapturePawnMoves(startSquare, piece, processor, isAboutToPromote, false);
     generateEnPassantMoves(startSquare, piece, processor);
 }

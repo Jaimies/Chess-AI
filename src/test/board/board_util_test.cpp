@@ -81,3 +81,13 @@ TEST(BoardUtil, isRookAtStartRank) {
     ASSERT_TRUE(BoardUtil::isRookAtStartRank(56, Piece::Black));
     ASSERT_TRUE(BoardUtil::isRookAtStartRank(59, Piece::Black));
 }
+
+TEST(BoardUtil, isPawnAboutToPromote) {
+    ASSERT_FALSE(BoardUtil::isPawnAboutToPromote(40, Piece::White | Piece::Pawn));
+    ASSERT_TRUE(BoardUtil::isPawnAboutToPromote(48, Piece::White | Piece::Pawn));
+    ASSERT_TRUE(BoardUtil::isPawnAboutToPromote(49, Piece::White | Piece::Pawn));
+
+    ASSERT_FALSE(BoardUtil::isPawnAboutToPromote(48, Piece::Black | Piece::Pawn));
+    ASSERT_TRUE(BoardUtil::isPawnAboutToPromote(8, Piece::Black | Piece::Pawn));
+    ASSERT_TRUE(BoardUtil::isPawnAboutToPromote(15, Piece::Black | Piece::Pawn));
+}
