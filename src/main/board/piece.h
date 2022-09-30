@@ -2,35 +2,34 @@
 
 #include <unordered_map>
 
-class Piece {
-public:
-    static const int None = 0;
-    static const int King = 1;
-    static const int Queen = 2;
-    static const int Bishop = 3;
-    static const int Knight = 4;
-    static const int Rook = 5;
-    static const int Pawn = 6;
+namespace Piece {
+    const int None = 0;
+    const int King = 1;
+    const int Queen = 2;
+    const int Bishop = 3;
+    const int Knight = 4;
+    const int Rook = 5;
+    const int Pawn = 6;
 
-    static const int White = 8;
-    static const int Black = 16;
+    const int White = 8;
+    const int Black = 16;
 
-    static const int LeftRook = 32;
-    static const int RightRook = 64;
+    const int LeftRook = 32;
+    const int RightRook = 64;
 
-    static const int PawnValue = 10000;
-    static const int BishopValue = 30000;
-    static const int KnightValue = 30000;
-    static const int RookValue = 50000;
-    static const int QueenValue = 90000;
+    const int PawnValue = 10000;
+    const int BishopValue = 30000;
+    const int KnightValue = 30000;
+    const int RookValue = 50000;
+    const int QueenValue = 90000;
 
-    static int getColour(int piece);
-    static int getType(int piece);
-    static bool isSlidingPiece(int piece);
-    static bool isLongRangeSlidingPiece(int piece);
-    static int getOpponentColour(int colour);
-    static int getOpponentColourFromPiece(int piece);
-    static int getValue(int piece);
+    int getColour(int piece);
+    int getType(int piece);
+    bool isSlidingPiece(int piece);
+    bool isLongRangeSlidingPiece(int piece);
+    int getOpponentColour(int colour);
+    int getOpponentColourFromPiece(int piece);
+    int getValue(int piece);
 
-    constexpr static const int piecesToPromoteTo[]{Queen, Rook, Bishop, Knight};
+    constexpr const int piecesToPromoteTo[]{Queen, Rook, Bishop, Knight};
 };
