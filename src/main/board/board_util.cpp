@@ -22,14 +22,11 @@ namespace BoardUtil {
     };
 
     int initialRankOfPawn(int piece) {
-        int colour = Piece::getColour(piece);
-
-        if (colour == Piece::None) throw std::invalid_argument("Expected a pawn with a colour, got one with Piece::None");
-        return colour == Piece::White ? WhitePawnRank : BlackPawnRank;
+        return Piece::isWhite(piece) ? WhitePawnRank : BlackPawnRank;
     }
 
     int initialRankOfRook(int colour) {
-        return colour == Piece::White ? WhitePieceRank : BlackPieceRank;
+        return Piece::isWhite(colour) ? WhitePieceRank : BlackPieceRank;
     }
 
     bool isPawnAtStartSquare(int square, int piece) {

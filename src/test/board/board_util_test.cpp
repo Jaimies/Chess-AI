@@ -40,8 +40,6 @@ TEST(BoardUtil, initialRankOfPawn) {
     ASSERT_EQ(BoardUtil::initialRankOfPawn(Piece::White | Piece::Pawn), 1);
     ASSERT_EQ(BoardUtil::initialRankOfPawn(Piece::Black | Piece::Pawn), 6);
     ASSERT_EQ(BoardUtil::initialRankOfPawn(Piece::Black | Piece::Pawn), 6);
-    ASSERT_THROW({ BoardUtil::initialRankOfPawn(0); }, std::invalid_argument);
-    ASSERT_THROW({ BoardUtil::initialRankOfPawn(Piece::Pawn); }, std::invalid_argument);
 }
 
 TEST(BoardUtil, isPawnAtStartSquare) {
