@@ -62,6 +62,6 @@ add_executable(
         ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.cpp ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.h
         ../main/ai/transposition_table.cpp ../main/board/board_util.cpp ../main/board/board_util.h
         board/board_util_test.cpp board/board_unit_test.cpp board/board_integrated_test.cpp
-        board/piece_test.cpp)
+        board/piece_test.cpp ../main/board/board_squares.h)
 
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb atomic)

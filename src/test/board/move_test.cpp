@@ -1,19 +1,20 @@
 #include <gtest/gtest.h>
 #include "../../main/board/piece.h"
 #include "../../main/move/move.h"
+#include "../../main/board/board_squares.h"
 
 TEST(Move, FromString) {
     auto move = NormalMove::fromString("a1b1");
-    EXPECT_EQ(move.startSquare, 0);
-    EXPECT_EQ(move.targetSquare, 1);
+    EXPECT_EQ(move.startSquare, BoardSquares::a1);
+    EXPECT_EQ(move.targetSquare, BoardSquares::b1);
 
     auto move2 = NormalMove::fromString("d2d4");
-    EXPECT_EQ(move2.startSquare, 11);
-    EXPECT_EQ(move2.targetSquare, 27);
+    EXPECT_EQ(move2.startSquare, BoardSquares::d2);
+    EXPECT_EQ(move2.targetSquare, BoardSquares::d4);
 
     auto move3 = NormalMove::fromString("d7e5");
-    EXPECT_EQ(move3.startSquare, 51);
-    EXPECT_EQ(move3.targetSquare, 36);
+    EXPECT_EQ(move3.startSquare, BoardSquares::d7);
+    EXPECT_EQ(move3.targetSquare, BoardSquares::e5);
 }
 
 TEST(Move, ToString) {

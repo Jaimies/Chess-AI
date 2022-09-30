@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "../../main/board/board.h"
 #include "../string_util.h"
+#include "../../main/board/board_util.h"
+#include "../../main/board/board_squares.h"
 
 TEST(Board, IsInEndgame) {
     ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/8/1Q2K3 w - - 0 1")->isInEndgame());
@@ -15,8 +17,8 @@ TEST(Board, generateCaptureMoves) {
     board->generateCaptures();
     EXPECT_EQ(board->legalMoves.size(), 1);
     auto expectedMove = visit(GetMovePointerVisitor, board->legalMoves[0]);
-    EXPECT_EQ(expectedMove->startSquare, 25);
-    EXPECT_EQ(expectedMove->targetSquare, 29);
+    EXPECT_EQ(expectedMove->startSquare, BoardSquares::b4);
+    EXPECT_EQ(expectedMove->targetSquare, BoardSquares::f4);
 
     MoveVariant move = NormalMove::fromString("b4c4");
     board->makeMoveWithoutGeneratingMoves(move);
@@ -24,8 +26,8 @@ TEST(Board, generateCaptureMoves) {
     board->generateCaptures();
     auto expectedMove2 = visit(GetMovePointerVisitor, board->legalMoves[0]);
     EXPECT_EQ(board->legalMoves.size(), 1);
-    EXPECT_EQ(expectedMove2->startSquare, 39);
-    EXPECT_EQ(expectedMove2->targetSquare, 33);
+    EXPECT_EQ(expectedMove2->startSquare, BoardSquares::h5);
+    EXPECT_EQ(expectedMove2->targetSquare, BoardSquares::b5);
 }
 
 void assertToFenStringWorksInPosition(std::string position) {
@@ -49,7 +51,7 @@ TEST(Board, enPassantCapablePawnSquare_is_numOfSquareWhereThePawnStands) {
     auto board = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
     MoveVariant move = NormalMove::fromString("c2c4");
     board->makeMove(move);
-    ASSERT_EQ(board->enPassantCapablePawnSquare, 27);
+    ASSERT_EQ(board->enPassantCapablePawnSquare, BoardSquares::d4);
 }
 
 TEST(Board, enPassantCapablePawnSquare_resetsToNegativeOneAfterAnotherMoveIsMade) {

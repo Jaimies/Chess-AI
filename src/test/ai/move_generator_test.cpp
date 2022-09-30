@@ -12,9 +12,9 @@ TEST(MoveGenerator, FindsBestMoveInPositionWithCheckmate) {
     std::cout << generator->positionsAnalyzed << std::endl;
     std::cout << move->toString() << std::endl;
 
-    ASSERT_TRUE(move->startSquare == 62 && move->targetSquare == 45
-                || move->startSquare == 62 && move->targetSquare == 47
-                || move->startSquare == 52 && move->targetSquare == 44);
+    ASSERT_TRUE(move->toString() == "g8f6"
+                || move->toString() == "g8h6"
+                || move->toString() == "e7e6");
 }
 
 TEST(MoveGenerator, FindsBestMoveInPositionWithPotentialCaptures) {
@@ -25,7 +25,7 @@ TEST(MoveGenerator, FindsBestMoveInPositionWithPotentialCaptures) {
     std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
     std::cout << generator->positionsAnalyzed << std::endl;
 
-    ASSERT_TRUE(move->startSquare == 42 && move->targetSquare == 35);
+    ASSERT_EQ(move->toString(), "c6d5");
 }
 
 TEST(MoveGenerator, FindsCorrectBestMoveInPosition2) {
@@ -36,7 +36,7 @@ TEST(MoveGenerator, FindsCorrectBestMoveInPosition2) {
     std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
     std::cout << generator->positionsAnalyzed << std::endl;
 
-    ASSERT_TRUE(move->startSquare == 25 && move->targetSquare == 29);
+    ASSERT_EQ(move->toString(), "b4f4");
 }
 
 TEST(MoveGenerator, UsesSensiblePositioning) {
@@ -123,9 +123,8 @@ TEST(MoveGenerator, DoesNotDoStupidMoves_4) {
         auto generator = new MoveGenerator();
         auto bestMove = generator->getBestMove(board);
         std::cout << bestMove->toString() << std::endl;
-        ASSERT_TRUE(bestMove->toString() == "d7e6" || bestMove->toString() == "a7a6"
-                    || bestMove->toString() == "e7e6" || bestMove->toString() == "a8d8"
-                    || bestMove->toString() == "e8c8");
+        std::cout << generator->analysisInfo->depthSearchedTo << std::endl;
+        ASSERT_TRUE(bestMove->toString() == "g8f6" || bestMove->toString() == "a7a6");
         std::cout << i + 1 << " / 100" << std::endl;
     }
 }
