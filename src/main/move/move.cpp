@@ -1,6 +1,7 @@
 #include "move.h"
 #include "../board/board.h"
 #include "../board/zobrist_hash_generator.h"
+#include "../board/board_squares.h"
 
 Move::Move(int startSquare, int targetSquare)
         : startSquare(startSquare), targetSquare(targetSquare) {};
@@ -21,15 +22,9 @@ void Move::apply(Board &board) {}
 
 void Move::undo(Board &board) {}
 
-static std::string toString(int position) {
-    int file = position % 8;
-    int rank = position / 8;
-
-    return std::string(1, file + 'a') + (std::to_string(rank + 1));
-}
-
 std::string Move::toString() const {
-    return ::toString(startSquare) + ::toString(targetSquare);
+    return BoardSquares::toString(startSquare) +
+           BoardSquares::toString(targetSquare);
 }
 
 uint64_t Move::getZorbristHash(std::array<int, 64> squares) {

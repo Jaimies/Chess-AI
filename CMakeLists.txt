@@ -74,6 +74,7 @@ set(PROJECT_SOURCES
         src/main/ai/search_captures.cpp src/main/ai/search_captures.h
         src/main/ai/single_depth_move_generator.cpp src/main/ai/single_depth_move_generator.h
         src/main/board/board_util.cpp src/main/board/board_util.h
+        src/main/board/board_squares.h src/main/board/board_squares.cpp
         resources.qrc
         ${TS_FILES}
         )

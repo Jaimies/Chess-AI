@@ -13,8 +13,6 @@ namespace BoardUtil {
     int rank(int square);
     int file(int square);
 
-    int squareFromPosition(std::string position);
-
     int initialRankOfPawn(int piece);
     int initialRankOfRook(int colour);
 

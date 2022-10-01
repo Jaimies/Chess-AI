@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace BoardSquares {
     const int a1 = 0;
     const int b1 = 1;
@@ -65,4 +67,7 @@ namespace BoardSquares {
     const int f8 = 61;
     const int g8 = 62;
     const int h8 = 63;
+
+    int fromString(std::string position);
+    std::string toString(int position);
 }

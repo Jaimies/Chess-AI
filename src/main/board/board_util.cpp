@@ -14,13 +14,6 @@ namespace BoardUtil {
         return square % 8;
     }
 
-    int squareFromPosition(std::string position) {
-        auto rank = position[0] - 'a';
-        auto file = position[1] - '1';
-
-        return file * 8 + rank;
-    };
-
     int initialRankOfPawn(int piece) {
         return Piece::isWhite(piece) ? WhitePawnRank : BlackPawnRank;
     }

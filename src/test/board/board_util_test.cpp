@@ -27,16 +27,6 @@ TEST(BoardUtil, rank) {
     ASSERT_EQ(BoardUtil::rank(BoardSquares::h8), 7);
 }
 
-TEST(BoardUtil, squareFromPosition) {
-    ASSERT_EQ(BoardUtil::squareFromPosition("a1"), 0);
-    ASSERT_EQ(BoardUtil::squareFromPosition("b1"), 1);
-    ASSERT_EQ(BoardUtil::squareFromPosition("c1"), 2);
-    ASSERT_EQ(BoardUtil::squareFromPosition("f1"), 5);
-    ASSERT_EQ(BoardUtil::squareFromPosition("a2"), 8);
-    ASSERT_EQ(BoardUtil::squareFromPosition("e2"), 12);
-    ASSERT_EQ(BoardUtil::squareFromPosition("d4"), 27);
-}
-
 TEST(BoardUtil, initialRankOfPawn) {
     ASSERT_EQ(BoardUtil::initialRankOfPawn(Piece::White | Piece::Pawn), 1);
     ASSERT_EQ(BoardUtil::initialRankOfPawn(Piece::Black | Piece::Pawn), 6);
