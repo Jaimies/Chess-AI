@@ -1,6 +1,8 @@
 #include <array>
+#include <iostream>
 #include "board.h"
 #include "zobrist_hash_generator.h"
+#include "board_util.h"
 
 _ZobristHashGenerator ZobristHashGenerator;
 
@@ -15,15 +17,22 @@ _ZobristHashGenerator::_ZobristHashGenerator() {
             hashTable[squareIndex][pieceIndex] = get64rand();
         }
     }
+
+    for (unsigned int i = 0; i < 8; i++) {
+        hashesOfFiles[i] = get64rand();
+    }
 }
 
-uint64_t _ZobristHashGenerator::hash(Board *board) {
+uint64_t _ZobristHashGenerator::hash(const Board * const board) {
     unsigned long long int hash = 0;
 
     for (unsigned int square = 0; square < 64; square++) {
         auto piece = board->squares[square];
         if (piece != 0) hash ^= hashTable[square][piece];
     }
+
+    if(board->enPassantTargetSquare != -1)
+        hash ^= hashesOfFiles[BoardUtil::file(board->enPassantTargetSquare)];
 
     if (board->canWhiteCastleLeft())
         hash ^= whiteLeftCastlingHash;

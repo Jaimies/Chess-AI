@@ -24,6 +24,7 @@ private:
     std::mt19937_64 gen = std::mt19937_64 (rd());
 
     std::array<std::array<uint64_t, 12>, 64> hashTable;
+    std::array<uint64_t, 8> hashesOfFiles;
     uint64_t whiteLeftCastlingHash = get64rand();
     uint64_t whiteRightCastlingHash = get64rand();
     uint64_t blackLeftCastlingHash = get64rand();

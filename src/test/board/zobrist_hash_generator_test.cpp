@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../../main/board/zobrist_hash_generator.h"
+#include "../../main/board/board_util.h"
 
 TEST(ZobristHashGenerator, DifferentPositionsReturnDifferentHashes) {
     auto board = Board::fromFenString("rnbqkbnr/pppppppp/8/8/2B5/5Q2/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -27,4 +28,26 @@ TEST(ZobristHashGenerator, ConsidersCastlingRights) {
 
     ASSERT_NE(ZobristHashGenerator.hash(board), hashAfterFirstChange);
     ASSERT_NE(ZobristHashGenerator.hash(board), originalHash);
+}
+
+TEST(ZobristHashGenerator, BoardWhereEnPassantCanBeMade_HasADifferentHashTo_OneWhereNoEnPassantCanBeMade) {
+    auto boardWithEnPassant = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
+    MoveVariant move = NormalMove::fromString("c2c4");
+    boardWithEnPassant->makeMove(move);
+
+    auto boardWithoutEnPassant = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/2PpP3/8/PP3PPP/RNBQKBNR w KQkq - 0 1", Piece::Black);
+
+    ASSERT_NE(ZobristHashGenerator.hash(boardWithEnPassant), ZobristHashGenerator.hash(boardWithoutEnPassant));
+}
+
+TEST(ZobristHashGenerator, TwoDifferentBoardsWithEnPassantMoves_HaveDifferentHashes) {
+    auto boardWithEnPassant = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
+    MoveVariant move = NormalMove::fromString("c2c4");
+    boardWithEnPassant->makeMove(move);
+
+    auto otherBoardWithEnPassant = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/2Pp4/8/PP2PPPP/RNBQKBNR w KQkq - 0 1");
+    MoveVariant otherMove = NormalMove::fromString("e2e4");
+    otherBoardWithEnPassant->makeMove(otherMove);
+
+    ASSERT_NE(ZobristHashGenerator.hash(boardWithEnPassant), ZobristHashGenerator.hash(otherBoardWithEnPassant));
 }
