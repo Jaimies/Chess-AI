@@ -40,27 +40,32 @@ TEST(Board, toFenString) {
     assertToFenStringWorksInPosition("8/2k5/3p4/p2P1p2/P2P1P2/4K3/8/8/ b - - 0 1");
 }
 
-TEST(Board, enPassantCapablePawnSquare_is_negativeOneIfThereAreNoEnPassantMoves) {
+TEST(Board, enPassantTargetSquare_is_negativeOneIfThereAreNoEnPassantMoves) {
     auto board = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
     MoveVariant move = NormalMove::fromString("c2c3");
     board->makeMove(move);
-    ASSERT_EQ(board->enPassantCapablePawnSquare, -1);
+    ASSERT_EQ(board->enPassantTargetSquare, -1);
 }
 
-TEST(Board, enPassantCapablePawnSquare_is_numOfSquareWhereThePawnStands) {
+TEST(Board, enPassantTargetSquare_is_squareTargetedByEnPassant) {
     auto board = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
     MoveVariant move = NormalMove::fromString("c2c4");
     board->makeMove(move);
-    ASSERT_EQ(board->enPassantCapablePawnSquare, BoardSquares::d4);
+    ASSERT_EQ(board->enPassantTargetSquare, BoardSquares::c3);
+
+    auto otherBoard = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/2Pp4/8/PP2PPPP/RNBQKBNR w KQkq - 0 1");
+    MoveVariant otherMove = NormalMove::fromString("e2e4");
+    otherBoard->makeMove(otherMove);
+    ASSERT_EQ(otherBoard->enPassantTargetSquare, BoardSquares::e3);
 }
 
-TEST(Board, enPassantCapablePawnSquare_resetsToNegativeOneAfterAnotherMoveIsMade) {
+TEST(Board, enPassantTargetSquare_resetsToNegativeOneAfterAnotherMoveIsMade) {
     auto board = Board::fromFenString("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1");
     MoveVariant move = NormalMove::fromString("c2c4");
     board->makeMove(move);
     MoveVariant move2 = NormalMove::fromString("d7d5");
     board->makeMove(move2);
-    ASSERT_EQ(board->enPassantCapablePawnSquare, -1);
+    ASSERT_EQ(board->enPassantTargetSquare, -1);
 }
 
 TEST(Board, allCastlesArePossibleBeforeAnyCastlingPiecesMove) {

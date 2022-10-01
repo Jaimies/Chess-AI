@@ -7,7 +7,7 @@ void MoveGenerationProcessor::processMove(MoveVariant move) {
 
 void MoveGenerationProcessor::processEnPassantMove(EnPassantMove move) {
     MoveProcessor::processEnPassantMove(move);
-    board->enPassantCapablePawnSquare = move.startSquare;
+    board->enPassantTargetSquare = move.targetSquare;
 }
 
 void AttackedSquaresGenerationProcessor::processMove(MoveVariant move) {

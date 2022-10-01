@@ -355,7 +355,7 @@ void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
     moveHistory.push(move);
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
-    enPassantCapablePawnSquare = -1;
+    enPassantTargetSquare = -1;
 }
 
 bool Board::violatesPin(MoveVariant &move) const {
