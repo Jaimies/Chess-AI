@@ -2,7 +2,7 @@
 
 Evaluation getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = getSquareValueTable(board, piece);
-    auto positionToAccess = Piece::getColour(piece) == Piece::White ? 63 - position : position;
+    auto positionToAccess = Piece::isWhite(piece) ? 63 - position : position;
     return (*squareValueTable)[positionToAccess] * 10;
 }
 

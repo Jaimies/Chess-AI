@@ -553,7 +553,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *
     if (!isSquareInFrontClear(startSquare, piece)) return;
 
     for (int pawnOffset: possibleOffsets) {
-        int offset = Piece::getColour(piece) == Piece::White ? pawnOffset : -pawnOffset;
+        int offset = Piece::isWhite(piece) ? pawnOffset : -pawnOffset;
 
         if (pawnOffset == 16) {
             if (!BoardUtil::isPawnAtStartSquare(startSquare, piece)) continue;
@@ -573,7 +573,7 @@ void Board::generateForwardPawnMoves(int startSquare, int piece, MoveProcessor *
 }
 
 bool Board::isSquareInFrontClear(int startSquare, int piece) const {
-    int positionOfPieceInFront = startSquare + (Piece::getColour(piece) == Piece::White ? 8 : -8);
+    int positionOfPieceInFront = startSquare + (Piece::isWhite(piece) ? 8 : -8);
     return squares[positionOfPieceInFront] == Piece::None;
 }
 
@@ -582,7 +582,7 @@ void Board::generateCapturePawnMoves(int startSquare, int piece, MoveProcessor *
     int file = startSquare % 8;
 
     for (int captureOffset: pawnCaptureOffsets) {
-        int offset = Piece::getColour(piece) == Piece::White ? captureOffset : -captureOffset;
+        int offset = Piece::isWhite(piece) ? captureOffset : -captureOffset;
 
         if (offset == 7 && file == 0 || offset == 9 && file == 7
             || offset == -9 && file == 0 || offset == -7 && file == 7)
@@ -651,7 +651,7 @@ void Board::generateEnPassantMoves(int square, int piece, MoveProcessor *process
             || basicLastMove.targetSquare != neighbourPosition)
             continue;
 
-        int targetPositionOffset = Piece::getColour(piece) == Piece::White ? 8 : -8;
+        int targetPositionOffset = Piece::isWhite(piece) ? 8 : -8;
 
         processor->processEnPassantMove(
                 {square, neighbourPosition + targetPositionOffset, neighbourPiece, neighbourPosition}
@@ -772,9 +772,8 @@ std::string Board::toFenString() const {
                 }
 
                 auto type = Piece::getType(piece);
-                auto color = Piece::getColour(piece);
                 auto pieceLetter = getPieceLetter(type);
-                char finalChar = color == Piece::White ? toupper(pieceLetter) : pieceLetter;
+                char finalChar = Piece::isWhite(piece) ? toupper(pieceLetter) : pieceLetter;
                 output += finalChar;
             }
         }
