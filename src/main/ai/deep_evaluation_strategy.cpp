@@ -10,11 +10,17 @@ bool shouldUpdateTransposition(int depth, int type, const Transposition &transpo
     return depth > transposition.depth && transposition.type == type;
 }
 
+static int getNodeType(int64_t eval, int64_t alpha, int64_t beta) {
+    if (eval >= beta) return Transposition::LOWER;
+    if (eval <= alpha) return Transposition::UPPER;
+    return Transposition::EXACT;
+}
+
 namespace DeepEvaluationStrategy {
     int64_t Base::getEvaluation(
-            Board *board, int depth, int &nodeType, int64_t alpha, int64_t beta,
+            Board *board, int depth, int64_t alpha, int64_t beta,
             const DeepEvaluationStrategy::Base *furtherEvaluationStrategy
-    ) const {
+   ) const {
         auto boardHash = board->getZobristHash();
 
         TranspositionTable::const_accessor accessor;
@@ -36,6 +42,8 @@ namespace DeepEvaluationStrategy {
 
             auto evaluation = -furtherEvaluationStrategy->deepEvaluate(board, depth - 1, -beta, -alpha);
 
+            int nodeType = getNodeType(evaluation, alpha, beta);
+
             if (shouldUpdateTransposition(depth, nodeType, transposition))
                 accessor->second->exchange({evaluation, depth, nodeType});
 
@@ -44,19 +52,19 @@ namespace DeepEvaluationStrategy {
 
         auto evaluation = -furtherEvaluationStrategy->deepEvaluate(board, depth - 1, -beta, -alpha);
 
-        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({evaluation, depth, nodeType}));
+        AtomicTranspositionPtr ptr(new std::atomic<Transposition>({evaluation, depth, getNodeType(evaluation, alpha, beta)}));
         generator->transpositions->insert({{boardHash, ptr}});
 
         return evaluation;
     }
 
     void Base::deepEvaluateMove(
-            Board *board, MoveVariant move, int depth, int &nodeType,
+            Board *board, MoveVariant move, int depth,
             int64_t &alpha, int64_t &beta, bool &shouldExit, EvaluationUpdateStrategy *strategy) const {
         board->makeMoveWithoutGeneratingMoves(move);
-        auto evaluation = getEvaluation(board, depth, nodeType, alpha, beta, generator->sequentialStrategy);
+        auto evaluation = getEvaluation(board, depth, alpha, beta, generator->sequentialStrategy);
         board->unmakeMove(move);
-        strategy->updateEvaluation(evaluation, shouldExit, alpha, beta, nodeType);
+        strategy->updateEvaluation(evaluation, shouldExit, alpha, beta);
     }
 
     int64_t Base::deepEvaluate(Board *board, int depth, int64_t alpha, int64_t beta) const {
@@ -74,32 +82,31 @@ namespace DeepEvaluationStrategy {
 
         auto moves = std::vector(board->legalMoves);
         sortMoves(board, moves);
-        auto nodeType = Transposition::UPPER;
 
-        return _deepEvaluate(board, moves, depth, nodeType, alpha, beta);
+        return _deepEvaluate(board, moves, depth, alpha, beta);
     };
 
     int64_t
-    Sequential::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType, int64_t alpha, int64_t beta) const {
+    Sequential::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) const {
         bool shouldExit = false;
 
         for (auto &move: moves) {
             if (shouldExit || generator->parent->analysisFinished) return alpha;
-            deepEvaluateMove(board, move, depth, nodeType, alpha, beta, shouldExit, strategy);
+            deepEvaluateMove(board, move, depth, alpha, beta, shouldExit, strategy);
         }
 
         return alpha;
     }
 
     int64_t
-    Parallel::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType, int64_t alpha, int64_t beta) const {
+    Parallel::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha, int64_t beta) const {
         bool shouldExit = false;
 
-        auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit, &nodeType](tbb::blocked_range<size_t> range) {
+        auto body = [this, board, moves, depth, &alpha, &beta, &shouldExit](tbb::blocked_range<size_t> range) {
             for (size_t i = range.begin(); i < range.end(); ++i) {
                 if (shouldExit || generator->parent->analysisFinished) return;
                 auto boardCopy = board->copy();
-                deepEvaluateMove(boardCopy, moves[i], depth, nodeType, alpha, beta, shouldExit, strategy);
+                deepEvaluateMove(boardCopy, moves[i], depth, alpha, beta, shouldExit, strategy);
                 delete boardCopy;
             }
         };
@@ -109,28 +116,28 @@ namespace DeepEvaluationStrategy {
         return alpha;
     }
 
-    int64_t Base::getNullWindowEval(Board *board, int depth, int &nodeType, int64_t alpha) const {
-        return getEvaluation(board, depth, nodeType, alpha, alpha + 1, generator->sequentialStrategy);
+    int64_t Base::getNullWindowEval(Board *board, int depth, int64_t alpha) const {
+        return getEvaluation(board, depth, alpha, alpha + 1, generator->sequentialStrategy);
     }
 
-    int64_t Pvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType, int64_t alpha,
+    int64_t Pvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha,
                                int64_t beta) const {
         bool shouldExit = false;
 
         board->makeMoveWithoutGeneratingMoves(moves[0]);
-        alpha = getEvaluation(board, depth, nodeType, alpha, beta, generator->pvsStrategy);
+        alpha = getEvaluation(board, depth, alpha, beta, generator->pvsStrategy);
         board->unmakeMove(moves[0]);
 
         for (size_t i = 1; i < moves.size(); i++) {
             board->makeMoveWithoutGeneratingMoves(moves[i]);
-            auto nullWindowEval = getNullWindowEval(board, depth, nodeType, alpha);
+            auto nullWindowEval = getNullWindowEval(board, depth, alpha);
             board->unmakeMove(moves[i]);
 
             if (nullWindowEval != alpha) {
                 // this move is better than the current option
                 board->makeMoveWithoutGeneratingMoves(moves[i]);
-                auto fullWindowEval = getEvaluation(board, depth, nodeType, alpha, beta, generator->pvsStrategy);
-                strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta, nodeType);
+                auto fullWindowEval = getEvaluation(board, depth, alpha, beta, generator->pvsStrategy);
+                strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta);
                 board->unmakeMove(moves[i]);
             }
 
@@ -141,28 +148,28 @@ namespace DeepEvaluationStrategy {
     }
 
     int64_t
-    ParallelPvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int &nodeType,  int64_t alpha,
+    ParallelPvs::_deepEvaluate(Board *board, std::vector<MoveVariant> moves, int depth, int64_t alpha,
                                int64_t beta) const {
         bool shouldExit = false;
 
         board->makeMoveWithoutGeneratingMoves(moves[0]);
-        alpha = getEvaluation(board, depth, nodeType, alpha, beta, getFirstMoveEvaluationStrategy());
+        alpha = getEvaluation(board, depth, alpha, beta, getFirstMoveEvaluationStrategy());
         board->unmakeMove(moves[0]);
 
-        tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, &nodeType, board, depth, &shouldExit, this, &alpha, &beta](tbb::blocked_range<size_t> range) {
+        tbb::parallel_for(tbb::blocked_range<size_t>(1, moves.size()), [moves, board, depth, &shouldExit, this, &alpha, &beta](tbb::blocked_range<size_t> range) {
             for (size_t i = range.begin(); i < range.end(); i++) {
                 auto initialAlpha = alpha;
                 auto boardCopy = board->copy();
                 auto moveCopy = moves[i];
                 boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
-                auto nullWindowEval = getNullWindowEval(boardCopy, depth, nodeType, initialAlpha);
+                auto nullWindowEval = getNullWindowEval(boardCopy, depth, initialAlpha);
                 boardCopy->unmakeMove(moveCopy);
 
                 if (nullWindowEval != initialAlpha) {
                     // this move is better than the current option
                     boardCopy->makeMoveWithoutGeneratingMoves(moveCopy);
-                    auto fullWindowEval = getEvaluation(boardCopy, depth, nodeType, alpha, beta, generator->pvsStrategy);
-                    strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta, nodeType);
+                    auto fullWindowEval = getEvaluation(boardCopy, depth,alpha, beta, generator->pvsStrategy);
+                    strategy->updateEvaluation(fullWindowEval, shouldExit, alpha, beta);
                     boardCopy->unmakeMove(moveCopy);
                 }
 
