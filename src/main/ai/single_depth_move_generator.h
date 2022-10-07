@@ -20,7 +20,7 @@ public:
     Board *board;
     const int depth;
     std::optional<MoveVariant> bestMove;
-    int64_t bestEvaluation = EvalValues::min;
+    int64_t alpha = EvalValues::min;
     std::mutex mutex;
 
     const Sequential * const sequentialStrategy = new Sequential(this);
@@ -30,13 +30,13 @@ public:
     const ParallelPvsWithSequentialChildren * const parallelPvsWithSequentialChildrenStrategy = new ParallelPvsWithSequentialChildren(this);
 
     Move *getBestMove(Move *supposedBestMove, AiSettings settings);
-    int64_t getFirstMoveAlpha(std::vector<MoveVariant> moves) const;
-    int64_t getDeepEvaluation(Board *board, int64_t lowerBound, int64_t upperBound) const;
+    int64_t evalFirstMove(std::vector<MoveVariant> moves) const;
+    int64_t deepEval(Board *board, int64_t lowerBound, int64_t upperBound) const;
     int64_t nullWindowEval(Board *board, int64_t lowerBound) const;
     bool needsFullEval(Board *board, MoveVariant &move) const;
 
     void doFullEvalIfNeeded(Board *board, MoveVariant move);
-    void fullEval(MoveVariant move);
+    void evalMove(MoveVariant move);
     std::vector<MoveVariant> getSortedMoves(Move *supposedBestMove) const;
 
     ~SingleDepthMoveGenerator() {
