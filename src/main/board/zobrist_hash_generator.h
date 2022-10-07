@@ -12,7 +12,7 @@ class _ZobristHashGenerator {
 public:
     _ZobristHashGenerator();
 
-    uint64_t hash(Board *board);
+    uint64_t hash(const Board * const board);
     uint64_t hashPiece(int square, int piece);
 private:
     std::uniform_int_distribution<uint64_t> dis = std::uniform_int_distribution<uint64_t>(

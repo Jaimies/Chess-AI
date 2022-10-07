@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../../main/board/board.h"
+#include "../../main/board/zobrist_hash_generator.h"
 
 void assertZobristHashIsTheSameAsFromZobristHashGenerator(Board *board, int depth) {
     board->generateMoves();

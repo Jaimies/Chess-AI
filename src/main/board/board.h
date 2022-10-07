@@ -43,7 +43,6 @@ public:
 
     ApplyMoveVisitor applyMoveVisitor = ApplyMoveVisitor{this};
     UndoMoveVisitor undoMoveVisitor = UndoMoveVisitor(this);
-    GetZobristHashVisitor getZobristHashVisitor = GetZobristHashVisitor(this);
 
     ~Board();
 
@@ -65,7 +64,7 @@ public:
     int _getOpponentKingSquare() const;
 
     bool isInEndgame() const;
-    uint64_t getZobristHash() const { return zobristHash; };
+    uint64_t getZobristHash() const;
 
     bool canWhiteCastleLeft() const;
     bool canWhiteCastleRight() const;
@@ -80,7 +79,7 @@ public:
 private:
     int numSquaresToEdge[64][8];
 
-    std::stack<MoveVariant > moveHistory;
+    std::stack<MoveVariant> moveHistory;
     std::stack<int> castlingPieceMovementHistory;
 
     std::array<bool, 64> attacksKing;
@@ -92,7 +91,6 @@ private:
     int kingSquare;
     int opponentKingSquare;
     bool _isInEndgame = false;
-    uint64_t zobristHash = 0;
 
     MoveGenerationProcessor *moveGenerationProcessor = new MoveGenerationProcessor(this);
     CaptureGenerationProcessor *captureGenerationProcessor = new CaptureGenerationProcessor(this);

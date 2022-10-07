@@ -37,18 +37,6 @@ struct _GetEnPassantMoveVisitor {
 
 extern _GetEnPassantMoveVisitor GetEnPassantMoveVisitor;
 
-struct GetZobristHashVisitor {
-    explicit GetZobristHashVisitor(Board *board) : board(board) {};
-
-    uint64_t operator()(NormalMove &move) const;
-    uint64_t operator()(PromotionMove &move) const;
-    uint64_t operator()(CastlingMove &move) const;
-    uint64_t operator()(EnPassantMove &move) const;
-
-private:
-    Board *board;
-};
-
 struct _IsCastlingMoveVisitor {
     bool operator()(NormalMove &move) const { return false; }
     bool operator()(PromotionMove &move) const { return false; }

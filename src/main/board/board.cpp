@@ -85,7 +85,6 @@ void Board::unmakeMove(MoveVariant &move) {
     changeColourToMove();
     kingSquare = _getKingSquare();
     moveHistory.pop();
-    zobristHash ^= visit(getZobristHashVisitor, move);
 }
 
 Board *Board::copy() const {
@@ -108,7 +107,6 @@ Board::Board(int colourToMove, std::stack<MoveVariant> moveHistory, std::unorder
     updateEndgameState();
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
-    zobristHash = ZobristHashGenerator.hash(this);
 }
 
 void Board::computeMoveData() {
@@ -275,7 +273,6 @@ void Board::loadFenString(std::string &fenString) {
 
     kingSquare = _getKingSquare();
     opponentKingSquare = _getOpponentKingSquare();
-    zobristHash = ZobristHashGenerator.hash(this);
 }
 
 void Board::updateCastlingPieceMovement(MoveVariant &move) {
@@ -348,7 +345,6 @@ void Board::updateGameState() {
 }
 
 void Board::makeMoveWithoutGeneratingMoves(MoveVariant &move) {
-    zobristHash ^= visit(getZobristHashVisitor, move);
     updateCastlingPieceMovement(move);
     visit(applyMoveVisitor, move);
     changeColourToMove();
@@ -752,6 +748,10 @@ char getPieceLetter(int type) {
     if (type == Piece::Knight) return 'n';
     if (type == Piece::King) return 'k';
     return '1';
+}
+
+uint64_t Board::getZobristHash() const {
+    return ZobristHashGenerator.hash(this);
 }
 
 std::string Board::toFenString() const {
