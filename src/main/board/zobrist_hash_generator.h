@@ -29,6 +29,7 @@ private:
     uint64_t whiteRightCastlingHash = get64rand();
     uint64_t blackLeftCastlingHash = get64rand();
     uint64_t blackRightCastlingHash = get64rand();
+    uint64_t isBlackHash = get64rand();
 
     uint64_t get64rand();
 };

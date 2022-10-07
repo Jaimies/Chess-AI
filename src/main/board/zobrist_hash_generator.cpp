@@ -31,6 +31,9 @@ uint64_t _ZobristHashGenerator::hash(const Board * const board) {
         if (piece != 0) hash ^= hashTable[square][piece];
     }
 
+    if(board->colourToMove == Piece::Black)
+        hash ^= isBlackHash;
+
     if(board->enPassantTargetSquare != -1)
         hash ^= hashesOfFiles[BoardUtil::file(board->enPassantTargetSquare)];
 

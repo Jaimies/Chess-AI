@@ -51,3 +51,10 @@ TEST(ZobristHashGenerator, TwoDifferentBoardsWithEnPassantMoves_HaveDifferentHas
 
     ASSERT_NE(ZobristHashGenerator.hash(boardWithEnPassant), ZobristHashGenerator.hash(otherBoardWithEnPassant));
 }
+
+TEST(ZobristHashGenerator, TwoBoardsWithTheSamePositionButDifferentPlayerToMoveHaveDifferentHashes) {
+    auto boardWhereWhiteMoves = Board::fromFenString(Board::startPosition, Piece::White);
+    auto boardWhereBlackMoves = Board::fromFenString(Board::startPosition, Piece::Black);
+
+    ASSERT_NE(ZobristHashGenerator.hash(boardWhereWhiteMoves), ZobristHashGenerator.hash(boardWhereBlackMoves));
+}
