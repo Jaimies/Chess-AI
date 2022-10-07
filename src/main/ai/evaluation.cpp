@@ -1,6 +1,6 @@
 #include "evaluation.h"
 
-Evaluation getPiecePositionValue(Board *board, int piece, int position) {
+Eval getPiecePositionValue(Board *board, int piece, int position) {
     auto squareValueTable = getSquareValueTable(board, piece);
     auto positionToAccess = Piece::isWhite(piece) ? 63 - position : position;
     return (*squareValueTable)[positionToAccess] * 10;
@@ -20,9 +20,9 @@ int64_t performEvaluation(Board *board) {
     return sum;
 }
 
-Evaluation evaluatePositionWithoutMoves(Board *board, int depth) {
+Eval evaluatePositionWithoutMoves(Board *board, int depth) {
     // prefer to checkmate sooner, rather than later
-    if (board->isKingUnderAttack) return checkmateEvaluation - depth;
+    if (board->isKingUnderAttack) return EvalValues::checkmate - depth;
     return 0;
 }
 

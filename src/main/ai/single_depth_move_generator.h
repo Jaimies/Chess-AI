@@ -20,7 +20,7 @@ public:
     Board *board;
     const int depth;
     std::optional<MoveVariant> bestMove;
-    int64_t bestEvaluation = minEvaluation;
+    int64_t bestEvaluation = EvalValues::min;
     std::mutex mutex;
 
     const Sequential * const sequentialStrategy = new Sequential(this);

@@ -30,7 +30,7 @@ Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings s
 void SingleDepthMoveGenerator::fullEval(MoveVariant move) {
     auto boardCopy = board->copy();
     boardCopy->makeMoveWithoutGeneratingMoves(move);
-    auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth, minEvaluation, -bestEvaluation);
+    auto evaluation = -parallelPvsStrategy->deepEvaluate(boardCopy, depth, EvalValues::min, -bestEvaluation);
     boardCopy->unmakeMove(move);
 
     mutex.lock();
@@ -80,7 +80,7 @@ void SingleDepthMoveGenerator::doFullEvalIfNeeded(Board *board, MoveVariant move
 
 int64_t SingleDepthMoveGenerator::getFirstMoveAlpha(std::vector<MoveVariant> moves) const {
     board->makeMoveWithoutGeneratingMoves(moves[0]);
-    int64_t firstMoveAlpha = -parallelPvsStrategy->deepEvaluate(board, depth, minEvaluation, maxEvaluation);
+    int64_t firstMoveAlpha = -parallelPvsStrategy->deepEvaluate(board, depth, EvalValues::min, EvalValues::max);
     board->unmakeMove(moves[0]);
     return firstMoveAlpha;
 }

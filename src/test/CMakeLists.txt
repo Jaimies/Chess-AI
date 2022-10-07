@@ -49,7 +49,7 @@ add_executable(
         ../main/ai/square_value_tables.h ../main/ai/square_value_tables.cpp
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h
         ../main/util/vector_util.h ../main/util/thread_util.h
-        ../main/ai/constants.h ../main/ai/constants.cpp
+        ../main/ai/constants.h
         ../main/ai/deep_evaluation_strategy.h ../main/ai/deep_evaluation_strategy.cpp
         ../main/ai/move_sorting.h ../main/ai/move_sorting.cpp
         ../main/ai/transposition_table.h ../main/ai/transposition.h

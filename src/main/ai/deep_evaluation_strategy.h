@@ -15,7 +15,7 @@ class SingleDepthMoveGenerator;
 namespace DeepEvaluationStrategy {
     class Base {
     public:
-        int64_t deepEvaluate(Board *board, int depth, int64_t alpha = minEvaluation, int64_t beta = maxEvaluation) const;
+        int64_t deepEvaluate(Board *board, int depth, int64_t alpha = EvalValues::min, int64_t beta = EvalValues::max) const;
 
     protected:
         SingleDepthMoveGenerator *generator;
