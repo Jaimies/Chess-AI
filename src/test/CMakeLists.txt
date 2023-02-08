@@ -50,7 +50,6 @@ add_executable(
         ../main/ai/analysis_info.h ../main/ai/ai_settings.h
         ../main/util/vector_util.h ../main/util/thread_util.h
         ../main/ai/constants.h
-        ../main/ai/deep_evaluation_strategy.h ../main/ai/deep_evaluation_strategy.cpp
         ../main/ai/move_sorting.h ../main/ai/move_sorting.cpp
         ../main/ai/transposition_table.h ../main/ai/transposition.h
         ../main/ai/evaluation_update_strategy.cpp ../main/ai/evaluation_update_strategy.h
@@ -59,9 +58,17 @@ add_executable(
         ../main/move/visitors.cpp ../main/move/visitors.h
         ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h
         ../main/ai/search_captures.cpp ../main/ai/search_captures.h
-        ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.cpp ../main/ai/evalstrategy/sequential_deep_evaluation_strategy.h
         ../main/ai/transposition_table.cpp ../main/board/board_util.cpp ../main/board/board_util.h
         board/board_util_test.cpp board/board_unit_test.cpp board/board_integrated_test.cpp
-        board/piece_test.cpp ../main/board/board_squares.h ../main/board/board_squares.cpp board/board_squares_test.cpp)
+        board/piece_test.cpp ../main/board/board_squares.h ../main/board/board_squares.cpp board/board_squares_test.cpp
+        ../main/ai/deepevalstrategy/base.cpp ../main/ai/deepevalstrategy/base.h
+        ../main/ai/deepevalstrategy/sequential.cpp ../main/ai/deepevalstrategy/sequential.h
+        ../main/ai/deepevalstrategy/parallel.cpp ../main/ai/deepevalstrategy/parallel.h
+        ../main/ai/deepevalstrategy/pvs.cpp ../main/ai/deepevalstrategy/pvs.h
+        ../main/ai/deepevalstrategy/parallel_pvs.cpp ../main/ai/deepevalstrategy/parallel_pvs.h
+        ../main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.cpp ../main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.h
+        ../main/ai/deepevalstrategy/sequential_deep_evaluation_strategy.cpp ../main/ai/deepevalstrategy/sequential_deep_evaluation_strategy.h
+)
 
 target_link_libraries(all_tests gtest_main ${BOOST_LIBRARIES} TBB::tbb atomic)
+target_include_directories(all_tests PRIVATE "../main/")

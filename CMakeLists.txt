@@ -65,7 +65,6 @@ set(PROJECT_SOURCES
         src/main/ai/square_value_tables.h src/main/ai/square_value_tables.cpp
         src/main/ai/analysis_info.h src/main/ai/ai_settings.h
         src/main/ai/constants.h
-        src/main/ai/deep_evaluation_strategy.h src/main/ai/deep_evaluation_strategy.cpp
         src/main/ai/evaluation_update_strategy.h src/main/ai/evaluation_update_strategy.cpp
         src/main/ai/move_sorting.h src/main/ai/move_sorting.cpp
         src/main/ai/transposition_table.h src/main/ai/transposition.h
@@ -77,6 +76,12 @@ set(PROJECT_SOURCES
         src/main/board/board_squares.h src/main/board/board_squares.cpp
         resources.qrc
         ${TS_FILES}
+        src/main/ai/deepevalstrategy/base.cpp src/main/ai/deepevalstrategy/base.h
+        src/main/ai/deepevalstrategy/sequential.cpp src/main/ai/deepevalstrategy/sequential.h
+        src/main/ai/deepevalstrategy/parallel.cpp src/main/ai/deepevalstrategy/parallel.h
+        src/main/ai/deepevalstrategy/pvs.cpp src/main/ai/deepevalstrategy/pvs.h
+        src/main/ai/deepevalstrategy/parallel_pvs.cpp src/main/ai/deepevalstrategy/parallel_pvs.h
+        src/main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.cpp src/main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.h
         )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include "../../main/ai/move_generator.h"
-#include "../../main/ai/single_depth_move_generator.h"
-#include "../../main/ai/evalstrategy/sequential_deep_evaluation_strategy.h"
+#include "ai/move_generator.h"
+#include "ai/single_depth_move_generator.h"
+#include "ai/deepevalstrategy/sequential_deep_evaluation_strategy.h"
 
 template<class T>
 void assertAllValuesAreTheSame(std::vector<T> values) {

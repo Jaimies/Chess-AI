@@ -1,5 +1,6 @@
 #include "search_captures.h"
 #include "move_generator.h"
+#include "move_sorting.h"
 
 int64_t searchCaptures(Board *board, long alpha, long beta) {
     board->checkIfLegalMovesExist();

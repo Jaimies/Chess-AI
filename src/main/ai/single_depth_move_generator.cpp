@@ -1,7 +1,9 @@
 #include "single_depth_move_generator.h"
-#include "../util/thread_util.h"
-#include "../util/vector_util.h"
-#include "move_generator.h"
+#include "util/thread_util.h"
+#include "util/vector_util.h"
+#include "ai/move_generator.h"
+#include "ai/move_sorting.h"
+#include <tbb/parallel_for.h>
 
 Move *SingleDepthMoveGenerator::getBestMove(Move *supposedBestMove, AiSettings settings) {
     if (board->legalMoves.empty()) return nullptr;

@@ -1,4 +1,5 @@
 #include "square_value_tables.h"
+#include <stdexcept>
 
 const std::array<int64_t, 64> *kingMidGameSquareValues = new std::array<int64_t, 64>{
         -30, -40, -40, -50, -50, -40, -40, -30,

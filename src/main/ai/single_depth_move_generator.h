@@ -1,11 +1,16 @@
 #pragma once
 
 #include <mutex>
-#include "transposition_table.h"
-#include "../move/move.h"
-#include "ai_settings.h"
-#include "constants.h"
-#include "deep_evaluation_strategy.h"
+#include "ai/transposition_table.h"
+#include "move/move.h"
+#include "ai/ai_settings.h"
+#include "ai/constants.h"
+#include "ai/deepevalstrategy/base.h"
+#include "ai/deepevalstrategy/sequential.h"
+#include "ai/deepevalstrategy/parallel.h"
+#include "ai/deepevalstrategy/pvs.h"
+#include "ai/deepevalstrategy/parallel_pvs.h"
+#include "ai/deepevalstrategy/parallel_pvs_with_sequential_children.h"
 
 class MoveGenerator;
 

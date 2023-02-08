@@ -2,7 +2,7 @@
 
 #include "analysis_info.h"
 #include "ai_settings.h"
-#include "deep_evaluation_strategy.h"
+#include "deepevalstrategy/base.h"
 #include "constants.h"
 #include <thread>
 
