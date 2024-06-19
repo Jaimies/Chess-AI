@@ -2,20 +2,20 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Chess VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_PREFIX_PATH /home/max/Qt/6.2.2/gcc_64/)
+set(CMAKE_PREFIX_PATH $ENV{HOME}/Qt/6.4.2/gcc_64/)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(src/main)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools REQUIRED)
+find_package(Qt6 COMPONENTS Widgets LinguistTools REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
 find_package(TBB CONFIG REQUIRED)
@@ -32,7 +32,7 @@ FIND_LIBRARY(GCCLIBATOMIC_LIBRARY NAMES atomic atomic.so.1 libatomic.so.1
         /usr/lib
         /lib64
         /lib
-        )
+)
 
 IF (GCCLIBATOMIC_LIBRARY)
     SET(GCCLIBATOMIC_FOUND TRUE)
@@ -84,41 +84,25 @@ set(PROJECT_SOURCES
         src/main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.cpp src/main/ai/deepevalstrategy/parallel_pvs_with_sequential_children.h
         )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(Chess
-            MANUAL_FINALIZATION
-            ${PROJECT_SOURCES}
-            )
-    # Define target properties for Android with Qt 6 as:
-    #    set_property(TARGET Chess APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+qt_add_executable(Chess
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-else()
-    if(ANDROID)
-        add_library(Chess SHARED
-                ${PROJECT_SOURCES}
-                )
-        # Define properties for Android with Qt 5 after find_package() calls as:
-        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(Chess
-                ${PROJECT_SOURCES}
-                )
-    endif()
+target_compile_definitions(Chess PRIVATE QT_NO_KEYWORDS)
+# Define target properties for Android with Qt 6 as:
+#    set_property(TARGET Chess APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-endif()
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
-target_link_libraries(Chess PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${BOOST_LIBRARIES} TBB::tbb atomic)
+target_link_libraries(Chess PRIVATE Qt6::Widgets ${BOOST_LIBRARIES} TBB::tbb atomic)
 
 set_target_properties(Chess PROPERTIES
         MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-        )
+)
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(Chess)
-endif()
+qt_finalize_executable(Chess)
