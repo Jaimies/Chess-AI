@@ -59,7 +59,7 @@ add_executable(
         ../main/ai/single_depth_move_generator.cpp ../main/ai/single_depth_move_generator.h
         ../main/ai/search_captures.cpp ../main/ai/search_captures.h
         ../main/ai/transposition_table.cpp ../main/board/board_util.cpp ../main/board/board_util.h
-        board/board_util_test.cpp board/board_unit_test.cpp board/board_integrated_test.cpp
+        board/board_util_test.cpp board/board_test.cpp
         board/piece_test.cpp ../main/board/board_squares.h ../main/board/board_squares.cpp board/board_squares_test.cpp
         ../main/ai/deepevalstrategy/base.cpp ../main/ai/deepevalstrategy/base.h
         ../main/ai/deepevalstrategy/sequential.cpp ../main/ai/deepevalstrategy/sequential.h
