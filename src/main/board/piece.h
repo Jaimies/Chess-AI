@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 namespace Piece {
     const int None = 0;
     const int King = 1;
