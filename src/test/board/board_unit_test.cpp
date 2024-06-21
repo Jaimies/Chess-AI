@@ -3,6 +3,7 @@
 #include "../string_util.h"
 #include "../../main/board/board_util.h"
 #include "../../main/board/board_squares.h"
+#include "board/zobrist_hash_generator.h"
 
 TEST(Board, IsInEndgame) {
     ASSERT_TRUE(Board::fromFenString("q7/1k6/8/8/8/8/8/1Q2K3 w - - 0 1")->isInEndgame());
@@ -137,4 +138,9 @@ TEST(Board, blackCanNoLongerCastleRightIfTheirRightRookMoves) {
 
     ASSERT_TRUE(board->canBlackCastleLeft());
     ASSERT_FALSE(board->canBlackCastleRight());
+}
+
+TEST(Board, getZobristHash_isTheSameAs_ZobristHashGenerator_hash) {
+    auto board = Board::fromFenString("r3kbnr/ppp1pppp/2n1q3/1B3b2/3P4/2N2N2/PPP2PPP/R1BQK2R b KQk - 0 1");
+    ASSERT_EQ(board->getZobristHash(), ZobristHashGenerator.hash(board));
 }
