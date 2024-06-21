@@ -3,11 +3,11 @@
 
 namespace Piece {
     int getType(int piece) {
-        return piece & 7;
+        return piece & Piece::Type;
     }
 
     int getColour(int piece) {
-        return piece & 24;
+        return piece & Piece::Colour;
     }
 
     int getOpponentColour(int colour) {

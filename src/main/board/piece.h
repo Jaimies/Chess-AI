@@ -3,6 +3,8 @@
 namespace Piece {
     const int None        = 0b0000000;
 
+    // use piece & Piece::Type to get the type
+    const int Type        = 0b0000111;
     const int King        = 0b0000001;
     const int Queen       = 0b0000010;
     const int Bishop      = 0b0000011;
@@ -10,6 +12,8 @@ namespace Piece {
     const int Rook        = 0b0000101;
     const int Pawn        = 0b0000110;
 
+    // use piece & Piece::Colour to get the colour
+    const int Colour      = 0b0011000;
     const int White       = 0b0001000;
     const int Black       = 0b0010000;
 
