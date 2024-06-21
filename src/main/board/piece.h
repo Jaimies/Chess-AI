@@ -1,25 +1,26 @@
 #pragma once
 
 namespace Piece {
-    const int None = 0;
-    const int King = 1;
-    const int Queen = 2;
-    const int Bishop = 3;
-    const int Knight = 4;
-    const int Rook = 5;
-    const int Pawn = 6;
+    const int None        = 0b0000000;
 
-    const int White = 8;
-    const int Black = 16;
+    const int King        = 0b0000001;
+    const int Queen       = 0b0000010;
+    const int Bishop      = 0b0000011;
+    const int Knight      = 0b0000100;
+    const int Rook        = 0b0000101;
+    const int Pawn        = 0b0000110;
 
-    const int LeftRook = 32;
-    const int RightRook = 64;
+    const int White       = 0b0001000;
+    const int Black       = 0b0010000;
 
-    const int PawnValue = 10000;
+    const int LeftRook    = 0b0100000;
+    const int RightRook   = 0b1000000;
+
+    const int PawnValue   = 10000;
     const int BishopValue = 30000;
     const int KnightValue = 30000;
-    const int RookValue = 50000;
-    const int QueenValue = 90000;
+    const int RookValue   = 50000;
+    const int QueenValue  = 90000;
 
     int getColour(int piece);
     int getOpponentColour(int colour);
